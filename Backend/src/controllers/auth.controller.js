@@ -1,5 +1,6 @@
 import { config } from "../config/config.js";
 import userModel from "../models/user.model.js";
+import jwt from "jsonwebtoken"
 
 async function sendTokenResponse(user, res, message) {
     const token = jwt.sign({
@@ -8,7 +9,7 @@ async function sendTokenResponse(user, res, message) {
         expiresIn: "7d"
     })
     res.cookie("token", token)
-    res.status(200), json({
+    res.status(200).json({
         message,
         success: true,
         user: {
