@@ -433,6 +433,132 @@ Middleware functions sit in the Express request pipeline between incoming reques
 * **Execution Order:** 5.
 * **Output:** Adds `Access-Control-Allow-Origin: http://localhost:5173` and `Access-Control-Allow-Credentials: true` response headers.
 
+### 9.4.1 Development Proxy Architecture (Vite Dev Server) vs. Production Strategy
+
+#### 1. Development Proxy Mechanism (Vite Dev Server)
+In local development, the Axios API service is configured with a relative base URL without a hardcoded protocol, domain, or port:
+
+```js
+// Frontend: src/features/auth/service/auth.api.js
+const authApiInstance = axios.create({
+    baseURL: "/api/auth", // Relative path without domain or port
+    withCredentials: true
+});
+```
+
+When Axios dispatches a request (e.g., `/api/auth/login`), the browser resolves it against the origin of the React development server:
+`http://localhost:5173/api/auth/login`
+
+To eliminate hardcoded backend URLs and bypass CORS preflight checks during development, Vite is configured with a dev server proxy in `vite.config.js`:
+
+```js
+// Frontend: vite.config.js
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  server: {
+    proxy: {
+      "/api": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        secure: false,
+      }
+    }
+  }
+})
+```
+
+#### 2. Request Routing & CORS Bypassing in Development
+
+When Vite Dev Server receives a request matching `/api`, it intercepts and silently forwards (proxies) the request to the Express server running on port `3000`.
+
+```mermaid
+flowchart LR
+    A[Browser] -- GET /api/auth/login --> B[Vite Dev Server :5173]
+    B -- Silent Proxy Forward --> C[Express Server :3000]
+```
+
+**Browser Perspective:**
+* **Origin:** `http://localhost:5173`
+* **Destination:** `http://localhost:5173`
+* **Security Result:** **Same-Origin request!** The browser believes it is communicating exclusively with port 5173. Consequently, browser CORS checks (`OPTIONS` preflight) are bypassed completely in local development.
+
+---
+
+> [!WARNING]
+> **CRITICAL ARCHITECTURAL REQUIREMENT: Vite Dev Server Proxy is ONLY for Local Development!**
+>
+> The `server.proxy` configuration in `vite.config.js` **only runs during local development** when executing `vite dev`.
+> When building the application for production (`npm run build` / `vite build`), Vite compiles static minified HTML, CSS, and JS files. **The Vite dev server proxy does NOT exist in production!**
+
+---
+
+#### 3. Production Deployment Strategies (What to do for Production)
+
+For production deployments, software architecture requires choosing one of two production deployment patterns:
+
+##### Strategy A: Reverse Proxy at Web Server Level (Recommended - Maintains Same-Origin)
+Deploy your built React static assets behind a production Web server or Gateway (e.g., **Nginx**, **Caddy**, **Cloudflare Workers**, or **Vercel / Netlify Rewrites**).
+
+The production Web server handles routing:
+- All static routes (`/`, `/login`, `/assets/*`) serve the built React single-page app.
+- All `/api/*` routes are reverse-proxied internally to the Node.js / Express backend container (`http://backend-service:3000`).
+
+**Example Nginx Configuration (`nginx.conf`):**
+```nginx
+server {
+    listen 80;
+    server_name myapp.com;
+
+    # Serve React Frontend Static Build
+    location / {
+        root /usr/share/nginx/html;
+        try_files $uri $uri/ /index.html;
+    }
+
+    # Reverse Proxy API requests to Node.js Backend Container
+    location /api/ {
+        proxy_pass http://localhost:3000/api/;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+* **Advantage:** Preserves relative `baseURL: "/api/auth"` in client code. The browser continues to see Same-Origin (`https://myapp.com`), allowing HttpOnly authentication cookies to work without third-party cross-site cookie restrictions.
+
+##### Strategy B: Environment Variable Dynamic Base URL (Cross-Domain Setup)
+If the frontend and backend are hosted on separate domains or subdomains in production (e.g. Frontend on `https://app.mysite.com` and Backend API on `https://api.mysite.com`):
+
+1. **Configure Environment-Driven `baseURL` in Axios:**
+   ```js
+   const authApiInstance = axios.create({
+       baseURL: `${import.meta.env.VITE_API_URL || ""}/api/auth`,
+       withCredentials: true
+   });
+   ```
+2. **Set Production Environment Variable (`.env.production`):**
+   ```env
+   VITE_API_URL=https://api.mysite.com
+   ```
+3. **Configure Backend CORS for Cross-Domain Credentials:**
+   In Express `app.js`, explicitly whitelist the production frontend domain:
+   ```js
+   app.use(cors({
+       origin: "https://app.mysite.com",
+       credentials: true
+   }));
+   ```
+4. **Configure Production Cookie Flags for Cross-Site Delivery:**
+   ```js
+   res.cookie("token", token, {
+       httpOnly: true,
+       secure: true, // Required for HTTPS
+       sameSite: "none" // Required for cross-subdomain / cross-origin cookie delivery
+   });
+   ```
+
 ### 9.5 Express-Validator Validation Middleware
 * **Purpose:** Sanitizes and asserts correctness of request payload fields before reaching controllers.
 * **Input:** `req.body`.
@@ -866,7 +992,7 @@ Follow this step-by-step checklist to build this exact authentication system in 
 
 ### Phase 4: Frontend Integration
 - [ ] **Step 19:** Initialize React app with Redux Toolkit and Axios.
-- [ ] **Step 20:** Create Axios instance with `baseURL` and `withCredentials: true`.
+- [ ] **Step 20:** Create Axios instance with relative `baseURL: "/api/auth"` and `withCredentials: true`. Configure `server.proxy` in `vite.config.js` for local development forwarding, and configure an Nginx reverse proxy or dynamic `VITE_API_URL` env variable for production deployment.
 - [ ] **Step 21:** Build `auth.slice.js` for Redux state (`user`, `loading`, `error`).
 - [ ] **Step 22:** Build custom hook `useAuth.js` to dispatch state updates on successful API calls.
 - [ ] **Step 23:** Connect register and login form UI views to `useAuth`.
