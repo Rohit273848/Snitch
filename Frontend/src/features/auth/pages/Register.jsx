@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../hook/useAuth"
 import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 // ─── Google Fonts loader ─────────────────────────────────────────────────────
 function FontLoader() {
@@ -130,6 +131,7 @@ function InputField({
 // ─── Register Page ───────────────────────────────────────────────────────────
 
 export default function Register() {
+    const navigate = useNavigate();
     const { handleRegister } = useAuth();
     const [formData, setFormData] = useState({
         fullname: "", contactNumber: "", email: "", password: "", isSeller: false,
@@ -190,6 +192,7 @@ export default function Register() {
             fullname: formData.fullname,
             isSeller: formData.isSeller
         })
+        navigate("/")
     };
 
 

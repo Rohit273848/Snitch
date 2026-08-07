@@ -62,7 +62,7 @@ export const login = async (req, res) => {
             return res.status(401).json({ message: "Invalid password" })
         }
 
-        sendTokenResponse(user, res, "Login successfully")
+        await sendTokenResponse(user, res, "Login successfully")
     } catch (err) {
         console.log(err);
         res.status(500).json({ message: "Internal Server error" })
