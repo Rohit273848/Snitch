@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { useAuth } from "../hook/useAuth"
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 // ─── Google Fonts loader ─────────────────────────────────────────────────────
 function FontLoader() {
@@ -485,7 +486,7 @@ export default function Register() {
                                 </div>
 
                                 {/* ── CTA ── */}
-                                <div className="pt-3">
+                                <div className="pt-3 g-5">
                                     <button
                                         type="submit"
                                         disabled={isSubmitting}
@@ -505,11 +506,13 @@ export default function Register() {
                                         )}
                                     </button>
 
+
                                     {/* Decorative button shadow/reflection */}
                                     <div
                                         className="w-full h-1 bg-yellow-500/20 mt-px transition-opacity duration-200 hover:opacity-40"
                                         style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
                                     />
+                                    <ContinueWithGoogle />
                                 </div>
 
                                 {/* ── Login redirect ── */}

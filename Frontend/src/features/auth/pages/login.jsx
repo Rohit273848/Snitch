@@ -1,6 +1,7 @@
 ﻿import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hook/useAuth";
+import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
 // --- Google Fonts loader
 function FontLoader() {
@@ -231,6 +232,8 @@ export default function Login() {
                                     </button>
                                 </div>
 
+
+
                                 <div className="pt-2">
                                     <button type="submit" disabled={isSubmitting}
                                         className="w-full h-14 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-bold text-[13px] tracking-[0.12em] uppercase flex items-center justify-between px-7 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer group"
@@ -243,6 +246,7 @@ export default function Login() {
                                     </button>
                                     <div className="w-full h-1 bg-yellow-500/20 mt-px" style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }} />
                                 </div>
+                                <ContinueWithGoogle />
 
                                 <div className="flex items-center justify-center gap-3 pt-1">
                                     <div className="h-px flex-1 bg-zinc-900" />

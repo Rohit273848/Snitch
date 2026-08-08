@@ -68,3 +68,51 @@ export const login = async (req, res) => {
         res.status(500).json({ message: "Internal Server error" })
     }
 }
+
+export const googleCallBackController = async (req, res) => {
+    try {
+        const { id, emails, displayName } = req.user;
+
+        const email = emails?.[0]?.value;
+
+        if (!email) {
+            return res.status(400).json({
+                message: "Google account email not available",
+            });
+        }
+
+        let user = await userModel.findOne({ email });
+
+        if (!user) {
+            user = await userModel.create({
+                email,
+                fullname: displayName,
+                role: "buyer",
+                googleID: id,
+            });
+        }
+
+        const token = jwt.sign(
+            {
+                id: user._id,
+            },
+            config.jwt_secret,
+            {
+                expiresIn: "7d",
+            }
+        );
+
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: config.NODE_ENV === "production",
+            sameSite:
+                config.NODE_ENV === "production" ? "None" : "Lax",
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        });
+
+        res.redirect(config.CLIENT_URL);
+
+    } catch (error) {
+        res.redirect(config.CLIENT_URL);
+    }
+};
