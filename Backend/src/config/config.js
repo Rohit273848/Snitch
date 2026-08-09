@@ -4,26 +4,24 @@ dotenv.config();
 
 
 if (!process.env.MONGO_URI) {
-    console.error("Error: Missing MONGO_URI environment variable");
-    process.exit(1);
+    throw new Error("Missing MONGO_URI environment variable");
 }
 
 if (!process.env.JWT_SECRET) {
-    console.error("Error: Missing JWT_SECRET environment variable");
-    process.exit(1);
-}
-
-if (!process.env.GOOGLE_CLIENT_SECRET) {
-    console.error("Error: Missing GOOGLE_CLIENT_SECRET environment variable");
-    process.exit(1);
+    throw new Error("Missing JWT_SECRET environment variable");
 }
 
 if (!process.env.GOOGLE_CLIENT_ID) {
-    console.error("Error: Missing GOOGLE_CLIENT_ID environment variable");
-    process.exit(1);
+    throw new Error("Missing GOOGLE_CLIENT_ID environment variable");
 }
 
+if (!process.env.GOOGLE_CLIENT_SECRET) {
+    throw new Error("Missing GOOGLE_CLIENT_SECRET environment variable");
+}
 
+if (!process.env.IMAGEKIT_PRIVATE_KEY) {
+    throw new Error("Missing ImageKit Private Key")
+}
 
 
 
@@ -36,4 +34,5 @@ export const config = {
     NODE_ENV: process.env.NODE_ENV,
     CLIENT_URL: process.env.CLIENT_URL,
     SERVER_URL: process.env.SERVER_URL,
+    IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY
 }
