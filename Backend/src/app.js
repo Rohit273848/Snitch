@@ -45,6 +45,6 @@ app.get("/", (req, res) => {
     res.send(" World");
 });
 app.use('/api/auth', authRoutes);
-app.use('/api', productRoutes)
+app.use('/api/products', productRoutes)
 
 export default app;

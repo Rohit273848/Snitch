@@ -24,7 +24,7 @@ export async function createProduct(req, res) {
             seller: seller._id,
             price: {
                 amount: priceAmount,
-                currency: priceCurrency || "INR"
+                currenc: priceCurrency || "INR"
             },
             images
         })
@@ -40,6 +40,25 @@ export async function createProduct(req, res) {
         return res.status(500).json({
             success: false,
             message: "Failed to create product",
+        });
+    }
+}
+
+export async function getProducts(req, res) {
+    try {
+        const user = req.user;
+        const products = await productModel.find({ seller: user._id });
+        res.status(200).json({
+            message: "produts fetches successfully",
+            success: true,
+            products
+        })
+    } catch (err) {
+        console.error("get product error:", err);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get product",
         });
     }
 }
