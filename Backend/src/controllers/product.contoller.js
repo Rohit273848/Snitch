@@ -24,7 +24,7 @@ export async function createProduct(req, res) {
             seller: seller._id,
             price: {
                 amount: priceAmount,
-                currenc: priceCurrency || "INR"
+                currency: priceCurrency || "INR"
             },
             images
         })
