@@ -451,132 +451,37 @@ export default function Home() {
                 style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
             >
                 {/* ══════════════════════════════════════════════
-                    LEFT PANEL — editorial sidebar
-                ══════════════════════════════════════════════ */}
-                <div className={`hidden lg:flex flex-col relative w-[28%] xl:w-[24%] min-h-screen bg-[#0a0a0a] border-r border-zinc-900 overflow-hidden flex-shrink-0 ${mounted ? "panel-in" : "opacity-0"}`}>
-
-                    {/* Giant watermark 'S' */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                        <span
-                            className="s-glow text-[30vw] font-black text-white leading-none tracking-tighter"
-                            style={{ opacity: 0.05 }}
-                        >
-                            S
-                        </span>
-                    </div>
-
-                    {/* Vertical Scrolling Marquee */}
-                    <div className="absolute left-6 top-0 bottom-0 w-5 overflow-hidden pointer-events-none select-none opacity-[0.07]">
-                        <div className="marquee-track flex flex-col gap-8">
-                            {Array.from({ length: 10 }).map((_, i) => (
-                                <span 
-                                    key={i} 
-                                    className="text-[9px] tracking-[0.4em] uppercase text-white"
-                                    style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: "'JetBrains Mono', monospace" }}
-                                >
-                                    SNITCH — WEAR THE FUTURE —
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Decorative corners */}
-                    <div className="absolute top-8 left-8 w-16 h-16 border-l border-t border-zinc-800 pointer-events-none" />
-                    <div className="absolute bottom-8 right-8 w-16 h-16 border-r border-b border-zinc-800 pointer-events-none" />
-
-                    {/* Header Logo */}
-                    <div className="relative z-10 flex items-center justify-between px-8 pt-10">
-                        <Link to="/" className="inline-flex items-center gap-2.5 group">
-                            <span className="h-8 w-8 rounded-md bg-yellow-500 flex items-center justify-center text-black font-black text-base shadow-lg shadow-yellow-500/20 group-hover:shadow-yellow-500/40 transition-shadow duration-300">
-                                S
-                            </span>
-                            <span className="text-[13px] font-bold tracking-[0.3em] uppercase text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                SNITCH
-                            </span>
-                        </Link>
-                    </div>
-
-                    {/* Sidebar Content */}
-                    <div className="relative z-10 flex-1 flex flex-col justify-center px-8 xl:px-10">
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="h-px w-8 bg-yellow-500" />
-                            <span className="text-[9px] tracking-[0.2em] uppercase text-yellow-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                01 / Store Catalog
-                            </span>
-                        </div>
-
-                        <h2 className="text-4xl xl:text-5xl font-black leading-[0.95] tracking-[-0.04em] text-white mb-6 uppercase">
-                            All<br />
-                            <span className="text-yellow-500">Drop</span><br />
-                            s.
-                        </h2>
-
-                        <p className="text-sm text-zinc-500 leading-relaxed max-w-[220px] mb-8 font-light tracking-wide">
-                            Explore high-fashion streetwear and curated releases from verified sellers.
-                        </p>
-
-                        {/* Real-time stats */}
-                        <div className="space-y-3 mb-8">
-                            <div className="border border-zinc-900 p-3.5 bg-[#0e0e0e]/60">
-                                <p className="text-xl font-black text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                    {loading ? "—" : allProducts.length}
-                                </p>
-                                <p className="text-[9px] tracking-[0.15em] uppercase text-zinc-500 mt-0.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                    Total Product Drops
-                                </p>
-                            </div>
-
-                            <div className="border border-zinc-900 p-3.5 bg-[#0e0e0e]/60">
-                                <p className="text-xl font-black text-yellow-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                    {loading ? "—" : uniqueSellersCount}
-                                </p>
-                                <p className="text-[9px] tracking-[0.15em] uppercase text-zinc-500 mt-0.5" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                    Independent Sellers
-                                </p>
-                            </div>
-                        </div>
-
-                        {/* Navigation link for Sellers */}
-                        {user?.role === "seller" && (
-                            <Link 
-                                to="/seller/products"
-                                className="group border border-zinc-800 hover:border-yellow-500/50 p-3 flex items-center justify-between text-xs text-zinc-300 hover:text-white transition-all bg-[#0e0e0e]"
-                            >
-                                <span className="font-semibold uppercase tracking-wider text-[11px]">Go To Seller Dashboard</span>
-                                <ArrowIcon className="w-3.5 h-3.5 text-yellow-500 group-hover:translate-x-1 transition-transform" />
-                            </Link>
-                        )}
-                    </div>
-
-                    {/* Bottom strip */}
-                    <div className="relative z-10 px-8 pb-10">
-                        <div className="h-px w-full bg-zinc-900 mb-6" />
-                        <p className="text-[9px] tracking-[0.15em] uppercase text-zinc-700" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                            © {new Date().getFullYear()} SNITCH Inc.
-                        </p>
-                    </div>
-                </div>
-
-                {/* ══════════════════════════════════════════════
                     MAIN CONTENT — catalog & grid
                 ══════════════════════════════════════════════ */}
                 <div className="flex-1 min-h-screen bg-[#0e0e0e] flex flex-col overflow-y-auto">
 
-                    {/* Mobile top header */}
-                    <div className="lg:hidden flex items-center justify-between px-6 pt-8 pb-4 border-b border-zinc-900">
-                        <Link to="/" className="inline-flex items-center gap-2.5">
-                            <span className="h-8 w-8 rounded-md bg-yellow-500 flex items-center justify-center text-black font-black text-base">
+                    {/* Top Navigation Bar */}
+                    <div className="flex items-center justify-between px-6 sm:px-10 py-6 border-b border-zinc-900 bg-[#0a0a0a]">
+                        <Link to="/" className="inline-flex items-center gap-2.5 group">
+                            <span className="h-8 w-8 rounded-md bg-yellow-500 flex items-center justify-center text-black font-black text-base shadow-lg shadow-yellow-500/20 group-hover:shadow-yellow-500/40 transition-shadow duration-300">
                                 S
                             </span>
-                            <span className="text-[13px] font-bold tracking-[0.3em] uppercase text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                            <span className="text-[14px] font-bold tracking-[0.3em] uppercase text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                                 SNITCH
                             </span>
                         </Link>
-                        {user?.role === "seller" && (
-                            <Link to="/seller/products" className="text-[10px] uppercase font-bold tracking-widest text-yellow-500 border border-yellow-500/30 px-3 py-1.5">
-                                Dashboard
-                            </Link>
-                        )}
+
+                        <div className="flex items-center gap-4">
+                            {user && (
+                                <div className="hidden sm:flex items-center gap-2 text-zinc-400 text-xs font-mono">
+                                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                                    <span className="text-[11px] tracking-wide text-zinc-400" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                        {user.email} <span className="text-yellow-500">({user.role})</span>
+                                    </span>
+                                </div>
+                            )}
+
+                            {user?.role === "seller" && (
+                                <Link to="/seller/products" className="text-[11px] uppercase font-bold tracking-widest text-yellow-500 hover:text-yellow-400 border border-yellow-500/30 hover:border-yellow-500/60 px-4 py-2 transition-all">
+                                    Dashboard
+                                </Link>
+                            )}
+                        </div>
                     </div>
 
                     {/* Main Header */}
