@@ -91,8 +91,12 @@ export default function Login() {
         setIsSubmitting(true);
         setApiError("");
         try {
-            await handleLogin({ email: formData.email, password: formData.password });
-            navigate("/");
+            const user = await handleLogin({ email: formData.email, password: formData.password });
+            if (user.role == "seller") {
+                navigate("/seller/products")
+            } else if (user.role == "buyer") {
+                navigate("/");
+            }
         } catch (err) {
             setApiError(err?.message || "Invalid email or password. Please try again.");
         } finally {

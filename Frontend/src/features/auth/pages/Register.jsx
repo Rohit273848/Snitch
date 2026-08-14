@@ -186,14 +186,19 @@ export default function Register() {
         setIsSubmitting(true);
         setTimeout(() => setIsSubmitting(false), 1800);
 
-        await handleRegister({
+        const user = await handleRegister({
             email: formData.email,
             contact: formData.contactNumber,
             password: formData.password,
             fullname: formData.fullname,
             isSeller: formData.isSeller
         })
-        navigate("/")
+        if (user.role == "seller") {
+            navigate("/seller/product")
+        } else {
+
+            navigate("/")
+        }
     };
 
 
