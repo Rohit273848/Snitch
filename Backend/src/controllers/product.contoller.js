@@ -62,3 +62,20 @@ export async function getProducts(req, res) {
         });
     }
 }
+export async function getAllProducts(req, res) {
+    try {
+        const products = await productModel.find().populate("seller", "username email name");
+        res.status(200).json({
+            message: "all products fetches successfully",
+            success: true,
+            products
+        })
+    } catch (err) {
+        console.error("get product error:", err);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get product",
+        });
+    }
+}

@@ -3,14 +3,14 @@ import Register from "../features/auth/pages/Register"
 import Login from "../features/auth/pages/login"
 import CreateProduct from "../features/products/pages/CreateProduct.jsx"
 import SellerProduct from "../features/products/pages/SellerProduct.jsx"
+import Home from "../features/products/pages/Home.jsx"
 import Protected from "../features/auth/components/Protected.jsx"
 import SellerProtected from "../features/auth/components/SellerProtected.jsx"
 
 export const router = createBrowserRouter([
     {
         path: "/",
-        element: <Protected> <h1>Hello world</h1></Protected>,
-
+        element: <Protected><Home /></Protected>,
     }, {
         path: '/register',
         element: <Register />
