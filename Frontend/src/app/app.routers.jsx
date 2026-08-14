@@ -3,11 +3,13 @@ import Register from "../features/auth/pages/Register"
 import Login from "../features/auth/pages/login"
 import CreateProduct from "../features/products/pages/CreateProduct.jsx"
 import SellerProduct from "../features/products/pages/SellerProduct.jsx"
+import Protected from "../features/auth/components/Protected.jsx"
+import SellerProtected from "../features/auth/components/SellerProtected.jsx"
 
 export const router = createBrowserRouter([
     {
         path: "/",
-        element: <h1>Hello world</h1>,
+        element: <Protected> <h1>Hello world</h1></Protected>,
 
     }, {
         path: '/register',
@@ -22,11 +24,16 @@ export const router = createBrowserRouter([
         children: [
             {
                 path: "create-product",
-                element: <CreateProduct />
+                element: <SellerProtected>
+                    <CreateProduct />
+                </SellerProtected>
+
             },
             {
                 path: "products",
-                element: <SellerProduct />
+                element: <SellerProtected>
+                    <SellerProduct />
+                </SellerProtected>
             }
         ]
     }
