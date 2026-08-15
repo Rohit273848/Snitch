@@ -54,7 +54,7 @@ const productSchema = new mongoose.Schema({
             price: {
                 amount: {
                     type: String,
-                    required: true
+                    required: false
                 },
                 currency: {
                     type: String,
@@ -63,9 +63,7 @@ const productSchema = new mongoose.Schema({
                 }
             }
         },
-        {
 
-        }
     ]
 
 
