@@ -4,6 +4,7 @@ import Login from "../features/auth/pages/login"
 import CreateProduct from "../features/products/pages/CreateProduct.jsx"
 import SellerProduct from "../features/products/pages/SellerProduct.jsx"
 import Home from "../features/products/pages/Home.jsx"
+import ProductModal from "../features/products/pages/ProductModal.jsx"
 import Protected from "../features/auth/components/Protected.jsx"
 import SellerProtected from "../features/auth/components/SellerProtected.jsx"
 
@@ -11,6 +12,10 @@ export const router = createBrowserRouter([
     {
         path: "/",
         element: <Protected><Home /></Protected>,
+    },
+    {
+        path: "/product/:id",
+        element: <Protected><ProductModal /></Protected>,
     }, {
         path: '/register',
         element: <Register />

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useProduct } from "../hook/useProduct.js";
 import { useSelector } from "react-redux";
 
@@ -81,12 +81,12 @@ function ArrowIcon({ className = "w-4 h-4" }) {
 function ProductCard({ product, onClick }) {
     const symbol = currencySymbol[product.price?.currency] ?? product.price?.currency ?? "₹";
     const formattedPrice = Number(product.price?.amount || 0).toLocaleString("en-IN");
-    
+
     // Extract seller display name
     const sellerName = product.seller?.username || product.seller?.name || product.seller?.email?.split('@')[0] || "Verified Seller";
 
     return (
-        <div 
+        <div
             onClick={() => onClick(product)}
             className="group border border-zinc-900 hover:border-zinc-700 bg-[#0e0e0e] transition-all duration-300 cursor-pointer flex flex-col justify-between"
         >
@@ -104,7 +104,7 @@ function ProductCard({ product, onClick }) {
                             <PackageIcon className="w-10 h-10 text-zinc-700" />
                         </div>
                     )}
-                    
+
                     {/* Seller Tag Badge */}
                     <div className="absolute top-2 left-2 flex items-center gap-1 bg-black/80 text-yellow-500 text-[10px] tracking-wider uppercase px-2 py-1 backdrop-blur-md border border-zinc-800"
                         style={{ fontFamily: "'JetBrains Mono', monospace" }}>
@@ -114,7 +114,7 @@ function ProductCard({ product, onClick }) {
 
                     {/* Image count badge */}
                     {product.images && product.images.length > 1 && (
-                        <span 
+                        <span
                             className="absolute bottom-2 right-2 text-[9px] tracking-widest uppercase bg-black/80 text-zinc-300 px-1.5 py-0.5 backdrop-blur-sm border border-zinc-800"
                             style={{ fontFamily: "'JetBrains Mono', monospace" }}
                         >
@@ -226,132 +226,18 @@ function ErrorState({ onRetry }) {
 }
 
 // ─── Product Quick Detail Modal ──────────────────────────────────────────────
-function ProductModal({ product, onClose }) {
-    const [selectedImg, setSelectedImg] = useState(0);
 
-    if (!product) return null;
-
-    const symbol = currencySymbol[product.price?.currency] ?? product.price?.currency ?? "₹";
-    const formattedPrice = Number(product.price?.amount || 0).toLocaleString("en-IN");
-    const sellerName = product.seller?.username || product.seller?.name || product.seller?.email || "Seller";
-
-    return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
-            <div className="relative w-full max-w-4xl bg-[#0a0a0a] border border-zinc-800 overflow-hidden shadow-2xl flex flex-col md:flex-row max-h-[90vh]">
-                {/* Close Button */}
-                <button 
-                    onClick={onClose}
-                    className="absolute top-4 right-4 z-20 w-8 h-8 rounded-full bg-black/60 border border-zinc-800 text-zinc-400 hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-                >
-                    <XIcon className="w-4 h-4" />
-                </button>
-
-                {/* Left: Images Showcase */}
-                <div className="w-full md:w-1/2 bg-[#0e0e0e] border-b md:border-b-0 md:border-r border-zinc-900 p-6 flex flex-col justify-between">
-                    <div className="relative aspect-square bg-zinc-950 overflow-hidden border border-zinc-900 mb-4">
-                        {product.images && product.images.length > 0 ? (
-                            <img 
-                                src={product.images[selectedImg]?.url ?? product.images[selectedImg]} 
-                                alt={product.title} 
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center">
-                                <PackageIcon className="w-12 h-12 text-zinc-800" />
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Image Thumbnails */}
-                    {product.images && product.images.length > 1 && (
-                        <div className="flex gap-2 overflow-x-auto pb-1">
-                            {product.images.map((img, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setSelectedImg(i)}
-                                    className={`w-14 h-14 flex-shrink-0 border transition-all cursor-pointer ${
-                                        selectedImg === i ? "border-yellow-500 scale-95" : "border-zinc-800 opacity-60 hover:opacity-100"
-                                    }`}
-                                >
-                                    <img src={img?.url ?? img} alt="" className="w-full h-full object-cover" />
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                {/* Right: Product Meta & Purchase Info */}
-                <div className="w-full md:w-1/2 p-6 md:p-8 flex flex-col justify-between overflow-y-auto">
-                    <div className="space-y-6">
-                        {/* Seller Pill */}
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 text-[11px] font-medium tracking-wider uppercase"
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                            <UserBadgeIcon className="w-3.5 h-3.5" />
-                            <span>Listed by: {sellerName}</span>
-                        </div>
-
-                        {/* Title */}
-                        <div>
-                            <h2 className="text-2xl md:text-3xl font-black text-white uppercase tracking-tight mb-2">
-                                {product.title}
-                            </h2>
-                            <div className="h-0.5 w-12 bg-yellow-500" />
-                        </div>
-
-                        {/* Price */}
-                        <div className="flex items-baseline gap-2">
-                            <span className="text-xl font-bold text-yellow-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                {symbol}{formattedPrice}
-                            </span>
-                            <span className="text-xs text-zinc-600 uppercase tracking-widest" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                {product.price?.currency || "INR"}
-                            </span>
-                        </div>
-
-                        {/* Description */}
-                        <div>
-                            <h4 className="text-[10px] tracking-[0.2em] uppercase text-zinc-500 mb-2" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                Product Details
-                            </h4>
-                            <p className="text-xs text-zinc-400 leading-relaxed font-light whitespace-pre-line">
-                                {product.description}
-                            </p>
-                        </div>
-                    </div>
-
-                    {/* Bottom Actions */}
-                    <div className="pt-8 space-y-3 border-t border-zinc-900 mt-6">
-                        <button 
-                            className="w-full h-12 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-[12px] tracking-[0.12em] uppercase flex items-center justify-between px-6 transition-all cursor-pointer"
-                            style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
-                        >
-                            <span>Add To Bag</span>
-                            <ArrowIcon className="w-4 h-4" />
-                        </button>
-
-                        <button 
-                            onClick={onClose}
-                            className="w-full h-10 bg-zinc-900 hover:bg-zinc-800 text-zinc-400 text-xs tracking-widest uppercase transition-colors cursor-pointer"
-                        >
-                            Close Preview
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
 
 // ─── Main Home Component ──────────────────────────────────────────────────────
 export default function Home() {
+    const navigate = useNavigate();
     const [mounted, setMounted] = useState(false);
     const [fetchError, setFetchError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [sortBy, setSortBy] = useState("newest"); // "newest", "price-low", "price-high", "title"
-    const [selectedProduct, setSelectedProduct] = useState(null);
 
     const { handleGetAllProducts } = useProduct();
-    
+
     // Select state from Redux
     const allProducts = useSelector(state => state.product.allProducts || []);
     const loading = useSelector(state => state.product.loading);
@@ -381,7 +267,7 @@ export default function Home() {
             const query = searchTerm.toLowerCase();
             const titleMatch = p.title?.toLowerCase().includes(query);
             const descMatch = p.description?.toLowerCase().includes(query);
-            const sellerMatch = 
+            const sellerMatch =
                 p.seller?.username?.toLowerCase().includes(query) ||
                 p.seller?.name?.toLowerCase().includes(query) ||
                 p.seller?.email?.toLowerCase().includes(query);
@@ -446,7 +332,7 @@ export default function Home() {
                 .card-grid > * { animation: contentIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
             `}</style>
 
-            <main 
+            <main
                 className="min-h-screen w-full flex bg-[#0a0a0a] selection:bg-yellow-500 selection:text-black"
                 style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
             >
@@ -538,7 +424,7 @@ export default function Home() {
 
                         {/* ── SEARCH & FILTER CONTROLS ── */}
                         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 pt-2">
-                            
+
                             {/* Search Bar */}
                             <div className="relative flex-1">
                                 <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-500 w-4 h-4" />
@@ -550,7 +436,7 @@ export default function Home() {
                                     className="w-full h-11 pl-10 pr-4 bg-[#0a0a0a] border border-zinc-800 text-white text-xs placeholder-zinc-600 focus:outline-none focus:border-yellow-500 transition-colors"
                                 />
                                 {searchTerm && (
-                                    <button 
+                                    <button
                                         onClick={() => setSearchTerm("")}
                                         className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600 hover:text-zinc-300 text-xs"
                                     >
@@ -618,9 +504,9 @@ export default function Home() {
                                 <div className="card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                                     {filteredProducts.map((product, i) => (
                                         <div key={product._id || i} style={{ animationDelay: `${i * 40}ms` }}>
-                                            <ProductCard 
-                                                product={product} 
-                                                onClick={(prod) => setSelectedProduct(prod)}
+                                            <ProductCard
+                                                product={product}
+                                                onClick={(prod) => navigate(`/product/${prod._id}`)}
                                             />
                                         </div>
                                     ))}
@@ -631,14 +517,6 @@ export default function Home() {
                     </div>
                 </div>
             </main>
-
-            {/* Product Details Modal */}
-            {selectedProduct && (
-                <ProductModal 
-                    product={selectedProduct} 
-                    onClose={() => setSelectedProduct(null)} 
-                />
-            )}
         </>
     );
 }

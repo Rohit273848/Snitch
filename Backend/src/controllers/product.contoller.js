@@ -79,3 +79,27 @@ export async function getAllProducts(req, res) {
         });
     }
 }
+
+export async function getProductById(req, res) {
+    try {
+        const { id } = req.params;
+        const product = await productModel.findById(id).populate("seller", "username email name");
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+        res.status(200).json({
+            message: "product fetched successfully",
+            success: true,
+            product
+        });
+    } catch (err) {
+        console.error("get product by id error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to get product",
+        });
+    }
+}
