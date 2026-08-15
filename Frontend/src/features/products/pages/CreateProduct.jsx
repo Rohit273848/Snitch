@@ -425,7 +425,7 @@ export default function CreateProduct() {
     try {
       const product = await handleProductCreation(data);
 
-      navigate("/seller/products");
+      navigate("/seller/dashboard");
     } catch (error) {
       console.error(error);
 
@@ -598,7 +598,7 @@ export default function CreateProduct() {
                   Seller
                 </span>
                 <span className="text-zinc-800">/</span>
-                <Link to="/seller/products"
+                <Link to="/seller/dashboard"
                   className="text-[9px] tracking-[0.2em] uppercase text-zinc-700 hover:text-zinc-400 transition-colors" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                   Products
                 </Link>
@@ -738,7 +738,7 @@ export default function CreateProduct() {
                   <div className="h-px flex-1 bg-zinc-900" />
                   <p className="text-[11px] text-zinc-600 tracking-wider" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                     <Link
-                      to="/seller/products"
+                      to="/seller/dashboard"
                       className="text-zinc-500 hover:text-yellow-500 font-semibold transition-colors duration-150"
                     >
                       ← Back to My Products

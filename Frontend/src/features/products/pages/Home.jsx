@@ -363,7 +363,7 @@ export default function Home() {
                             )}
 
                             {user?.role === "seller" && (
-                                <Link to="/seller/products" className="text-[11px] uppercase font-bold tracking-widest text-yellow-500 hover:text-yellow-400 border border-yellow-500/30 hover:border-yellow-500/60 px-4 py-2 transition-all">
+                                <Link to="/seller/dashboard" className="text-[11px] uppercase font-bold tracking-widest text-yellow-500 hover:text-yellow-400 border border-yellow-500/30 hover:border-yellow-500/60 px-4 py-2 transition-all">
                                     Dashboard
                                 </Link>
                             )}

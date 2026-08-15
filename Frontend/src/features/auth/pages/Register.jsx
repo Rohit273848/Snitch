@@ -194,7 +194,7 @@ export default function Register() {
             isSeller: formData.isSeller
         })
         if (user.role == "seller") {
-            navigate("/seller/product")
+            navigate("/seller/dashboard")
         } else {
 
             navigate("/")

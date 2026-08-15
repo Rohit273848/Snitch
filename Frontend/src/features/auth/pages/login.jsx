@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../hook/useAuth";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
@@ -93,7 +93,7 @@ export default function Login() {
         try {
             const user = await handleLogin({ email: formData.email, password: formData.password });
             if (user.role == "seller") {
-                navigate("/seller/products")
+                navigate("/seller/dashboard")
             } else if (user.role == "buyer") {
                 navigate("/");
             }
