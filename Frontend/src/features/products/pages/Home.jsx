@@ -133,16 +133,24 @@ function ProductCard({ product, onClick }) {
                         {product.description}
                     </p>
 
-                    <div className="pt-2 flex items-baseline gap-1">
-                        <span className="text-[11px] text-zinc-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                            {symbol}
-                        </span>
-                        <span className="text-base font-extrabold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                            {formattedPrice}
-                        </span>
-                        <span className="text-[9px] text-zinc-600 uppercase tracking-widest ml-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                            {product.price?.currency || "INR"}
-                        </span>
+                    <div className="pt-2 flex items-baseline justify-between gap-1">
+                        <div className="flex items-baseline gap-1">
+                            <span className="text-[11px] text-zinc-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                {symbol}
+                            </span>
+                            <span className="text-base font-extrabold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                {formattedPrice}
+                            </span>
+                            <span className="text-[9px] text-zinc-600 uppercase tracking-widest ml-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
+                                {product.price?.currency || "INR"}
+                            </span>
+                        </div>
+
+                        {product.variants && product.variants.length > 0 && (
+                            <span className="text-[8px] font-mono uppercase bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 px-1.5 py-0.5 font-bold tracking-wider">
+                                {product.variants.length} Varieties
+                            </span>
+                        )}
                     </div>
                 </div>
             </div>

@@ -1,5 +1,5 @@
 import { setAllProducts, setLoading, setSellerProduct } from "../state/product.slice";
-import { createProduct, getAllProducts, getProductById, getSellerProduct } from "../services/product.api";
+import { createProduct, getAllProducts, getProductById, getSellerProduct, updateSellerProduct, deleteSellerProduct } from "../services/product.api";
 import { useDispatch } from "react-redux";
 
 export const useProduct = () => {
@@ -32,6 +32,18 @@ export const useProduct = () => {
         dispatch(setLoading(false));
         return data.product;
     }
-    return { handleGetSellerProduct, handleProductCreation, handleGetAllProducts, handleGetProductById }
+    async function handleUpdateSellerProduct(id, updateData) {
+        dispatch(setLoading(true));
+        const data = await updateSellerProduct(id, updateData);
+        dispatch(setLoading(false));
+        return data.product;
+    }
+    async function handleDeleteSellerProduct(id) {
+        dispatch(setLoading(true));
+        const data = await deleteSellerProduct(id);
+        dispatch(setLoading(false));
+        return data;
+    }
+    return { handleGetSellerProduct, handleProductCreation, handleGetAllProducts, handleGetProductById, handleUpdateSellerProduct, handleDeleteSellerProduct }
 }
 

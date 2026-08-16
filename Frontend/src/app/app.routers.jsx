@@ -3,6 +3,7 @@ import Register from "../features/auth/pages/Register"
 import Login from "../features/auth/pages/login"
 import CreateProduct from "../features/products/pages/CreateProduct.jsx"
 import SellerProduct from "../features/products/pages/SellerProduct.jsx"
+import SellerProductModel from "../features/products/pages/SellerProductModel.jsx"
 import Home from "../features/products/pages/Home.jsx"
 import ProductModal from "../features/products/pages/ProductModal.jsx"
 import Protected from "../features/auth/components/Protected.jsx"
@@ -38,6 +39,12 @@ export const router = createBrowserRouter([
                 path: "dashboard",
                 element: <SellerProtected>
                     <SellerProduct />
+                </SellerProtected>
+            },
+            {
+                path: "product/:id",
+                element: <SellerProtected>
+                    <SellerProductModel />
                 </SellerProtected>
             }
         ]

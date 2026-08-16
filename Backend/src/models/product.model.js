@@ -33,6 +33,11 @@ const productSchema = new mongoose.Schema({
             }
         }
     ],
+    attributeKeys: [
+        {
+            type: String
+        }
+    ],
     variants: [
         {
             images: [
@@ -48,12 +53,12 @@ const productSchema = new mongoose.Schema({
                 default: 0
             },
             attributes: {
-                type: Map,
-                of: String
+                type: mongoose.Schema.Types.Mixed,
+                default: {}
             },
             price: {
                 amount: {
-                    type: String,
+                    type: Number,
                     required: false
                 },
                 currency: {
@@ -67,7 +72,7 @@ const productSchema = new mongoose.Schema({
     ]
 
 
-}, { timestamps: true })
+}, { timestamps: true, toJSON: { flattenMaps: true }, toObject: { flattenMaps: true } })
 
 const productModel = new mongoose.model('product', productSchema);
 export default productModel;

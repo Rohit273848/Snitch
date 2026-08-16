@@ -358,10 +358,54 @@ export default function CreateProduct() {
   const [mounted, setMounted] = useState(false);
   const [focused, setFocused] = useState(null);
   const [images, setImages] = useState([]);
+  const [attributeKeys, setAttributeKeys] = useState(["Color", "Size"]);
+  const [initialVariants, setInitialVariants] = useState([
+    { attributes: { Color: "Red", Size: "S" }, stock: 10 },
+    { attributes: { Color: "Red", Size: "M" }, stock: 0 },
+    { attributes: { Color: "Red", Size: "L" }, stock: 15 }
+  ]);
   const [apiError, setApiError] = useState(null);
 
   const navigate = useNavigate();
 
+  const handleAddAttributeKey = () => {
+    const newKey = `Attr${attributeKeys.length + 1}`;
+    setAttributeKeys([...attributeKeys, newKey]);
+  };
+
+  const handleRemoveAttributeKey = (index) => {
+    setAttributeKeys(attributeKeys.filter((_, i) => i !== index));
+  };
+
+  const handleAttributeKeyChange = (index, value) => {
+    const updated = [...attributeKeys];
+    updated[index] = value;
+    setAttributeKeys(updated);
+  };
+
+  const handleAddInitialVariant = () => {
+    const defaultAttrs = {};
+    attributeKeys.forEach(k => {
+      if (k.trim()) defaultAttrs[k.trim()] = "";
+    });
+    setInitialVariants([...initialVariants, { attributes: defaultAttrs, stock: 10 }]);
+  };
+
+  const handleRemoveInitialVariant = (idx) => {
+    setInitialVariants(initialVariants.filter((_, i) => i !== idx));
+  };
+
+  const handleVariantAttrChange = (variantIdx, attrKey, val) => {
+    const updated = [...initialVariants];
+    updated[variantIdx].attributes[attrKey] = val;
+    setInitialVariants(updated);
+  };
+
+  const handleVariantStockChange = (variantIdx, stockVal) => {
+    const updated = [...initialVariants];
+    updated[variantIdx].stock = Number(stockVal) || 0;
+    setInitialVariants(updated);
+  };
 
   // UI-only local state for visual development
   const [formData, setFormData] = useState({
@@ -371,18 +415,14 @@ export default function CreateProduct() {
     priceCurrency: "INR",
   });
 
-  // TODO: Connect your useProduct() hook here.
-  // Example:
   const { handleProductCreation } = useProduct();
   const loading = useSelector((state) => state.product.loading);
-
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 50);
     return () => clearTimeout(t);
   }, []);
 
-  // UI-only change handler — wire to your real form state when ready
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -417,6 +457,13 @@ export default function CreateProduct() {
     data.append("description", formData.description);
     data.append("priceAmount", formData.priceAmount);
     data.append("priceCurrency", formData.priceCurrency);
+    
+    // Filter and append attribute keys defined for this product
+    const validKeys = attributeKeys.map(k => k.trim()).filter(Boolean);
+    data.append("attributeKeys", JSON.stringify(validKeys));
+
+    // Append initial variants with size and stock availability
+    data.append("variants", JSON.stringify(initialVariants));
 
     images.forEach((img) => {
       data.append("images", img.file);
@@ -687,8 +734,143 @@ export default function CreateProduct() {
                   </div>
                 </div>
 
-                {/* ── SECTION 3: Images ── */}
-                <SectionLabel index="03" label="Product Images" />
+                {/* ── SECTION 3: Variety Specification Keys ── */}
+                <SectionLabel index="03" label="Variety Attributes Schema" />
+
+                <div className="space-y-4 bg-[#0a0a0a] border border-zinc-900 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-mono font-bold uppercase text-zinc-300">
+                        Product Variety Attributes
+                      </p>
+                      <p className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                        Define attribute keys (e.g., Color, Size, Material). All future product varieties will use these keys.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddAttributeKey}
+                      className="text-[10px] uppercase font-mono text-yellow-500 hover:underline cursor-pointer"
+                    >
+                      + Add Attribute Key
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {attributeKeys.map((keyVal, idx) => (
+                      <div key={idx} className="flex items-center gap-3">
+                        <input
+                          type="text"
+                          placeholder="Attribute Key (e.g., Color, Size, Fit)"
+                          value={keyVal}
+                          onChange={(e) => handleAttributeKeyChange(idx, e.target.value)}
+                          className="w-full bg-[#0e0e0e] border border-zinc-800 px-4 py-2.5 text-xs text-white focus:border-yellow-500 focus:outline-none font-mono"
+                        />
+                        {attributeKeys.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveAttributeKey(idx)}
+                            className="text-zinc-600 hover:text-red-400 p-1 text-xs font-mono cursor-pointer"
+                          >
+                            ✕
+                          </button>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── SECTION 4: Initial Varieties & Stock Availability ── */}
+                <SectionLabel index="04" label="Initial Varieties & Stock" />
+
+                <div className="space-y-4 bg-[#0a0a0a] border border-zinc-900 p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-xs font-mono font-bold uppercase text-zinc-300">
+                        Add Sizes &amp; Stock Availability
+                      </p>
+                      <p className="text-[10px] text-zinc-500 font-mono mt-0.5">
+                        Set availability per size/variety. Stock &gt; 0 shows as Available to buyers; Stock = 0 shows as Not Available.
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleAddInitialVariant}
+                      className="text-[10px] uppercase font-mono text-yellow-500 hover:underline cursor-pointer"
+                    >
+                      + Add Size / Variety
+                    </button>
+                  </div>
+
+                  <div className="space-y-3">
+                    {initialVariants.map((varItem, vIdx) => (
+                      <div key={vIdx} className="bg-[#0e0e0e] border border-zinc-800 p-3 space-y-3">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-mono font-bold uppercase text-yellow-500">
+                            Variety Drop #{vIdx + 1}
+                          </span>
+                          <div className="flex items-center gap-3">
+                            <span className={`text-[9px] font-mono font-bold uppercase px-2 py-0.5 border ${
+                              Number(varItem.stock) > 0
+                                ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                                : "text-red-400 bg-red-500/10 border-red-500/20"
+                            }`}>
+                              {Number(varItem.stock) > 0 ? `Available (${varItem.stock})` : "Not Available (Out of Stock)"}
+                            </span>
+                            {initialVariants.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveInitialVariant(vIdx)}
+                                className="text-zinc-600 hover:text-red-400 text-xs font-mono p-1 cursor-pointer"
+                              >
+                                ✕
+                              </button>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Attribute fields */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {attributeKeys.map((attrKey, kIdx) => {
+                            if (!attrKey.trim()) return null;
+                            const keyName = attrKey.trim();
+                            return (
+                              <div key={kIdx} className="flex items-center gap-2 bg-black p-2 border border-zinc-900">
+                                <span className="text-[10px] font-mono text-yellow-500 font-bold uppercase w-16 truncate">
+                                  {keyName}:
+                                </span>
+                                <input
+                                  type="text"
+                                  placeholder={`e.g. ${keyName === 'Color' ? 'Red' : keyName === 'Size' ? 'S / M / L' : 'Value'}`}
+                                  value={varItem.attributes[keyName] || ""}
+                                  onChange={(e) => handleVariantAttrChange(vIdx, keyName, e.target.value)}
+                                  className="w-full bg-[#0e0e0e] border border-zinc-800 px-2.5 py-1 text-xs text-white focus:border-yellow-500 focus:outline-none font-mono"
+                                />
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Stock Input */}
+                        <div className="flex items-center gap-3 pt-1">
+                          <label className="text-[10px] uppercase font-mono text-zinc-400">
+                            Available Stock Quantity:
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={varItem.stock}
+                            onChange={(e) => handleVariantStockChange(vIdx, e.target.value)}
+                            className="w-28 bg-black border border-zinc-800 px-3 py-1 text-xs text-white font-mono focus:border-yellow-500 focus:outline-none"
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* ── SECTION 5: Images ── */}
+                <SectionLabel index="05" label="Product Images" />
 
                 {/* Image Upload
                                     TODO: Store selected images in your form state. Field: images
