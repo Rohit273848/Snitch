@@ -355,4 +355,4 @@ export async function deleteSellerProduct(req, res) {
             message: "Failed to delete product"
         });
     }
-}
+}

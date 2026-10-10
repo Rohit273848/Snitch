@@ -6,7 +6,8 @@ import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 
 import authRoutes from "./routes/auth.routes.js";
-import productRoutes from "./routes/product.routes.js"
+import productRoutes from "./routes/product.routes.js";
+import cartRoutes from "./routes/cart.routes.js";
 import { config } from "./config/config.js";
 
 
@@ -42,9 +43,11 @@ app.use(
 );
 
 app.get("/", (req, res) => {
-    res.send(" World");
+    res.send("World");
 });
+
 app.use('/api/auth', authRoutes);
-app.use('/api/products', productRoutes)
+app.use('/api/products', productRoutes);
+app.use('/api/cart', cartRoutes);
 
 export default app;
