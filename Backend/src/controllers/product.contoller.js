@@ -1,65 +1,156 @@
 import productModel from "../models/product.model.js";
-// import { config } from "../config/config.js";
-import { uploadFile, deleteFileByUrl } from "../services/storage.service.js";
+import { uploadFile, deleteFileByUrl, deleteFileById } from "../services/storage.service.js";
 
 export async function createProduct(req, res) {
     try {
-        let { title, description, priceAmount, priceCurrency, attributeKeys, variants } = req.body;
+        let { title, description, priceAmount, priceCurrency, attributeKeys, variants, imageMetadata } = req.body;
         const seller = req.user;
-        if (!req.files) {
+
+        if (!req.files || req.files.length === 0) {
             return res.status(400).json({
-                message: "Product image is required",
+                success: false,
+                message: "At least one product image is required",
             });
         }
+
+        // Clean & parse attributeKeys
         if (typeof attributeKeys === 'string') {
-            try { attributeKeys = JSON.parse(attributeKeys); } catch (e) { attributeKeys = []; }
+            try { attributeKeys = JSON.parse(attributeKeys); } catch { attributeKeys = []; }
         }
         if (!Array.isArray(attributeKeys)) attributeKeys = [];
+        const cleanAttributeKeys = attributeKeys
+            .map(k => String(k || "").trim())
+            .filter(Boolean);
 
+        // Parse imageMetadata
+        let parsedImageMeta = [];
+        if (typeof imageMetadata === 'string') {
+            try { parsedImageMeta = JSON.parse(imageMetadata); } catch { parsedImageMeta = []; }
+        } else if (Array.isArray(imageMetadata)) {
+            parsedImageMeta = imageMetadata;
+        }
+
+        // Clean & parse variants
         let parsedVariants = [];
         if (typeof variants === 'string') {
-            try { variants = JSON.parse(variants); } catch (e) { variants = []; }
+            try { variants = JSON.parse(variants); } catch { variants = []; }
         }
         if (Array.isArray(variants)) {
-            parsedVariants = variants.map(v => ({
-                stock: Number(v.stock || 0),
-                attributes: typeof v.attributes === 'object' && v.attributes !== null ? v.attributes : {},
-                images: Array.isArray(v.images) ? v.images.filter(img => img && img.url && !img.url.startsWith('blob:')) : [],
-                price: v.price?.amount ? { amount: Number(v.price.amount), currency: v.price.currency || priceCurrency || "INR" } : undefined
-            }));
+            const seenCombos = new Set();
+            for (let i = 0; i < variants.length; i++) {
+                const v = variants[i];
+                const rawAttrs = (typeof v.attributes === 'object' && v.attributes !== null) ? v.attributes : {};
+                const cleanAttrs = {};
+                for (const [k, val] of Object.entries(rawAttrs)) {
+                    if (k.trim() && val !== undefined && val !== null && String(val).trim()) {
+                        cleanAttrs[k.trim()] = String(val).trim();
+                    }
+                }
+
+                // If attributeKeys are defined, ensure each variant has those attributes filled
+                if (cleanAttributeKeys.length > 0) {
+                    const missing = cleanAttributeKeys.filter(k => !cleanAttrs[k]);
+                    if (missing.length > 0) {
+                        return res.status(400).json({
+                            success: false,
+                            message: `Variant #${i + 1} is missing attribute values for: ${missing.join(", ")}`,
+                        });
+                    }
+                }
+
+                // Check for duplicate attribute combinations
+                const comboKey = Object.entries(cleanAttrs)
+                    .sort(([a], [b]) => a.localeCompare(b))
+                    .map(([k, val]) => `${k.toLowerCase()}:${val.toLowerCase()}`)
+                    .join("|");
+
+                if (comboKey && seenCombos.has(comboKey)) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Duplicate variant combination detected: ${Object.entries(cleanAttrs).map(([k, val]) => `${k}=${val}`).join(", ")}`,
+                    });
+                }
+                if (comboKey) {
+                    seenCombos.add(comboKey);
+                }
+
+                const stockNum = Number(v.stock);
+                if (isNaN(stockNum) || !Number.isInteger(stockNum) || stockNum < 0) {
+                    return res.status(400).json({
+                        success: false,
+                        message: `Variant #${i + 1} stock must be a non-negative integer`,
+                    });
+                }
+
+                const variantObj = {
+                    attributes: cleanAttrs,
+                    stock: stockNum,
+                    images: Array.isArray(v.images)
+                        ? v.images.filter(img => img && img.url && typeof img.url === "string" && !img.url.startsWith("blob:"))
+                        : [],
+                };
+
+                // Optional variant price override
+                if (v.price && (v.price.amount !== undefined && v.price.amount !== null && v.price.amount !== "")) {
+                    const vAmount = Number(v.price.amount);
+                    if (!isNaN(vAmount) && vAmount >= 0) {
+                        variantObj.price = {
+                            amount: vAmount,
+                            currency: v.price.currency || priceCurrency || "INR",
+                        };
+                    }
+                }
+
+                parsedVariants.push(variantObj);
+            }
         }
 
-        const images = await Promise.all(req.files.map(async (file) => {
-            return await uploadFile({
-                buffer: file.buffer,
-                fileName: file.originalname,
-            });
-        }))
+        // Upload images via storage service
+        const uploadedImages = await Promise.all(
+            req.files.map(async (file, idx) => {
+                const uploaded = await uploadFile({
+                    buffer: file.buffer,
+                    fileName: file.originalname,
+                });
+                const meta = parsedImageMeta[idx] || {};
+                return {
+                    url: uploaded.url,
+                    fileId: uploaded.fileId || "",
+                    color: meta.color ? String(meta.color).trim() : "",
+                    isCover: Boolean(meta.isCover),
+                };
+            })
+        );
+
+        // Ensure at least one cover image is designated
+        if (uploadedImages.length > 0 && !uploadedImages.some(img => img.isCover)) {
+            uploadedImages[0].isCover = true;
+        }
 
         const product = await productModel.create({
-            title,
-            description,
+            title: title.trim(),
+            description: description.trim(),
             seller: seller._id,
             price: {
-                amount: priceAmount,
-                currency: priceCurrency || "INR"
+                amount: Number(priceAmount),
+                currency: priceCurrency || "INR",
             },
-            images,
-            attributeKeys,
-            variants: parsedVariants
-        })
-        res.status(201).json({
-            message: "product created successfully",
+            images: uploadedImages,
+            attributeKeys: cleanAttributeKeys,
+            variants: parsedVariants,
+        });
+
+        return res.status(201).json({
+            message: "Product created successfully",
             success: true,
-            product
-        })
+            product,
+        });
 
     } catch (err) {
         console.error("Create product error:", err);
-
-        return res.status(500).json({
+        return res.status(err.name === "ValidationError" ? 400 : 500).json({
             success: false,
-            message: "Failed to create product",
+            message: err.message || "Failed to create product",
         });
     }
 }

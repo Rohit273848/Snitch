@@ -53,7 +53,7 @@ export const addToCart = async (req, res) => {
         }
 
         // Determine price from variant or base product
-        const itemPrice = (variant && variant.price) ? variant.price : product.price;
+        const itemPrice = (variant && variant.price && variant.price.amount !== undefined) ? variant.price : product.price;
 
         // 2. Find cart if exists or create new cart
         let cart = await cartModel.findOne({ user: userId });

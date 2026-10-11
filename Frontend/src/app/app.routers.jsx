@@ -6,6 +6,7 @@ import SellerProduct from "../features/products/pages/SellerProduct.jsx"
 import SellerProductModel from "../features/products/pages/SellerProductModel.jsx"
 import Home from "../features/products/pages/Home.jsx"
 import ProductModal from "../features/products/pages/ProductModal.jsx"
+import CartPage from "../features/cart/pages/CartPage.jsx"
 import Protected from "../features/auth/components/Protected.jsx"
 import SellerProtected from "../features/auth/components/SellerProtected.jsx"
 
@@ -17,7 +18,16 @@ export const router = createBrowserRouter([
     {
         path: "/product/:id",
         element: <Protected><ProductModal /></Protected>,
-    }, {
+    },
+    {
+        path: "/cart",
+        element: <Protected><CartPage /></Protected>,
+    },
+    {
+        path: "/chat",
+        element: <Protected><CartPage /></Protected>,
+    },
+    {
         path: '/register',
         element: <Register />
     },

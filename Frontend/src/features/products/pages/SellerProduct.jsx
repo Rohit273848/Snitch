@@ -82,7 +82,7 @@ function ProductCard({ product, onDeleteCard }) {
                     (e.g. product.images[0].url or product.images[0]) */}
                 {product.images && product.images.length > 0 ? (
                     <img
-                        src={product.images[0].url ?? product.images[0]}
+                        src={product.images.find(img => img?.isCover)?.url || product.images[0]?.url || product.images[0]}
                         alt={product.title}
                         className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />

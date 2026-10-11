@@ -95,7 +95,7 @@ function ProductCard({ product, onClick }) {
                 <div className="relative aspect-[4/3] overflow-hidden bg-zinc-900">
                     {product.images && product.images.length > 0 ? (
                         <img
-                            src={product.images[0]?.url ?? product.images[0]}
+                            src={product.images.find(img => img?.isCover)?.url || product.images[0]?.url || product.images[0]}
                             alt={product.title}
                             className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
                         />
@@ -369,6 +369,17 @@ export default function Home() {
                                     </span>
                                 </div>
                             )}
+
+                            {/* Bag / Cart Link */}
+                            <Link
+                                to="/cart"
+                                className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-yellow-500 bg-[#0e0e0e] border border-zinc-800 hover:border-zinc-700 px-3 py-2 transition-all cursor-pointer"
+                            >
+                                <svg className="w-4 h-4 text-yellow-500" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.67 0-1.19-.578-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.125 1.007z" />
+                                </svg>
+                                <span>Bag</span>
+                            </Link>
 
                             {user?.role === "seller" && (
                                 <Link to="/seller/dashboard" className="text-[11px] uppercase font-bold tracking-widest text-yellow-500 hover:text-yellow-400 border border-yellow-500/30 hover:border-yellow-500/60 px-4 py-2 transition-all">

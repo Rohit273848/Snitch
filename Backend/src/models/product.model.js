@@ -5,10 +5,12 @@ const productSchema = new mongoose.Schema({
     title: {
         type: String,
         required: true,
+        trim: true,
     },
     description: {
         type: String,
         required: true,
+        trim: true,
     },
     seller: {
         type: mongoose.Schema.Types.ObjectId,
@@ -24,12 +26,25 @@ const productSchema = new mongoose.Schema({
             url: {
                 type: String,
                 required: true,
+            },
+            fileId: {
+                type: String,
+                default: "",
+            },
+            color: {
+                type: String,
+                default: "",
+            },
+            isCover: {
+                type: Boolean,
+                default: false,
             }
         }
     ],
     attributeKeys: [
         {
-            type: String
+            type: String,
+            trim: true,
         }
     ],
     variants: [
@@ -39,27 +54,29 @@ const productSchema = new mongoose.Schema({
                     url: {
                         type: String,
                         required: true,
+                    },
+                    fileId: {
+                        type: String,
+                        default: "",
                     }
                 }
             ],
             stock: {
                 type: Number,
-                default: 0
+                default: 0,
+                min: 0,
             },
             attributes: {
                 type: mongoose.Schema.Types.Mixed,
-                default: {}
+                default: {},
             },
             price: {
                 type: priceSchema,
-                required: true,
+                required: false,
             }
         },
-
     ]
+}, { timestamps: true, toJSON: { flattenMaps: true }, toObject: { flattenMaps: true } });
 
-
-}, { timestamps: true, toJSON: { flattenMaps: true }, toObject: { flattenMaps: true } })
-
-const productModel = new mongoose.model('product', productSchema);
+const productModel = mongoose.models.product || mongoose.model('product', productSchema);
 export default productModel;

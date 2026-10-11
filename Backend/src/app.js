@@ -50,4 +50,22 @@ app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
 
+// Global error handler middleware
+app.use((err, req, res, next) => {
+    if (err) {
+        console.error("Global error handler caught error:", err.message);
+        if (err.code === "LIMIT_FILE_SIZE") {
+            return res.status(400).json({
+                success: false,
+                message: "Image file size exceeds the 5MB limit",
+            });
+        }
+        return res.status(400).json({
+            success: false,
+            message: err.message || "An error occurred during request processing",
+        });
+    }
+    next();
+});
+
 export default app;

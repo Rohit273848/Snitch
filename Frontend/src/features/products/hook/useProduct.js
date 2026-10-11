@@ -7,43 +7,73 @@ export const useProduct = () => {
 
     async function handleProductCreation(formData) {
         dispatch(setLoading(true));
-        const data = await createProduct(formData);
-        dispatch(setLoading(false));
-        return data.product;
+        try {
+            const data = await createProduct(formData);
+            return data.product;
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
 
     async function handleGetSellerProduct() {
         dispatch(setLoading(true));
-        const data = await getSellerProduct();
-        dispatch(setSellerProduct(data.products))
-        dispatch(setLoading(false));
-        return data.products;
+        try {
+            const data = await getSellerProduct();
+            dispatch(setSellerProduct(data.products));
+            return data.products;
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
+
     async function handleGetAllProducts() {
         dispatch(setLoading(true));
-        const data = await getAllProducts();
-        dispatch(setAllProducts(data.products));
-        dispatch(setLoading(false));
-        return data.products;
+        try {
+            const data = await getAllProducts();
+            dispatch(setAllProducts(data.products));
+            return data.products;
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
+
     async function handleGetProductById(id) {
         dispatch(setLoading(true));
-        const data = await getProductById(id);
-        dispatch(setLoading(false));
-        return data.product;
+        try {
+            const data = await getProductById(id);
+            return data.product;
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
+
     async function handleUpdateSellerProduct(id, updateData) {
         dispatch(setLoading(true));
-        const data = await updateSellerProduct(id, updateData);
-        dispatch(setLoading(false));
-        return data.product;
+        try {
+            const data = await updateSellerProduct(id, updateData);
+            return data.product;
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
+
     async function handleDeleteSellerProduct(id) {
         dispatch(setLoading(true));
-        const data = await deleteSellerProduct(id);
-        dispatch(setLoading(false));
-        return data;
+        try {
+            const data = await deleteSellerProduct(id);
+            return data;
+        } finally {
+            dispatch(setLoading(false));
+        }
     }
-    return { handleGetSellerProduct, handleProductCreation, handleGetAllProducts, handleGetProductById, handleUpdateSellerProduct, handleDeleteSellerProduct }
-}
+
+    return {
+        handleGetSellerProduct,
+        handleProductCreation,
+        handleGetAllProducts,
+        handleGetProductById,
+        handleUpdateSellerProduct,
+        handleDeleteSellerProduct
+    };
+};
 
