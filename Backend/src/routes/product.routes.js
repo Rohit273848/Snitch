@@ -7,7 +7,7 @@ import { validate } from "../middleweres/validate.js";
 
 const router = Router();
 
-router.post("/", authenticateSeller, upload.array('images', 7), createProductValidator,validate, createProduct)
+router.post("/", authenticateSeller, upload.array('images', 7), createProductValidator, validate, createProduct)
 router.put("/seller/:id", authenticateSeller, upload.array('images', 7), updateSellerProduct)
 router.delete("/seller/:id", authenticateSeller, deleteSellerProduct)
 router.get("/seller", authenticateSeller, getProducts)

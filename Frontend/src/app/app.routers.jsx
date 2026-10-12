@@ -12,6 +12,14 @@ import SellerProtected from "../features/auth/components/SellerProtected.jsx"
 
 export const router = createBrowserRouter([
     {
+        path: '/register',
+        element: <Register />
+    },
+    {
+        path: "/login",
+        element: <Login />
+    },
+    {
         path: "/",
         element: <Protected><Home /></Protected>,
     },
@@ -27,14 +35,7 @@ export const router = createBrowserRouter([
         path: "/chat",
         element: <Protected><CartPage /></Protected>,
     },
-    {
-        path: '/register',
-        element: <Register />
-    },
-    {
-        path: "/login",
-        element: <Login />
-    },
+    
     {
         path: "/seller",
         children: [

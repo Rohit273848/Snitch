@@ -255,7 +255,7 @@ export async function updateSellerProduct(req, res) {
                     });
                 })
             );
-            
+
             newlyUploadedImages = uploadedImages;
             if (req.body.replaceImages === "true") {
                 product.images = uploadedImages;
@@ -267,7 +267,7 @@ export async function updateSellerProduct(req, res) {
         if (req.body.images) {
             let parsedImages = req.body.images;
             if (typeof parsedImages === 'string') {
-                try { parsedImages = JSON.parse(parsedImages); } catch (e) {}
+                try { parsedImages = JSON.parse(parsedImages); } catch (e) { }
             }
             if (Array.isArray(parsedImages)) {
                 product.images = parsedImages.map(img => typeof img === 'string' ? { url: img } : img);
@@ -302,7 +302,7 @@ export async function updateSellerProduct(req, res) {
                 const formattedVariants = parsedVariants.map(v => {
                     const amount = v.price?.amount || v.priceAmount;
                     const currency = v.price?.currency || v.priceCurrency || product.price.currency || "INR";
-                    
+
                     // Filter out transient blob: URLs
                     const validImages = Array.isArray(v.images)
                         ? v.images

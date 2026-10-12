@@ -226,7 +226,7 @@ export default function ProductModal() {
             `}</style>
 
             <main className="min-h-screen w-full bg-[#0a0a0a] text-white flex flex-col selection:bg-yellow-500 selection:text-black">
-                
+
                 {/* ══════════════════════════════════════════════
                     1. TOP NAVIGATION BAR
                 ══════════════════════════════════════════════ */}
@@ -289,7 +289,7 @@ export default function ProductModal() {
                     2. MAIN PRODUCT CONTENT
                 ══════════════════════════════════════════════ */}
                 <div className={`flex-1 max-w-7xl w-full mx-auto px-6 sm:px-10 py-10 ${mounted ? "content-in" : "opacity-0"}`}>
-                    
+
                     {/* Breadcrumbs */}
                     <div className="flex items-center gap-2 mb-8 text-[10px] uppercase tracking-[0.2em] font-mono" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
                         <Link to="/" className="text-zinc-500 hover:text-zinc-300">Storefront</Link>
@@ -325,10 +325,10 @@ export default function ProductModal() {
                     {/* Full Product Details Layout */}
                     {!loadingProduct && !error && product && (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 xl:gap-14">
-                            
+
                             {/* LEFT COLUMN: Gallery & Images (7 cols) */}
                             <div className="lg:col-span-7 flex flex-col gap-4">
-                                
+
                                 {/* Main Image Preview */}
                                 <div className="relative aspect-square bg-[#0e0e0e] border border-zinc-800 overflow-hidden group">
                                     {displayImages && displayImages.length > 0 ? (
@@ -358,9 +358,8 @@ export default function ProductModal() {
                                             <button
                                                 key={i}
                                                 onClick={() => setSelectedImg(i)}
-                                                className={`w-20 h-20 flex-shrink-0 border transition-all cursor-pointer bg-[#0e0e0e] ${
-                                                    selectedImg === i ? "border-yellow-500 scale-95" : "border-zinc-800 opacity-60 hover:opacity-100"
-                                                }`}
+                                                className={`w-20 h-20 flex-shrink-0 border transition-all cursor-pointer bg-[#0e0e0e] ${selectedImg === i ? "border-yellow-500 scale-95" : "border-zinc-800 opacity-60 hover:opacity-100"
+                                                    }`}
                                             >
                                                 <img src={img?.url ?? img} alt="" className="w-full h-full object-cover" />
                                             </button>
@@ -372,7 +371,7 @@ export default function ProductModal() {
                             {/* RIGHT COLUMN: Specifications & Buying Actions (5 cols) */}
                             <div className="lg:col-span-5 flex flex-col justify-between space-y-8">
                                 <div className="space-y-6">
-                                    
+
                                     {/* Seller Tag */}
                                     <div className="inline-flex items-center gap-2 px-3 py-1 bg-yellow-500/10 border border-yellow-500/30 text-yellow-500 text-[10px] font-semibold tracking-wider uppercase"
                                         style={{ fontFamily: "'JetBrains Mono', monospace" }}>
@@ -440,7 +439,7 @@ export default function ProductModal() {
                                     <div className="flex items-center gap-4 pt-2">
                                         <span className="text-xs uppercase tracking-widest text-zinc-400 font-mono">Quantity:</span>
                                         <div className="flex items-center border border-zinc-800 bg-[#0e0e0e]">
-                                            <button 
+                                            <button
                                                 onClick={() => setQuantity(q => Math.max(1, q - 1))}
                                                 disabled={isOutOfStock}
                                                 className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -448,7 +447,7 @@ export default function ProductModal() {
                                                 -
                                             </button>
                                             <span className="w-12 text-center text-xs font-bold font-mono">{quantity}</span>
-                                            <button 
+                                            <button
                                                 onClick={() => setQuantity(q => (currentStock ? Math.min(currentStock, q + 1) : q + 1))}
                                                 disabled={isOutOfStock || (currentStock && quantity >= currentStock)}
                                                 className="w-10 h-10 flex items-center justify-center text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -462,16 +461,15 @@ export default function ProductModal() {
 
                                 {/* Purchase Action Buttons */}
                                 <div className="space-y-4 pt-6 border-t border-zinc-900">
-                                    <button 
+                                    <button
                                         onClick={handleAddToCart}
                                         disabled={isOutOfStock || isAddingToCart}
-                                        className={`w-full h-14 font-bold text-[13px] tracking-[0.14em] uppercase flex items-center justify-center gap-3 transition-all cursor-pointer group ${
-                                            isOutOfStock
+                                        className={`w-full h-14 font-bold text-[13px] tracking-[0.14em] uppercase flex items-center justify-center gap-3 transition-all cursor-pointer group ${isOutOfStock
                                                 ? "bg-zinc-800 text-zinc-500 cursor-not-allowed"
                                                 : cartFeedback?.type === "success"
-                                                ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"
-                                                : "bg-yellow-500 hover:bg-yellow-400 text-black shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/25"
-                                        }`}
+                                                    ? "bg-emerald-500 text-black shadow-lg shadow-emerald-500/20"
+                                                    : "bg-yellow-500 hover:bg-yellow-400 text-black shadow-lg shadow-yellow-500/10 hover:shadow-yellow-500/25"
+                                            }`}
                                         style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}
                                     >
                                         {isAddingToCart ? (
@@ -495,11 +493,10 @@ export default function ProductModal() {
 
                                     {/* Cart Feedback Toast/Banner */}
                                     {cartFeedback && (
-                                        <div className={`p-3 text-xs font-mono uppercase tracking-wider text-center transition-all flex items-center justify-between gap-2 ${
-                                            cartFeedback.type === "success"
+                                        <div className={`p-3 text-xs font-mono uppercase tracking-wider text-center transition-all flex items-center justify-between gap-2 ${cartFeedback.type === "success"
                                                 ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
                                                 : "bg-red-500/10 text-red-400 border border-red-500/30"
-                                        }`}>
+                                            }`}>
                                             <span>{cartFeedback.message}</span>
                                             {cartFeedback.type === "success" && (
                                                 <Link to="/cart" className="underline font-bold text-yellow-400 hover:text-yellow-300 ml-2 whitespace-nowrap">
