@@ -160,3 +160,159 @@ export const getCart = async (req, res) => {
         });
     }
 };
+
+export const IncrementItemCartQuantity = async (req, res) => {
+    try {
+        const productId = req.params.productId || req.params.productID;
+        const variantId = req.params.variantId || req.params.variantID;
+        const userId = req.user?._id || req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: User not found",
+            });
+        }
+
+        if (!productId) {
+            return res.status(400).json({
+                success: false,
+                message: "Product ID is required",
+            });
+        }
+
+        const query = { _id: productId };
+        if (variantId) {
+            query["variants._id"] = variantId;
+        }
+
+        const product = await productModel.findOne(query);
+        if (!product) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found",
+            });
+        }
+
+        const cart = await cartModel.findOne({ user: userId });
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found",
+            });
+        }
+
+        const stock = await stockOfVariant(productId, variantId);
+
+        const currentItem = cart.items.find((item) => {
+            const isSameProduct = item.product.toString() === productId.toString();
+            const isSameVariant = variantId
+                ? item.variant && item.variant.toString() === variantId.toString()
+                : !item.variant;
+            return isSameProduct && isSameVariant;
+        });
+
+        if (!currentItem) {
+            return res.status(404).json({
+                success: false,
+                message: "Item not found in cart",
+            });
+        }
+
+        if (stock !== null && currentItem.quantity + 1 > stock) {
+            return res.status(400).json({
+                success: false,
+                message: `Requested quantity exceeds available stock. Only ${stock} items available.`,
+            });
+        }
+
+        currentItem.quantity += 1;
+        await cart.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Cart item quantity successfully incremented",
+            cart,
+        });
+    } catch (error) {
+        console.error("IncrementItemCartQuantity error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",  
+            error: error.message,
+        });
+    }
+};
+
+export const DecrementItemCartQuantity = async (req, res) => {
+    try {
+        const productId = req.params.productId || req.params.productID;
+        const variantId = req.params.variantId || req.params.variantID;
+        const userId = req.user?._id || req.user?.id;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: User not found",
+            });
+        }
+
+        if (!productId) {
+            return res.status(400).json({
+                success: false,
+                message: "Product ID is required",
+            });
+        }
+
+        const cart = await cartModel.findOne({ user: userId });
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: "Cart not found",
+            });
+        }
+
+        const itemIndex = cart.items.findIndex((item) => {
+            const isSameProduct = item.product.toString() === productId.toString();
+            const isSameVariant = variantId
+                ? item.variant && item.variant.toString() === variantId.toString()
+                : !item.variant;
+            return isSameProduct && isSameVariant;
+        });
+
+        if (itemIndex === -1) {
+            return res.status(404).json({
+                success: false,
+                message: "Item not found in cart",
+            });
+        }
+
+        const currentItem = cart.items[itemIndex];
+        let wasRemoved = false;
+
+        if (currentItem.quantity > 1) {
+            currentItem.quantity -= 1;
+        } else {
+            // Remove item from cart if quantity is reduced to 0
+            cart.items.splice(itemIndex, 1);
+            wasRemoved = true;
+        }
+
+        await cart.save();
+
+        return res.status(200).json({
+            success: true,
+            message: wasRemoved
+                ? "Item removed from cart"
+                : "Cart item quantity successfully decremented",
+            cart,
+        });
+    } catch (error) {
+        console.error("DecrementItemCartQuantity error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message,
+        });
+    }
+};

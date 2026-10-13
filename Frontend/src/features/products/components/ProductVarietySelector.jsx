@@ -21,9 +21,9 @@ const COLOR_MAP = {
   // Neutrals & Monochromes
   "black": "#121212",
   "jet-black": "#09090b",
-  "white": "#fafafa",
-  "off-white": "#f1f5f9",
-  "off white": "#f1f5f9",
+  "white": "#ffffff",
+  "off-white": "#f4f4f5",
+  "off white": "#f4f4f5",
   "cream": "#fef3c7",
   "ivory": "#fbfbf0",
   "charcoal": "#2b2c2e",
@@ -106,7 +106,7 @@ export function resolveColorHex(colorName) {
 }
 
 // ─── Ruler Icon ───────────────────────────────────────────────────────────────
-function RulerIcon({ className = "w-5 h-5" }) {
+function RulerIcon({ className = "w-4 h-4" }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
       <path strokeLinecap="round" strokeLinejoin="round" d="M3 8h18M3 16h18M3 8v8M21 8v8M7 8v4M11 8v6M15 8v4M19 8v6" />
@@ -114,7 +114,7 @@ function RulerIcon({ className = "w-5 h-5" }) {
   );
 }
 
-// ─── Size Chart Modal ─────────────────────────────────────────────────────────
+// ─── Size Chart Modal (Light Modern Snitch Style) ─────────────────────────────
 function SizeGuideModal({ isOpen, onClose }) {
   const [unit, setUnit] = useState("in"); // "in" | "cm"
 
@@ -130,20 +130,19 @@ function SizeGuideModal({ isOpen, onClose }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fade-in">
-      <div 
-        className="relative w-full max-w-lg bg-[#0e0e0e] border border-zinc-800 p-6 sm:p-8 text-white shadow-2xl"
-        style={{ clipPath: "polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px))" }}
-      >
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-lg bg-white border border-zinc-200 rounded-3xl p-6 sm:p-8 text-zinc-900 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
           <div>
-            <h3 className="text-base font-black uppercase tracking-wider text-white">Size Guide</h3>
-            <p className="text-[11px] text-zinc-400 font-mono">Standard Fit Measurement Guidelines</p>
+            <h3 className="text-base font-black uppercase tracking-wider text-zinc-950 font-mono">
+              Size Guide
+            </h3>
+            <p className="text-[11px] text-zinc-500 font-mono">Standard Fit Measurement Guidelines</p>
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white p-1 transition-colors cursor-pointer"
+            className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 flex items-center justify-center transition-colors cursor-pointer"
             aria-label="Close size guide"
           >
             ✕
@@ -152,20 +151,20 @@ function SizeGuideModal({ isOpen, onClose }) {
 
         {/* Unit Selector */}
         <div className="flex items-center justify-between my-4">
-          <span className="text-xs uppercase font-mono tracking-widest text-zinc-400">Measurements in</span>
-          <div className="flex border border-zinc-800 bg-black p-0.5">
+          <span className="text-xs uppercase font-mono tracking-widest text-zinc-500">Measurements in</span>
+          <div className="flex border border-zinc-200 bg-zinc-100 p-0.5 rounded-full">
             <button
               onClick={() => setUnit("in")}
-              className={`px-3 py-1 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
-                unit === "in" ? "bg-yellow-500 text-black font-bold" : "text-zinc-400 hover:text-white"
+              className={`px-3 py-1 text-xs font-mono uppercase tracking-wider rounded-full transition-all cursor-pointer ${
+                unit === "in" ? "bg-black text-white font-bold shadow-xs" : "text-zinc-600 hover:text-black"
               }`}
             >
               Inches
             </button>
             <button
               onClick={() => setUnit("cm")}
-              className={`px-3 py-1 text-xs font-mono uppercase tracking-wider transition-all cursor-pointer ${
-                unit === "cm" ? "bg-yellow-500 text-black font-bold" : "text-zinc-400 hover:text-white"
+              className={`px-3 py-1 text-xs font-mono uppercase tracking-wider rounded-full transition-all cursor-pointer ${
+                unit === "cm" ? "bg-black text-white font-bold shadow-xs" : "text-zinc-600 hover:text-black"
               }`}
             >
               CM
@@ -174,10 +173,10 @@ function SizeGuideModal({ isOpen, onClose }) {
         </div>
 
         {/* Measurement Table */}
-        <div className="overflow-x-auto border border-zinc-800/80 bg-black/40 mb-5">
+        <div className="overflow-x-auto border border-zinc-200 rounded-2xl bg-zinc-50/50 mb-5">
           <table className="w-full text-left text-xs font-mono">
             <thead>
-              <tr className="border-b border-zinc-800 bg-[#141414] text-zinc-400 text-[10px] uppercase tracking-wider">
+              <tr className="border-b border-zinc-200 bg-zinc-100 text-zinc-700 text-[10px] uppercase tracking-wider">
                 <th className="py-2.5 px-3">Size</th>
                 <th className="py-2.5 px-3">Standard</th>
                 <th className="py-2.5 px-3">Waist ({unit})</th>
@@ -185,14 +184,14 @@ function SizeGuideModal({ isOpen, onClose }) {
                 <th className="py-2.5 px-3">Length ({unit})</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-900">
+            <tbody className="divide-y divide-zinc-200">
               {sizeChartData.map((row) => (
-                <tr key={row.size} className="hover:bg-zinc-900/40 text-zinc-300">
-                  <td className="py-2 px-3 font-bold text-yellow-500">{row.size}</td>
-                  <td className="py-2 px-3 text-zinc-400">{row.us}</td>
-                  <td className="py-2 px-3">{row.waist}</td>
-                  <td className="py-2 px-3">{row.hip}</td>
-                  <td className="py-2 px-3">{row.length}</td>
+                <tr key={row.size} className="hover:bg-white text-zinc-800 transition-colors">
+                  <td className="py-2.5 px-3 font-bold text-zinc-950">{row.size}</td>
+                  <td className="py-2.5 px-3 text-zinc-500">{row.us}</td>
+                  <td className="py-2.5 px-3">{row.waist}</td>
+                  <td className="py-2.5 px-3">{row.hip}</td>
+                  <td className="py-2.5 px-3">{row.length}</td>
                 </tr>
               ))}
             </tbody>
@@ -201,14 +200,14 @@ function SizeGuideModal({ isOpen, onClose }) {
 
         {/* Tip */}
         <p className="text-[11px] text-zinc-500 font-light leading-relaxed mb-6">
-          <strong className="text-zinc-300 font-medium">Fit Tip:</strong> If your measurements fall between two sizes, order the larger size for a relaxed drape or smaller size for a tapered fit.
+          <strong className="text-zinc-900 font-medium">Fit Tip:</strong> If your measurements fall between two sizes, choose the larger size for an effortless oversized drape or smaller size for a clean tailored fit.
         </p>
 
         <button
           onClick={onClose}
-          className="w-full py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs uppercase tracking-widest transition-all cursor-pointer"
+          className="w-full py-3 bg-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md"
         >
-          Got it
+          Got It
         </button>
       </div>
     </div>
@@ -456,25 +455,24 @@ export default function ProductVarietySelector({
   }
 
   return (
-    <div className="variety-selector space-y-6 pt-3 pb-2 border-y border-zinc-900/90 my-4">
+    <div className="variety-selector space-y-6 pt-2 pb-2 border-y border-zinc-200 my-4">
       {/* ─────────────────────────────────────────────────────────────
           1. COLOR SECTION: Title and circular swatches
-          (Matches user screenshot: centered color name + circular swatches)
       ───────────────────────────────────────────────────────────── */}
       {availableColors.length > 0 && (
-        <div className="flex flex-col items-center justify-center text-center space-y-3">
+        <div className="flex flex-col items-start space-y-2.5">
           {/* Active Color Name */}
-          <div className="text-center">
-            <span
-              className="text-sm sm:text-base font-bold text-zinc-100 tracking-wide capitalize"
-              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-            >
-              {selectedColor || "Select Color"}
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 font-semibold">
+              Color:
+            </span>
+            <span className="text-xs font-bold text-zinc-950 font-mono uppercase tracking-tight">
+              {selectedColor || "Select"}
             </span>
           </div>
 
           {/* Color Circles Row */}
-          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 py-1">
+          <div className="flex flex-wrap items-center gap-3 py-1">
             {availableColors.map((color) => {
               const isSelected = String(selectedColor).toLowerCase().trim() === String(color).toLowerCase().trim();
               const hexColor = resolveColorHex(color);
@@ -489,25 +487,25 @@ export default function ProductVarietySelector({
                   aria-label={`Select ${color}`}
                   className="group relative flex items-center justify-center cursor-pointer transition-transform duration-200 active:scale-95"
                 >
-                  {/* Outer active selection ring (matches screenshot outer circular border) */}
+                  {/* Outer active selection ring */}
                   <div
                     className={`rounded-full p-[2.5px] transition-all duration-200 ${
                       isSelected
-                        ? "border-2 border-zinc-200 shadow-sm shadow-white/10"
-                        : "border-2 border-transparent hover:border-zinc-700"
+                        ? "border-2 border-black ring-2 ring-zinc-300 ring-offset-1 ring-offset-white shadow-xs"
+                        : "border-2 border-transparent hover:border-zinc-400"
                     }`}
                   >
                     {/* Inner color swatch circle */}
                     <div
-                      className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full transition-all shadow-inner ${
-                        isLight ? "border border-zinc-600/40" : ""
+                      className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full transition-all shadow-inner ${
+                        isLight ? "border border-zinc-300" : ""
                       }`}
                       style={{ backgroundColor: hexColor }}
                     />
                   </div>
 
                   {/* Micro tooltip on hover */}
-                  <span className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-zinc-900 text-[10px] text-zinc-300 px-2 py-0.5 rounded border border-zinc-800 whitespace-nowrap z-20">
+                  <span className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-black text-[9px] text-white px-2 py-0.5 rounded-full uppercase tracking-wider font-mono whitespace-nowrap z-20 shadow-sm">
                     {color}
                   </span>
                 </button>
@@ -519,31 +517,45 @@ export default function ProductVarietySelector({
 
       {/* ─────────────────────────────────────────────────────────────
           2. SIZE SECTION: "Select Size" + Size buttons + Ruler Icon
-          (Matches user screenshot: "Select Size" + < [28] [30] [32] [34] [36] > + ruler icon)
       ───────────────────────────────────────────────────────────── */}
       {availableSizes.length > 0 && (
-        <div className="flex flex-col items-center justify-center text-center space-y-3.5 pt-1">
-          {/* "Select Size" Header */}
-          <div className="text-center">
-            <span
-              className="text-xs sm:text-sm font-medium tracking-wide text-zinc-400"
-              style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
+        <div className="flex flex-col items-start space-y-3 pt-1">
+          {/* Size Header with Size Guide Trigger */}
+          <div className="w-full flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono uppercase tracking-wider text-zinc-500 font-semibold">
+                Size:
+              </span>
+              <span className="text-xs font-bold text-zinc-950 font-mono uppercase tracking-tight">
+                {selectedSize || "Select"}
+              </span>
+            </div>
+
+            {/* Size Chart Ruler Icon & Button */}
+            <button
+              type="button"
+              onClick={() => setShowSizeGuide(true)}
+              className="inline-flex items-center gap-1.5 text-zinc-600 hover:text-black transition-colors text-[11px] font-mono tracking-wider uppercase cursor-pointer group"
+              title="Open Size Guide"
             >
-              Select Size
-            </span>
+              <RulerIcon className="w-4 h-4 text-zinc-500 group-hover:text-black transition-colors" />
+              <span className="underline underline-offset-4 decoration-zinc-300 group-hover:decoration-black">
+                Size Guide
+              </span>
+            </button>
           </div>
 
-          {/* Carousel / Row of Size Circles */}
-          <div className="relative flex items-center justify-center gap-1.5 sm:gap-2.5 max-w-full">
+          {/* Carousel / Row of Size Buttons */}
+          <div className="relative flex items-center gap-2 max-w-full w-full">
             {/* Left arrow button */}
-            {availableSizes.length > 4 && (
+            {availableSizes.length > 5 && (
               <button
                 type="button"
                 onClick={() => handleScrollSizes("left")}
-                className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-zinc-600 hover:text-black hover:border-black transition-colors cursor-pointer flex-shrink-0"
                 aria-label="Scroll sizes left"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
               </button>
@@ -552,7 +564,7 @@ export default function ProductVarietySelector({
             {/* Scrollable container for sizes */}
             <div
               ref={sizeScrollRef}
-              className="flex items-center gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-1 px-1 scroll-smooth"
+              className="flex items-center gap-2 overflow-x-auto no-scrollbar py-1 scroll-smooth"
               style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
             >
               {availableSizes.map((size) => {
@@ -567,20 +579,20 @@ export default function ProductVarietySelector({
                     onClick={() => setSelectedSize(size)}
                     disabled={isOut}
                     title={isOut ? `${size} (Out of stock)` : `Size ${size}`}
-                    className={`relative w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center text-xs font-semibold font-mono transition-all duration-200 cursor-pointer overflow-hidden ${
+                    className={`relative min-w-[42px] h-10 px-3 rounded-full flex items-center justify-center text-xs font-bold font-mono transition-all duration-200 cursor-pointer overflow-hidden ${
                       isOut
-                        ? "bg-zinc-800/40 text-zinc-500 border border-zinc-800 cursor-not-allowed opacity-60"
+                        ? "bg-zinc-100 text-zinc-400 border border-zinc-200 cursor-not-allowed opacity-60"
                         : isSelected
-                        ? "bg-white text-black border-2 border-white font-bold shadow-lg shadow-white/10 scale-105"
-                        : "bg-transparent text-zinc-300 border border-zinc-700 hover:border-zinc-400 hover:text-white"
+                        ? "bg-black text-white border-2 border-black shadow-md scale-105"
+                        : "bg-white text-zinc-800 border border-zinc-300 hover:border-black hover:text-black"
                     }`}
                   >
                     <span>{size}</span>
 
-                    {/* Diagonal strike-through line for out-of-stock sizes (matches screenshot) */}
+                    {/* Diagonal strike-through line for out-of-stock sizes */}
                     {isOut && (
                       <span className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <span className="w-[140%] h-[1.5px] bg-zinc-600 -rotate-45 transform" />
+                        <span className="w-[140%] h-[1.5px] bg-zinc-400 -rotate-45 transform" />
                       </span>
                     )}
                   </button>
@@ -589,33 +601,18 @@ export default function ProductVarietySelector({
             </div>
 
             {/* Right arrow button */}
-            {availableSizes.length > 4 && (
+            {availableSizes.length > 5 && (
               <button
                 type="button"
                 onClick={() => handleScrollSizes("right")}
-                className="w-7 h-7 flex items-center justify-center text-zinc-500 hover:text-white transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full border border-zinc-200 bg-white flex items-center justify-center text-zinc-600 hover:text-black hover:border-black transition-colors cursor-pointer flex-shrink-0"
                 aria-label="Scroll sizes right"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
               </button>
             )}
-          </div>
-
-          {/* Size Chart Ruler Icon (matches ruler icon in user screenshot) */}
-          <div className="pt-1 flex items-center justify-center">
-            <button
-              type="button"
-              onClick={() => setShowSizeGuide(true)}
-              className="inline-flex items-center gap-1.5 text-zinc-400 hover:text-yellow-500 transition-colors text-[11px] font-mono tracking-widest uppercase cursor-pointer py-1 px-2 group"
-              title="Open Size Guide"
-            >
-              <RulerIcon className="w-4 h-4 text-zinc-400 group-hover:text-yellow-500 transition-colors" />
-              <span className="underline underline-offset-4 decoration-zinc-700 group-hover:decoration-yellow-500">
-                Size Guide
-              </span>
-            </button>
           </div>
         </div>
       )}
@@ -636,9 +633,9 @@ export default function ProductVarietySelector({
           if (values.length <= 1) return null;
 
           return (
-            <div key={keyName} className="space-y-2 pt-2">
-              <span className="text-[11px] uppercase tracking-wider text-zinc-400 font-mono block">
-                {keyName}: <span className="text-white font-bold">{selectedOtherAttrs[keyName] || values[0]}</span>
+            <div key={keyName} className="space-y-2 pt-1">
+              <span className="text-[11px] uppercase tracking-wider text-zinc-500 font-mono block">
+                {keyName}: <span className="text-zinc-950 font-bold">{selectedOtherAttrs[keyName] || values[0]}</span>
               </span>
               <div className="flex flex-wrap gap-2">
                 {values.map((val) => {
@@ -653,10 +650,10 @@ export default function ProductVarietySelector({
                           [keyName]: val,
                         }))
                       }
-                      className={`px-3 py-1.5 text-xs font-mono transition-all border cursor-pointer ${
+                      className={`px-3 py-1.5 text-xs font-mono rounded-full transition-all border cursor-pointer ${
                         isSelected
-                          ? "border-yellow-500 bg-yellow-500/10 text-yellow-400 font-bold"
-                          : "border-zinc-800 text-zinc-400 hover:border-zinc-700 hover:text-white bg-[#0e0e0e]"
+                          ? "border-black bg-black text-white font-bold"
+                          : "border-zinc-300 text-zinc-700 hover:border-black bg-white"
                       }`}
                     >
                       {val}

@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useProduct } from "../hook/useProduct.js"
+import { useProduct } from "../hook/useProduct.js";
 import { useSelector } from "react-redux";
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
@@ -9,29 +9,28 @@ function FontLoader() {
         const link = document.createElement("link");
         link.rel = "stylesheet";
         link.href =
-            "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap";
+            "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700&display=swap";
         document.head.appendChild(link);
     }, []);
     return null;
 }
 
-
-// ─── Currency symbol helper — UI only ────────────────────────────────────────
-const currencySymbol = { INR: "₹", USD: "$", EUR: "€" };
+// ─── Currency symbol helper ──────────────────────────────────────────────────
+const currencySymbol = { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" };
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 function PlusIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
     );
 }
 
-function ArrowIcon({ className = "w-4 h-4" }) {
+function ArrowLeftIcon({ className = "w-4 h-4" }) {
     return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
     );
 }
@@ -57,185 +56,212 @@ function AlertIcon({ className = "w-6 h-6" }) {
 function TrashIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            <path strokeLinecap="round" strokeLinejoin="round"
+                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
         </svg>
     );
 }
 
-// ─── Product Card ─────────────────────────────────────────────────────────────
+function SearchIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+        </svg>
+    );
+}
+
+function EditIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+    );
+}
+
+// ─── Product Card (Matching Light Snitch Aesthetic) ───────────────────────────
 function ProductCard({ product, onDeleteCard }) {
-    const symbol =
-        currencySymbol[product.price?.currency] ??
-        product.price?.currency;
+    const symbol = currencySymbol[product.price?.currency] ?? product.price?.currency ?? "₹";
+    const formattedPrice = Number(product.price?.amount || 0).toLocaleString("en-IN");
 
-    const formattedPrice =
-        Number(product.price?.amount).toLocaleString("en-IN");
-
-
+    const coverImage =
+        product.images?.find((img) => img?.isCover)?.url ||
+        product.images?.[0]?.url ||
+        product.images?.[0] ||
+        "";
 
     return (
-        <div className="group border border-zinc-900 hover:border-zinc-700 bg-[#0e0e0e] transition-all duration-300 cursor-default">
-            {/* Product image */}
-            <div className="relative aspect-[4/3] overflow-hidden bg-zinc-900">
-                {/* TODO: Use product.images from the API response.
-                    TODO: Decide which product image should be used as the card thumbnail.
-                    (e.g. product.images[0].url or product.images[0]) */}
-                {product.images && product.images.length > 0 ? (
+        <div className="group bg-white border border-zinc-200 hover:border-black rounded-2xl overflow-hidden transition-all duration-300 shadow-xs hover:shadow-md flex flex-col justify-between relative select-none">
+            {/* Top Image Box */}
+            <div className="relative aspect-[3/4] bg-[#f4f4f5] overflow-hidden">
+                {coverImage ? (
                     <img
-                        src={product.images.find(img => img?.isCover)?.url || product.images[0]?.url || product.images[0]}
+                        src={coverImage}
                         alt={product.title}
-                        className="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        loading="lazy"
+                        className="h-full w-full object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
                     />
                 ) : (
-                    // Fallback when no image is available
-                    <div className="h-full w-full flex items-center justify-center">
-                        <PackageIcon className="w-10 h-10 text-zinc-700" />
+                    <div className="h-full w-full flex items-center justify-center text-zinc-400">
+                        <PackageIcon className="w-10 h-10" />
                     </div>
                 )}
-                {/* Image count badge */}
+
+                {/* Multiple Images Badge */}
                 {product.images && product.images.length > 1 && (
-                    <span className="absolute bottom-2 right-2 text-[9px] tracking-widest uppercase bg-black/70 text-zinc-400 px-1.5 py-0.5 backdrop-blur-sm"
-                        style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        +{product.images.length - 1} more
+                    <span
+                        className="absolute bottom-2.5 right-2.5 text-[9px] font-mono-code tracking-wider uppercase bg-black/75 text-white px-2 py-0.5 rounded-full backdrop-blur-xs shadow-xs"
+                    >
+                        +{product.images.length - 1} photos
+                    </span>
+                )}
+
+                {/* Quick Delete Action Button (Floating Top Right) */}
+                <button
+                    type="button"
+                    onClick={(e) => onDeleteCard(e, product._id, product.title)}
+                    title="Delete product"
+                    className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/90 hover:bg-rose-50 text-zinc-500 hover:text-rose-600 backdrop-blur-sm shadow-xs flex items-center justify-center transition-all hover:scale-110 active:scale-95 cursor-pointer z-10"
+                >
+                    <TrashIcon className="w-4 h-4" />
+                </button>
+
+                {/* Category Pill (Floating Top Left) */}
+                {product.category && (
+                    <span className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-white/90 text-zinc-900 text-[10px] font-mono-code font-bold uppercase tracking-wider shadow-xs backdrop-blur-sm">
+                        {product.category}
                     </span>
                 )}
             </div>
 
-            {/* Card content */}
+            {/* Card Content */}
             <div className="p-4 space-y-2">
                 {/* Title */}
-                {/* TODO: Replace with product.title */}
-                <h3 className="text-sm font-semibold text-white truncate tracking-wide group-hover:text-yellow-500 transition-colors duration-200">
+                <h3 className="text-sm font-bold text-zinc-950 truncate tracking-tight uppercase group-hover:text-black transition-colors">
                     {product.title}
                 </h3>
 
                 {/* Description */}
-                {/* TODO: Replace with product.description */}
-                <p className="text-[11px] text-zinc-500 leading-relaxed line-clamp-2">
-                    {product.description}
+                <p className="text-[11px] text-zinc-500 leading-relaxed line-clamp-2 font-normal">
+                    {product.description || "No description provided for this listing."}
                 </p>
 
-                {/* Price */}
-                <div className="pt-1 flex items-baseline gap-1">
-                    {/* TODO: Replace with product.priceAmount and product.priceCurrency */}
-                    <span className="text-[11px] text-zinc-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        {symbol}
-                    </span>
-                    <span className="text-base font-bold text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        {formattedPrice}
-                    </span>
-                    <span className="text-[9px] text-zinc-700 uppercase tracking-widest ml-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        {product.price?.currency}
+                {/* Price & Variant Pill Footer */}
+                <div className="pt-2 border-t border-zinc-100 flex items-center justify-between">
+                    <div className="flex items-baseline gap-0.5 font-mono-code">
+                        <span className="text-[11px] text-zinc-500">{symbol}</span>
+                        <span className="text-base font-bold text-zinc-950 tracking-tight">
+                            {formattedPrice}
+                        </span>
+                    </div>
+
+                    {/* Manage Link Hint */}
+                    <span className="inline-flex items-center gap-1 text-[10px] font-mono-code font-bold uppercase tracking-wider text-zinc-500 group-hover:text-black transition-colors">
+                        <EditIcon className="w-3 h-3" />
+                        <span>Manage</span>
                     </span>
                 </div>
             </div>
-
-            {/* Bottom accent line — animates on hover */}
-            <div className="h-[2px] w-0 group-hover:w-full bg-yellow-500 transition-all duration-300" />
         </div>
     );
 }
 
-// ─── Product Skeleton (loading state) ────────────────────────────────────────
-// TODO: Connect this loading state to your Redux loading state.
-// Example:
-// const loading = useSelector((state) => state.product.loading);
-// Show <ProductSkeleton /> when loading is true.
+// ─── Loading Skeleton ─────────────────────────────────────────────────────────
 function ProductSkeleton() {
     return (
-        <div className="border border-zinc-900 animate-pulse">
-            <div className="aspect-[4/3] bg-zinc-900" />
+        <div className="bg-white border border-zinc-200 rounded-2xl overflow-hidden animate-pulse">
+            <div className="aspect-[3/4] bg-zinc-200" />
             <div className="p-4 space-y-3">
-                <div className="h-3 bg-zinc-800 rounded-sm w-3/4" />
+                <div className="h-4 bg-zinc-200 rounded-sm w-3/4" />
                 <div className="space-y-1.5">
-                    <div className="h-2 bg-zinc-900 rounded-sm w-full" />
-                    <div className="h-2 bg-zinc-900 rounded-sm w-5/6" />
+                    <div className="h-2.5 bg-zinc-200 rounded-sm w-full" />
+                    <div className="h-2.5 bg-zinc-200 rounded-sm w-4/5" />
                 </div>
-                <div className="h-4 bg-zinc-800 rounded-sm w-1/3 mt-2" />
+                <div className="h-4 bg-zinc-200 rounded-sm w-1/3 pt-2" />
             </div>
         </div>
     );
 }
 
 // ─── Empty State ──────────────────────────────────────────────────────────────
-// TODO: Replace this mock condition with the real products array.
-// Show this state when the real seller product list is empty.
 function EmptyProducts() {
     return (
-        <div className="flex flex-col items-center justify-center py-28 px-6">
-            {/* Icon container */}
-            <div className="w-20 h-20 border border-zinc-800 flex items-center justify-center mb-8 relative">
-                <PackageIcon className="w-8 h-8 text-zinc-700" />
-                {/* Decorative corner */}
-                <div className="absolute -top-px -right-px w-4 h-4 border-t border-r border-yellow-500/50" />
-                <div className="absolute -bottom-px -left-px w-4 h-4 border-b border-l border-yellow-500/50" />
+        <div className="bg-white border border-zinc-200 rounded-3xl p-10 sm:p-16 text-center max-w-xl mx-auto space-y-5 shadow-xs">
+            <div className="w-16 h-16 rounded-full bg-zinc-100 flex items-center justify-center mx-auto text-zinc-400">
+                <PackageIcon className="w-8 h-8" />
             </div>
 
-            <h2 className="text-2xl font-black tracking-[-0.03em] text-white uppercase mb-3">
-                No products yet
-            </h2>
-            <div className="flex items-center gap-4 mb-6">
-                <div className="h-[1px] w-8 bg-yellow-500" />
-                <p className="text-[12px] text-zinc-500 tracking-wide text-center">
-                    Create your first product to get started.
+            <div className="space-y-2">
+                <h2 className="text-2xl font-black uppercase tracking-tight text-zinc-950">
+                    No Products Listed Yet
+                </h2>
+                <p className="text-xs sm:text-sm text-zinc-500 max-w-md mx-auto font-normal leading-relaxed">
+                    You haven't added any products to your seller studio catalog yet. Publish your first drop with custom variety colors and sizes.
                 </p>
-                <div className="h-[1px] w-8 bg-yellow-500" />
             </div>
 
-            {/* CTA button — matches Register style */}
-            <Link
-                to="/seller/create-product"
-                className="group h-12 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-bold text-[12px] tracking-[0.12em] uppercase flex items-center justify-between px-6 transition-all duration-200"
-                style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
-            >
-                <span>Create Product</span>
-                <ArrowIcon className="w-3.5 h-3.5 ml-3 transition-transform duration-300 group-hover:translate-x-1" />
-            </Link>
-            {/* Button reflection */}
-            <div
-                className="w-full max-w-[180px] h-1 bg-yellow-500/20 mt-px"
-                style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
-            />
+            <div className="pt-2">
+                <Link
+                    to="/seller/create-product"
+                    className="inline-flex items-center gap-2 px-8 py-3.5 bg-black hover:bg-zinc-800 text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all shadow-md hover:shadow-lg font-mono-code cursor-pointer"
+                >
+                    <PlusIcon className="w-4 h-4" />
+                    <span>Create First Product</span>
+                </Link>
+            </div>
         </div>
     );
 }
 
 // ─── Error State ──────────────────────────────────────────────────────────────
-// TODO: Replace this mock error state with your real API error state.
-function ErrorState() {
+function ErrorState({ onRetry }) {
     return (
-        <div className="flex flex-col items-center justify-center py-24 px-6">
-            <div className="w-16 h-16 border border-red-500/20 flex items-center justify-center mb-6">
-                <AlertIcon className="w-6 h-6 text-red-400" />
+        <div className="bg-white border border-rose-200 rounded-3xl p-10 text-center max-w-md mx-auto space-y-4 shadow-xs">
+            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+                <AlertIcon className="w-6 h-6" />
             </div>
-            <h2 className="text-xl font-bold text-white uppercase tracking-tight mb-2">
-                Something went wrong
+            <h2 className="text-xl font-bold text-zinc-950 uppercase tracking-tight">
+                Unable to Load Products
             </h2>
-            <p className="text-[12px] text-zinc-500 tracking-wide text-center max-w-[240px]">
-                Unable to load your products. Please try again.
+            <p className="text-xs text-zinc-500 font-mono-code">
+                Something went wrong while retrieving your listings.
             </p>
+            {onRetry && (
+                <button
+                    type="button"
+                    onClick={onRetry}
+                    className="px-6 py-2.5 bg-black text-white text-xs font-bold uppercase rounded-full font-mono-code cursor-pointer"
+                >
+                    Try Again
+                </button>
+            )}
         </div>
     );
 }
 
-// ─── Seller Products Page ─────────────────────────────────────────────────────
+// ─── Main Seller Products Dashboard Component ─────────────────────────────────
 export default function SellerProduct() {
-    const [mounted, setMounted] = useState(false);
     const [fetchError, setFetchError] = useState(null);
+    const [searchQuery, setSearchQuery] = useState("");
 
     const { handleGetSellerProduct, handleDeleteSellerProduct } = useProduct();
-    const products = useSelector(
-        state => state.product.sellerProduct
-    )
+    const products = useSelector((state) => state.product.sellerProduct || []);
+    const loading = useSelector((state) => state.product.loading);
 
-    const loading = useSelector(
-        state => state.product.loading
-    )
+    const loadProducts = () => {
+        setFetchError(null);
+        handleGetSellerProduct().catch((err) => {
+            setFetchError(err?.response?.data?.message || "Failed to load products");
+        });
+    };
+
+    useEffect(() => {
+        loadProducts();
+    }, []);
 
     const handleDeleteCard = async (e, productId, title) => {
         e.preventDefault();
         e.stopPropagation();
-        if (!window.confirm(`Are you sure you want to delete "${title || 'this product'}"?`)) {
+        if (!window.confirm(`Are you sure you want to delete "${title || "this product"}"?`)) {
             return;
         }
         try {
@@ -246,253 +272,222 @@ export default function SellerProduct() {
         }
     };
 
-    useEffect(() => {
-        handleGetSellerProduct().catch((err) => {
-            setFetchError(
-                err?.response?.data?.message ||
-                "Failed to load products"
-            );
-        });
-    }, []);
-
-
-    useEffect(() => {
-        const t = setTimeout(() => setMounted(true), 50);
-        return () => clearTimeout(t);
-    }, []);
+    // Filter products by search query
+    const filteredProducts = useMemo(() => {
+        if (!Array.isArray(products)) return [];
+        if (!searchQuery.trim()) return products;
+        const q = searchQuery.toLowerCase().trim();
+        return products.filter(
+            (p) =>
+                p.title?.toLowerCase().includes(q) ||
+                p.description?.toLowerCase().includes(q) ||
+                p.category?.toLowerCase().includes(q)
+        );
+    }, [products, searchQuery]);
 
     return (
         <>
             <FontLoader />
 
             <style>{`
-        *, *::before, *::after { font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif; }
+                *, *::before, *::after {
+                    font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .font-mono-code {
+                    font-family: 'JetBrains Mono', monospace;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(8px); }
+                    to   { opacity: 1; transform: translateY(0); }
+                }
+                .fade-in-entry {
+                    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+                }
+            `}</style>
 
-        @keyframes panelIn {
-          from { opacity: 0; transform: translateX(-32px); }
-          to   { opacity: 1; transform: translateX(0); }
-        }
-        @keyframes contentIn {
-          from { opacity: 0; transform: translateY(24px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes marquee {
-          from { transform: translateY(0); }
-          to   { transform: translateY(-50%); }
-        }
-        @keyframes pulse-glow {
-          0%, 100% { opacity: 0.06; }
-          50%       { opacity: 0.12; }
-        }
+            <main className="min-h-screen w-full bg-[#fcfcfd] text-zinc-900 selection:bg-black selection:text-white pb-20">
 
-        .marquee-track { animation: marquee 22s linear infinite; }
-        .s-glow        { animation: pulse-glow 5s ease-in-out infinite; }
-        .panel-in      { animation: panelIn 0.7s cubic-bezier(0.22,1,0.36,1) both; }
-        .content-in    { animation: contentIn 0.65s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
-        .card-grid > * { animation: contentIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
-      `}</style>
-
-            <main
-                className="min-h-screen w-full flex bg-[#0a0a0a] selection:bg-yellow-500 selection:text-black"
-                style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}
-            >
-                {/* ══════════════════════════════════════════════
-                    LEFT PANEL — editorial sidebar
-                    (matches Register and CreateProduct pages)
-                ══════════════════════════════════════════════ */}
-                <div className={`hidden lg:flex flex-col relative w-[28%] xl:w-[24%] min-h-screen bg-[#0a0a0a] border-r border-zinc-900 overflow-hidden flex-shrink-0 ${mounted ? "panel-in" : "opacity-0"}`}>
-
-                    {/* Giant watermark 'S' */}
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                        <span
-                            className="s-glow text-[30vw] font-black text-white leading-none tracking-tighter"
-                            style={{ opacity: 0.05 }}
+                {/* ─── Breadcrumb & Top Bar ──────────────────────────────────── */}
+                <div className="border-b border-zinc-200 bg-white/70 backdrop-blur-xs">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between text-xs font-mono-code text-zinc-600">
+                        <Link
+                            to="/"
+                            className="inline-flex items-center gap-2 hover:text-black font-semibold transition-colors group cursor-pointer"
                         >
-                            S
-                        </span>
-                    </div>
-
-                    {/* Scrolling marquee */}
-                    <div className="absolute left-6 top-0 bottom-0 w-5 overflow-hidden pointer-events-none select-none opacity-[0.07]">
-                        <div className="marquee-track flex flex-col gap-8">
-                            {Array.from({ length: 10 }).map((_, i) => (
-                                <span key={i} className="text-[9px] tracking-[0.4em] uppercase text-white"
-                                    style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", fontFamily: "'JetBrains Mono', monospace" }}>
-                                    SNITCH — WEAR THE FUTURE —
-                                </span>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Decorative corners */}
-                    <div className="absolute top-8 left-8 w-16 h-16 border-l border-t border-zinc-800 pointer-events-none" />
-                    <div className="absolute bottom-8 right-8 w-16 h-16 border-r border-b border-zinc-800 pointer-events-none" />
-
-                    {/* Logo */}
-                    <div className="relative z-10 flex items-center justify-between px-8 pt-10">
-                        <Link to="/" className="inline-flex items-center gap-2.5 group">
-                            <span className="h-8 w-8 rounded-md bg-yellow-500 flex items-center justify-center text-black font-black text-base shadow-lg shadow-yellow-500/20 group-hover:shadow-yellow-500/40 transition-shadow duration-300">
-                                S
-                            </span>
-                            <span className="text-[13px] font-bold tracking-[0.3em] uppercase text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                SNITCH
-                            </span>
+                            <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                            <span>Return to Storefront</span>
                         </Link>
-                    </div>
 
-                    {/* Sidebar content */}
-                    <div className="relative z-10 flex-1 flex flex-col justify-center px-8 xl:px-10">
-                        <div className="flex items-center gap-3 mb-8">
-                            <div className="h-px w-8 bg-yellow-500" />
-                            <span className="text-[9px] tracking-[0.2em] uppercase text-yellow-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                03 / Dashboard
+                        {/* Status Indicator */}
+                        <div className="flex items-center gap-2 text-zinc-500">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="font-medium text-[11px] uppercase tracking-wider">
+                                Seller Studio Active
                             </span>
                         </div>
-
-                        <h2 className="text-4xl xl:text-5xl font-black leading-[0.95] tracking-[-0.04em] text-white mb-8 uppercase">
-                            My<br />
-                            <span className="text-yellow-500">Prod</span><br />
-                            ucts.
-                        </h2>
-
-                        <p className="text-sm text-zinc-500 leading-relaxed max-w-[220px] mb-10 font-light tracking-wide">
-                            Manage your listings, track your store, and keep your products fresh.
-                        </p>
-
-                        {/* Stats row — UI only */}
-                        <div className="space-y-4">
-                            <div className="border border-zinc-900 p-4">
-                                {/* TODO: Replace with real product count from Redux state */}
-                                <p className="text-2xl font-black text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                    {loading ? "—" : products.length}
-                                </p>
-                                <p className="text-[10px] tracking-[0.15em] uppercase text-zinc-600 mt-1" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                    Total Listings
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Bottom strip */}
-                    <div className="relative z-10 px-8 pb-10">
-                        <div className="h-px w-full bg-zinc-900 mb-6" />
-                        <p className="text-[9px] tracking-[0.15em] uppercase text-zinc-700" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                            © {new Date().getFullYear()} SNITCH Inc.
-                        </p>
                     </div>
                 </div>
 
-                {/* ══════════════════════════════════════════════
-                    MAIN CONTENT — product grid
-                ══════════════════════════════════════════════ */}
-                <div className="flex-1 min-h-screen bg-[#0e0e0e] flex flex-col overflow-y-auto">
+                {/* ─── Main Content Container ─────────────────────────────────── */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-12 fade-in-entry space-y-8">
 
-                    {/* Mobile logo */}
-                    <div className="lg:hidden flex items-center justify-between px-6 pt-8 pb-4 border-b border-zinc-900">
-                        <Link to="/" className="inline-flex items-center gap-2.5">
-                            <span className="h-8 w-8 rounded-md bg-yellow-500 flex items-center justify-center text-black font-black text-base">
-                                S
-                            </span>
-                            <span className="text-[13px] font-bold tracking-[0.3em] uppercase text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                SNITCH
-                            </span>
-                        </Link>
-                    </div>
-
-                    {/* Page header */}
-                    <div className={`px-6 sm:px-10 pt-12 pb-8 border-b border-zinc-900 ${mounted ? "content-in" : "opacity-0"}`}>
-
-                        {/* Breadcrumb */}
-                        <div className="flex items-center gap-2 mb-8">
-                            <span className="text-[9px] tracking-[0.2em] uppercase text-zinc-700" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                Seller
-                            </span>
-                            <span className="text-zinc-800">/</span>
-                            <span className="text-[9px] tracking-[0.2em] uppercase text-yellow-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                Products
-                            </span>
+                    {/* Page Header Banner */}
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-6 border-b border-zinc-200">
+                        <div>
+                            <div className="flex items-center gap-2 text-[11px] font-mono-code uppercase tracking-widest text-zinc-500 mb-1">
+                                <span>Seller Studio</span>
+                                <span>/</span>
+                                <span className="text-black font-bold">Catalog Management</span>
+                            </div>
+                            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-zinc-950">
+                                My Products
+                            </h1>
+                            <p className="text-xs text-zinc-500 mt-1 font-normal">
+                                Manage and monitor your catalog drops, update variety stock, and create new releases.
+                            </p>
                         </div>
 
-                        <div className="flex items-start justify-between gap-4 flex-wrap">
-                            {/* Title */}
-                            <div>
-                                <h1 className="text-3xl sm:text-4xl font-black tracking-[-0.04em] text-white leading-[0.95] uppercase mb-4">
-                                    My Products
-                                </h1>
-                                <div className="flex items-center gap-4">
-                                    <div className="h-[2px] w-10 bg-yellow-500" />
-                                    <p className="text-[12px] text-zinc-500 tracking-wide">
-                                        View the products you've created.
-                                    </p>
-                                </div>
-                            </div>
-
-                            {/* Create Product CTA button */}
-                            {/* This Link uses the existing /create route from app.routers.jsx */}
+                        {/* Top Action & Create CTA */}
+                        <div className="flex items-center gap-3 flex-wrap">
                             <Link
                                 to="/seller/create-product"
-                                className="group flex-shrink-0 h-12 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-bold text-[12px] tracking-[0.12em] uppercase flex items-center gap-2.5 px-5 transition-all duration-200"
-                                style={{ clipPath: "polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px))" }}
+                                className="inline-flex items-center gap-2 px-6 py-3 bg-black hover:bg-zinc-800 text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all shadow-md hover:shadow-lg font-mono-code cursor-pointer active:scale-95"
                             >
-                                <PlusIcon className="w-3.5 h-3.5" />
+                                <PlusIcon className="w-4 h-4" />
                                 <span>Create Product</span>
                             </Link>
                         </div>
                     </div>
 
-                    {/* Main body */}
-                    <div className={`flex-1 px-6 sm:px-10 py-10 ${mounted ? "content-in" : "opacity-0"}`}>
+                    {/* Stats Metric Strip */}
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+                        <div className="p-4 bg-white border border-zinc-200 rounded-2xl shadow-xs">
+                            <span className="text-[10px] font-mono-code uppercase tracking-wider text-zinc-400 block mb-1">
+                                Total Listings
+                            </span>
+                            <span className="text-2xl sm:text-3xl font-black text-zinc-950 font-mono-code">
+                                {loading ? "—" : products.length}
+                            </span>
+                        </div>
 
-                        {/* ── LOADING STATE ── */}
-
-                        {loading && (
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                                {Array.from({ length: 8 }).map((_, i) => (
-                                    <ProductSkeleton key={i} />
-                                ))}
+                        <div className="p-4 bg-white border border-zinc-200 rounded-2xl shadow-xs">
+                            <span className="text-[10px] font-mono-code uppercase tracking-wider text-zinc-400 block mb-1">
+                                Catalog Status
+                            </span>
+                            <div className="flex items-center gap-1.5 pt-1">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                <span className="text-sm font-bold text-zinc-950 font-mono-code uppercase">
+                                    Live & Verified
+                                </span>
                             </div>
-                        )}
+                        </div>
 
-                        {/* ── ERROR STATE ── */}
+                        <div className="p-4 bg-white border border-zinc-200 rounded-2xl shadow-xs">
+                            <span className="text-[10px] font-mono-code uppercase tracking-wider text-zinc-400 block mb-1">
+                                Storefront Brand
+                            </span>
+                            <span className="text-sm font-bold text-zinc-950 font-mono-code uppercase pt-1 block truncate">
+                                Snitch Independent
+                            </span>
+                        </div>
 
-                        {!loading && fetchError && <ErrorState />}
+                        <div className="p-4 bg-white border border-zinc-200 rounded-2xl shadow-xs">
+                            <span className="text-[10px] font-mono-code uppercase tracking-wider text-zinc-400 block mb-1">
+                                Fast Actions
+                            </span>
+                            <Link
+                                to="/seller/create-product"
+                                className="text-xs font-bold text-black hover:underline uppercase font-mono-code pt-1 block"
+                            >
+                                + Add Variety Drops →
+                            </Link>
+                        </div>
+                    </div>
 
-                        {/* ── EMPTY STATE ── */}
-                        {/* TODO: Replace this mock condition with the real products array.
-                            Show this state when the real seller product list is empty.
-                            Example:
-                            (!loading && !error && products.length === 0) */}
-                        {!loading && !fetchError && products.length === 0 && <EmptyProducts />}
+                    {/* Filter / Search Bar */}
+                    {products.length > 0 && (
+                        <div className="flex items-center justify-between gap-4 pt-2">
+                            <div className="relative flex-1 max-w-sm">
+                                <SearchIcon className="absolute left-3.5 top-1/2 -translate-y-1/2 text-zinc-400 w-4 h-4 pointer-events-none" />
+                                <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search products by title or category..."
+                                    className="w-full h-10 pl-10 pr-4 bg-white border border-zinc-200 rounded-full text-xs font-mono-code text-zinc-900 placeholder:text-zinc-400 focus:outline-none focus:border-black transition-all"
+                                />
+                            </div>
 
-                        {/* ── PRODUCT GRID ── */}
-                        {/* TODO: Replace mockProducts with the real products from Redux/API.
-                            The real data should come from your useProduct() hook. */}
-                        {!loading && !fetchError && products.length > 0 && (
-                            <div className="space-y-6">
-                                {/* Count label */}
-                                <div className="flex items-center gap-3">
-                                    <div className="h-px flex-1 bg-zinc-900" />
-                                    <span className="text-[9px] tracking-[0.2em] uppercase text-zinc-600" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                        {products.length} product{products.length !== 1 ? "s" : ""}
-                                    </span>
-                                    <div className="h-px flex-1 bg-zinc-900" />
+                            <span className="text-xs font-mono-code text-zinc-500 hidden sm:inline">
+                                Showing <strong>{filteredProducts.length}</strong> of {products.length} products
+                            </span>
+                        </div>
+                    )}
+
+                    {/* ── LOADING STATE ── */}
+                    {loading && (
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                            {Array.from({ length: 8 }).map((_, i) => (
+                                <ProductSkeleton key={i} />
+                            ))}
+                        </div>
+                    )}
+
+                    {/* ── ERROR STATE ── */}
+                    {!loading && fetchError && <ErrorState onRetry={loadProducts} />}
+
+                    {/* ── EMPTY STATE ── */}
+                    {!loading && !fetchError && products.length === 0 && <EmptyProducts />}
+
+                    {/* ── PRODUCT GRID ── */}
+                    {!loading && !fetchError && products.length > 0 && (
+                        <>
+                            {filteredProducts.length === 0 ? (
+                                <div className="py-16 text-center border border-dashed border-zinc-300 rounded-2xl bg-zinc-50 p-6 space-y-3">
+                                    <p className="text-xs font-mono-code uppercase tracking-wider text-zinc-500">
+                                        No products matched "{searchQuery}"
+                                    </p>
+                                    <button
+                                        type="button"
+                                        onClick={() => setSearchQuery("")}
+                                        className="text-xs font-bold underline font-mono-code uppercase cursor-pointer"
+                                    >
+                                        Clear Search
+                                    </button>
                                 </div>
-
-                                {/* Grid */}
-                                <div className="card-grid grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-
-                                    {products.map((product, i) => (
-                                        <div key={product._id} style={{ animationDelay: `${i * 60}ms` }}>
-                                            <Link to={`/seller/product/${product._id}`} className="block">
-                                                <ProductCard product={product} onDeleteCard={handleDeleteCard} />
-                                            </Link>
-                                        </div>
+                            ) : (
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                    {filteredProducts.map((product) => (
+                                        <Link
+                                            key={product._id}
+                                            to={`/seller/product/${product._id}`}
+                                            className="block h-full cursor-pointer"
+                                        >
+                                            <ProductCard product={product} onDeleteCard={handleDeleteCard} />
+                                        </Link>
                                     ))}
                                 </div>
-                            </div>
-                        )}
-                    </div>
+                            )}
+                        </>
+                    )}
+
                 </div>
+
+                {/* ─── Snitch Store Footer (Matching Home.jsx) ────────────────── */}
+                <footer className="mt-16 border-t border-zinc-200 bg-white py-10 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-2 font-mono-code">
+                    <div className="flex items-center justify-center gap-2">
+                        <span className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold text-black">
+                            S
+                        </span>
+                        <span className="font-bold text-zinc-900 tracking-widest uppercase">
+                            SNITCH STUDIO
+                        </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400">
+                        Seller dashboard for independent fashion creators and verified streetwear brands.
+                    </p>
+                </footer>
+
             </main>
         </>
     );

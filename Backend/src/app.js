@@ -14,6 +14,9 @@ import { config } from "./config/config.js";
 
 const app = express();
 
+// Trust reverse proxy (needed for Render and HTTPS cookies)
+app.set("trust proxy", 1);
+
 // middleware
 app.use(morgan("dev"));
 app.use(express.json());
@@ -35,9 +38,20 @@ passport.use(
     )
 );
 
+const allowedOrigins = [
+    config.CLIENT_URL?.replace(/\/$/, ""),
+    "http://localhost:5173",
+    "http://localhost:3000"
+].filter(Boolean);
+
 app.use(
     cors({
-        origin: "http://localhost:5173",
+        origin: (origin, callback) => {
+            if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
+                return callback(null, true);
+            }
+            return callback(new Error(`CORS blocked request from origin: ${origin}`));
+        },
         credentials: true,
     })
 );

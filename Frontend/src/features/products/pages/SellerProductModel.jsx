@@ -18,9 +18,9 @@ function FontLoader() {
 const currencySymbol = { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" };
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
-function BackArrowIcon({ className = "w-4 h-4" }) {
+function ArrowLeftIcon({ className = "w-4 h-4" }) {
     return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
         </svg>
     );
@@ -29,7 +29,7 @@ function BackArrowIcon({ className = "w-4 h-4" }) {
 function PlusIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
         </svg>
     );
 }
@@ -37,7 +37,8 @@ function PlusIcon({ className = "w-4 h-4" }) {
 function TrashIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+            <path strokeLinecap="round" strokeLinejoin="round"
+                d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
         </svg>
     );
 }
@@ -134,10 +135,10 @@ export default function SellerProductModel() {
         }
         if (product?.variants && product.variants.length > 0) {
             const keySet = new Set();
-            product.variants.forEach(v => {
+            product.variants.forEach((v) => {
                 let entries = [];
                 if (v.attributes instanceof Map) entries = Array.from(v.attributes.entries());
-                else if (typeof v.attributes === 'object' && v.attributes !== null) entries = Object.entries(v.attributes);
+                else if (typeof v.attributes === "object" && v.attributes !== null) entries = Object.entries(v.attributes);
                 entries.forEach(([k]) => keySet.add(k));
             });
             if (keySet.size > 0) return Array.from(keySet);
@@ -156,22 +157,11 @@ export default function SellerProductModel() {
     // Synchronize fixed attribute keys when opening the Add Variety modal
     useEffect(() => {
         if (showAddVariantModal) {
-            setNewVarAttributes(activeAttributeKeys.map(k => ({ key: k, value: "" })));
+            setNewVarAttributes(activeAttributeKeys.map((k) => ({ key: k, value: "" })));
         }
     }, [showAddVariantModal, activeAttributeKeys]);
 
     const [selectedImg, setSelectedImg] = useState(0);
-    const [mounted, setMounted] = useState(false);
-
-    useEffect(() => {
-        const t = setTimeout(() => setMounted(true), 50);
-        return () => clearTimeout(t);
-    }, []);
-
-    useEffect(() => {
-        if (!id) return;
-        fetchProductDetails();
-    }, [id]);
 
     const fetchProductDetails = async () => {
         setLoading(true);
@@ -188,18 +178,22 @@ export default function SellerProductModel() {
             setNewImageFiles([]);
 
             // Normalize variants attributes as plain JS objects so JSON.stringify won't wipe them
-            const parsedVariants = (data.variants || []).map(v => {
+            const parsedVariants = (data.variants || []).map((v) => {
                 let attrs = v.attributes;
                 if (attrs instanceof Map) {
                     attrs = Object.fromEntries(attrs);
-                } else if (typeof attrs === 'string') {
-                    try { attrs = JSON.parse(attrs); } catch (e) { attrs = {}; }
-                } else if (typeof attrs !== 'object' || attrs === null) {
+                } else if (typeof attrs === "string") {
+                    try {
+                        attrs = JSON.parse(attrs);
+                    } catch {
+                        attrs = {};
+                    }
+                } else if (typeof attrs !== "object" || attrs === null) {
                     attrs = {};
                 }
                 return {
                     ...v,
-                    attributes: attrs
+                    attributes: attrs,
                 };
             });
             setVariants(parsedVariants);
@@ -210,27 +204,36 @@ export default function SellerProductModel() {
         }
     };
 
+    useEffect(() => {
+        if (!id) return;
+        fetchProductDetails();
+    }, [id]);
+
     // Helper to safely convert Map or stringified attributes to plain JS objects for API payload
     const serializeVariantsForApi = (variantsList) => {
-        return (variantsList || []).map(v => {
+        return (variantsList || []).map((v) => {
             let attrsObj = v.attributes;
             if (attrsObj instanceof Map) {
                 attrsObj = Object.fromEntries(attrsObj);
-            } else if (typeof attrsObj === 'string') {
-                try { attrsObj = JSON.parse(attrsObj); } catch (e) { attrsObj = {}; }
-            } else if (typeof attrsObj !== 'object' || attrsObj === null) {
+            } else if (typeof attrsObj === "string") {
+                try {
+                    attrsObj = JSON.parse(attrsObj);
+                } catch {
+                    attrsObj = {};
+                }
+            } else if (typeof attrsObj !== "object" || attrsObj === null) {
                 attrsObj = {};
             }
             return {
                 ...v,
-                attributes: attrsObj
+                attributes: attrsObj,
             };
         });
     };
 
     // Process uploaded main product files (Max 7)
     const handleAddImageFiles = (files) => {
-        const validFiles = Array.from(files).filter(f => f.type.startsWith("image/"));
+        const validFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
         const currentCount = existingImages.length + newImageFiles.length;
         const availableSlots = 7 - currentCount;
 
@@ -239,22 +242,22 @@ export default function SellerProductModel() {
             return;
         }
 
-        const filesToAdd = validFiles.slice(0, availableSlots).map(file => ({
+        const filesToAdd = validFiles.slice(0, availableSlots).map((file) => ({
             id: Math.random().toString(36).substring(2, 9),
             name: file.name,
             url: URL.createObjectURL(file),
-            file
+            file,
         }));
 
-        setNewImageFiles(prev => [...prev, ...filesToAdd]);
+        setNewImageFiles((prev) => [...prev, ...filesToAdd]);
     };
 
     const handleRemoveExistingImage = (idx) => {
         setExistingImages(existingImages.filter((_, i) => i !== idx));
     };
 
-    const handleRemoveNewImageFile = (id) => {
-        setNewImageFiles(newImageFiles.filter(img => img.id !== id));
+    const handleRemoveNewImageFile = (fileId) => {
+        setNewImageFiles(newImageFiles.filter((img) => img.id !== fileId));
     };
 
     // Save core product edits (Title, Description, Price, Image Files up to 7)
@@ -283,7 +286,7 @@ export default function SellerProductModel() {
             formData.append("images", JSON.stringify(existingImages));
 
             // Append uploaded image files (up to 7)
-            newImageFiles.forEach(img => {
+            newImageFiles.forEach((img) => {
                 formData.append("images", img.file);
             });
 
@@ -303,34 +306,25 @@ export default function SellerProductModel() {
 
     // Variant image selection (up to 7 files)
     const handleAddVariantImageFiles = (files) => {
-        const validFiles = Array.from(files).filter(f => f.type.startsWith("image/"));
+        const validFiles = Array.from(files).filter((f) => f.type.startsWith("image/"));
         const availableSlots = 7 - newVarImageFiles.length;
         if (availableSlots <= 0) {
             alert("Maximum 7 images allowed for a variety.");
             return;
         }
 
-        const filesToAdd = validFiles.slice(0, availableSlots).map(file => ({
+        const filesToAdd = validFiles.slice(0, availableSlots).map((file) => ({
             id: Math.random().toString(36).substring(2, 9),
             name: file.name,
             url: URL.createObjectURL(file),
-            file
+            file,
         }));
 
-        setNewVarImageFiles(prev => [...prev, ...filesToAdd]);
+        setNewVarImageFiles((prev) => [...prev, ...filesToAdd]);
     };
 
-    const handleRemoveVariantImageFile = (id) => {
-        setNewVarImageFiles(newVarImageFiles.filter(img => img.id !== id));
-    };
-
-    // Add Attribute pair to new variant form
-    const handleAddAttributePair = () => {
-        setNewVarAttributes([...newVarAttributes, { key: "", value: "" }]);
-    };
-
-    const handleRemoveAttributePair = (index) => {
-        setNewVarAttributes(newVarAttributes.filter((_, i) => i !== index));
+    const handleRemoveVariantImageFile = (fileId) => {
+        setNewVarImageFiles(newVarImageFiles.filter((img) => img.id !== fileId));
     };
 
     const handleAttributeChange = (index, field, val) => {
@@ -344,7 +338,7 @@ export default function SellerProductModel() {
         e.preventDefault();
 
         const attributesObj = {};
-        newVarAttributes.forEach(attr => {
+        newVarAttributes.forEach((attr) => {
             if (attr.key.trim() && attr.value.trim()) {
                 attributesObj[attr.key.trim()] = attr.value.trim();
             }
@@ -359,12 +353,14 @@ export default function SellerProductModel() {
             stock: Number(newVarStock) || 0,
             attributes: attributesObj,
             images: newVarImageFiles
-                .filter(img => img.url && !img.url.startsWith('blob:'))
-                .map(img => ({ url: img.url })),
-            price: newVarPriceAmount.trim() ? {
-                amount: Number(newVarPriceAmount.trim()),
-                currency: newVarPriceCurrency || priceCurrency
-            } : null
+                .filter((img) => img.url && !img.url.startsWith("blob:"))
+                .map((img) => ({ url: img.url })),
+            price: newVarPriceAmount.trim()
+                ? {
+                      amount: Number(newVarPriceAmount.trim()),
+                      currency: newVarPriceCurrency || priceCurrency,
+                  }
+                : null,
         };
 
         const updatedVariantsList = serializeVariantsForApi([...variants, newVariantObj]);
@@ -376,17 +372,17 @@ export default function SellerProductModel() {
             formData.append("variants", JSON.stringify(updatedVariantsList));
 
             // Append uploaded image files if any
-            newVarImageFiles.forEach(img => {
+            newVarImageFiles.forEach((img) => {
                 formData.append("images", img.file);
             });
 
             const updated = await handleUpdateSellerProduct(id, formData);
             setProduct(updated);
 
-            const parsedVariants = (updated.variants || []).map(v => {
+            const parsedVariants = (updated.variants || []).map((v) => {
                 let attrs = v.attributes;
                 if (attrs instanceof Map) attrs = Object.fromEntries(attrs);
-                else if (typeof attrs !== 'object' || attrs === null) attrs = {};
+                else if (typeof attrs !== "object" || attrs === null) attrs = {};
                 return { ...v, attributes: attrs };
             });
             setVariants(parsedVariants);
@@ -420,10 +416,10 @@ export default function SellerProductModel() {
             const updated = await handleUpdateSellerProduct(id, formData);
             setProduct(updated);
 
-            const parsedVariants = (updated.variants || []).map(v => {
+            const parsedVariants = (updated.variants || []).map((v) => {
                 let attrs = v.attributes;
                 if (attrs instanceof Map) attrs = Object.fromEntries(attrs);
-                else if (typeof attrs !== 'object' || attrs === null) attrs = {};
+                else if (typeof attrs !== "object" || attrs === null) attrs = {};
                 return { ...v, attributes: attrs };
             });
             setVariants(parsedVariants);
@@ -452,10 +448,10 @@ export default function SellerProductModel() {
             const updated = await handleUpdateSellerProduct(id, formData);
             setProduct(updated);
 
-            const parsedVariants = (updated.variants || []).map(v => {
+            const parsedVariants = (updated.variants || []).map((v) => {
                 let attrs = v.attributes;
                 if (attrs instanceof Map) attrs = Object.fromEntries(attrs);
-                else if (typeof attrs !== 'object' || attrs === null) attrs = {};
+                else if (typeof attrs !== "object" || attrs === null) attrs = {};
                 return { ...v, attributes: attrs };
             });
             setVariants(parsedVariants);
@@ -467,7 +463,6 @@ export default function SellerProductModel() {
             setSaving(false);
         }
     };
-
 
     // Delete Entire Product
     const handleDeleteProduct = async () => {
@@ -489,114 +484,129 @@ export default function SellerProductModel() {
 
     const mainSymbol = currencySymbol[product?.price?.currency] ?? product?.price?.currency ?? "₹";
     const mainFormattedPrice = Number(product?.price?.amount || 0).toLocaleString("en-IN");
-    const allCurrentImages = [...existingImages.map(img => img?.url ?? img), ...newImageFiles.map(img => img.url)];
+    const allCurrentImages = [...existingImages.map((img) => img?.url ?? img), ...newImageFiles.map((img) => img.url)];
 
     return (
         <>
             <FontLoader />
 
             <style>{`
-                *, *::before, *::after { font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif; }
-                @keyframes contentIn {
-                    from { opacity: 0; transform: translateY(20px); }
+                *, *::before, *::after {
+                    font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                }
+                .font-mono-code {
+                    font-family: 'JetBrains Mono', monospace;
+                }
+                @keyframes fadeIn {
+                    from { opacity: 0; transform: translateY(8px); }
                     to   { opacity: 1; transform: translateY(0); }
                 }
-                .content-in { animation: contentIn 0.5s cubic-bezier(0.22,1,0.36,1) both; }
+                .fade-in-entry {
+                    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+                }
             `}</style>
 
-            <main className="min-h-screen w-full bg-[#0a0a0a] text-white flex flex-col selection:bg-yellow-500 selection:text-black">
+            <main className="min-h-screen w-full bg-[#fcfcfd] text-zinc-900 selection:bg-black selection:text-white pb-20">
 
-                {/* ══════════════════════════════════════════════
-                    TOP BAR / NAVIGATION
-                ══════════════════════════════════════════════ */}
-                <header className="sticky top-0 z-40 bg-[#0a0a0a]/95 backdrop-blur-xl border-b border-zinc-900 px-6 sm:px-10 py-4 flex items-center justify-between">
-                    <div className="flex items-center gap-5">
-                        <button
-                            onClick={() => navigate("/seller/dashboard")}
-                            className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-zinc-400 hover:text-yellow-500 transition-colors cursor-pointer"
-                            style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                {/* ─── Breadcrumb & Top Bar ──────────────────────────────────── */}
+                <div className="border-b border-zinc-200 bg-white/70 backdrop-blur-xs">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between text-xs font-mono-code text-zinc-600">
+                        <Link
+                            to="/seller/dashboard"
+                            className="inline-flex items-center gap-2 hover:text-black font-semibold transition-colors group cursor-pointer"
                         >
-                            <BackArrowIcon className="w-4 h-4" />
-                            <span>Dashboard</span>
-                        </button>
-                        <div className="h-4 w-px bg-zinc-800" />
-                        <Link to="/" className="inline-flex items-center gap-2 group">
-                            <span className="h-7 w-7 rounded bg-yellow-500 flex items-center justify-center text-black font-black text-sm">
-                                S
-                            </span>
-                            <span className="text-xs font-bold tracking-[0.25em] uppercase text-white" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                                SNITCH SELLER HUB
-                            </span>
+                            <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
+                            <span>Back to Seller Dashboard</span>
                         </Link>
-                    </div>
 
-                    <div className="flex items-center gap-3">
-                        <span className="hidden sm:inline-block text-[10px] uppercase font-mono tracking-widest text-zinc-500 border border-zinc-800 px-3 py-1.5">
-                            ID: {id?.slice(-8)}
-                        </span>
-                        <button
-                            onClick={() => setShowAddVariantModal(true)}
-                            className="h-9 px-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
-                            style={{ clipPath: "polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px))" }}
-                        >
-                            <PlusIcon className="w-3.5 h-3.5" />
-                            <span>Add New Variety</span>
-                        </button>
-
-                        <button
-                            type="button"
-                            onClick={handleDeleteProduct}
-                            disabled={saving}
-                            className="h-9 px-3.5 bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 font-bold text-xs uppercase tracking-wider flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
-                            title="Delete Product"
-                        >
-                            <TrashIcon className="w-3.5 h-3.5 text-red-400" />
-                            <span className="hidden sm:inline">Delete Product</span>
-                        </button>
+                        <div className="flex items-center gap-2 text-zinc-500">
+                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="font-medium text-[11px] uppercase tracking-wider">
+                                Product Editor Active
+                            </span>
+                        </div>
                     </div>
-                </header>
+                </div>
 
                 {/* Toast Notification */}
                 {successMsg && (
-                    <div className="fixed top-20 right-6 z-50 bg-emerald-500/90 text-black font-bold text-xs uppercase tracking-wider px-5 py-3 shadow-2xl flex items-center gap-2.5 backdrop-blur-md animate-bounce">
-                        <CheckIcon className="w-4 h-4 text-black" />
+                    <div className="fixed top-20 right-6 z-50 bg-black text-white font-mono-code font-bold text-xs uppercase tracking-wider px-5 py-3 rounded-full shadow-2xl flex items-center gap-2.5 backdrop-blur-md">
+                        <CheckIcon className="w-4 h-4 text-emerald-400" />
                         <span>{successMsg}</span>
                     </div>
                 )}
 
-                {/* ══════════════════════════════════════════════
-                    MAIN CONTENT BODY
-                ══════════════════════════════════════════════ */}
-                <div className={`flex-1 max-w-7xl w-full mx-auto px-6 sm:px-10 py-8 ${mounted ? "content-in" : "opacity-0"}`}>
+                {/* ─── Main Content Container ─────────────────────────────────── */}
+                <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-12 fade-in-entry space-y-8">
 
-                    {/* Breadcrumbs */}
-                    <div className="flex items-center gap-2 mb-6 text-[10px] uppercase tracking-[0.2em] font-mono text-zinc-500" style={{ fontFamily: "'JetBrains Mono', monospace" }}>
-                        <Link to="/seller/dashboard" className="hover:text-yellow-500">Seller Dashboard</Link>
-                        <span>/</span>
-                        <span>Product Model</span>
-                        <span>/</span>
-                        <span className="text-yellow-500 truncate max-w-[200px]">{product?.title || "Details"}</span>
+                    {/* Header with Title and Primary Actions */}
+                    <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-zinc-200">
+                        <div>
+                            <div className="flex items-center gap-2 text-[11px] font-mono-code uppercase tracking-widest text-zinc-500 mb-1">
+                                <span>Seller Studio</span>
+                                <span>/</span>
+                                <span>Catalog</span>
+                                <span>/</span>
+                                <span className="text-black font-bold">Manage Drop</span>
+                            </div>
+                            <h1 className="text-3xl sm:text-4xl font-black uppercase tracking-tight text-zinc-950">
+                                {product?.title || "Product Management"}
+                            </h1>
+                            <p className="text-xs text-zinc-500 mt-1 font-normal font-mono-code">
+                                ID: {id}
+                            </p>
+                        </div>
+
+                        {/* Top Actions: Add Variety & Delete Product */}
+                        <div className="flex items-center gap-3 flex-wrap">
+                            <button
+                                type="button"
+                                onClick={() => setShowAddVariantModal(true)}
+                                className="inline-flex items-center gap-2 px-5 py-2.5 bg-black hover:bg-zinc-800 text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all shadow-md font-mono-code cursor-pointer active:scale-95"
+                            >
+                                <PlusIcon className="w-4 h-4" />
+                                <span>Add New Variety</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={handleDeleteProduct}
+                                disabled={saving}
+                                className="inline-flex items-center gap-1.5 px-4 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 font-bold text-xs uppercase tracking-widest rounded-full transition-all font-mono-code cursor-pointer disabled:opacity-50"
+                                title="Delete entire product"
+                            >
+                                <TrashIcon className="w-3.5 h-3.5" />
+                                <span>Delete Listing</span>
+                            </button>
+                        </div>
                     </div>
 
                     {/* Loading State */}
                     {loading && (
                         <div className="flex flex-col items-center justify-center py-28 space-y-4">
-                            <div className="w-10 h-10 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
-                            <p className="text-xs text-zinc-500 uppercase tracking-widest font-mono">Loading Product Spec Sheet...</p>
+                            <div className="w-9 h-9 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                            <p className="text-xs font-mono-code text-zinc-500 uppercase tracking-widest">
+                                Loading product specifications...
+                            </p>
                         </div>
                     )}
 
                     {/* Error State */}
                     {!loading && error && (
-                        <div className="flex flex-col items-center justify-center py-20 px-6 border border-red-500/20 bg-red-500/5">
-                            <AlertIcon className="w-8 h-8 text-red-400 mb-4" />
-                            <h2 className="text-xl font-bold text-white uppercase tracking-tight mb-2">Product Not Found</h2>
-                            <p className="text-xs text-zinc-400 text-center max-w-md mb-6">{error}</p>
+                        <div className="bg-white border border-rose-200 rounded-3xl p-10 text-center max-w-md mx-auto space-y-4 shadow-xs">
+                            <div className="w-12 h-12 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center mx-auto">
+                                <AlertIcon className="w-6 h-6" />
+                            </div>
+                            <h2 className="text-xl font-bold text-zinc-950 uppercase tracking-tight">
+                                Product Not Found
+                            </h2>
+                            <p className="text-xs text-zinc-500 font-mono-code">{error}</p>
                             <button
+                                type="button"
                                 onClick={() => navigate("/seller/dashboard")}
-                                className="px-6 py-2.5 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs uppercase tracking-widest transition-all"
+                                className="px-6 py-2.5 bg-black text-white text-xs font-bold uppercase rounded-full font-mono-code cursor-pointer"
                             >
-                                Back to Seller Dashboard
+                                Back to Dashboard
                             </button>
                         </div>
                     )}
@@ -605,57 +615,60 @@ export default function SellerProductModel() {
                     {!loading && !error && product && (
                         <div className="space-y-10">
 
-                            {/* SECTION 1: MAIN PRODUCT OVERVIEW & EDIT PANEL */}
-                            <div className="bg-[#0e0e0e] border border-zinc-800 p-6 sm:p-8 relative">
-
-                                <div className="flex items-center justify-between border-b border-zinc-800 pb-5 mb-6">
-                                    <div className="flex items-center gap-3">
-                                        <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                                        <h2 className="text-xs font-mono uppercase tracking-[0.2em] text-zinc-400">
-                                            Main Product Information
+                            {/* ── SECTION 1: CORE PRODUCT DETAILS & EDIT CARD ── */}
+                            <div className="bg-white border border-zinc-200 rounded-3xl p-6 sm:p-8 shadow-xs relative">
+                                <div className="flex items-center justify-between border-b border-zinc-100 pb-4 mb-6">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-black" />
+                                        <h2 className="text-xs font-mono-code font-bold uppercase tracking-wider text-zinc-950">
+                                            Base Product Specifications
                                         </h2>
                                     </div>
 
                                     <button
+                                        type="button"
                                         onClick={() => setIsEditingCore(!isEditingCore)}
-                                        className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-yellow-500 hover:text-yellow-400 border border-yellow-500/30 px-3 py-1.5 transition-all cursor-pointer"
+                                        className="inline-flex items-center gap-2 text-xs font-mono-code uppercase tracking-wider text-zinc-700 hover:text-black border border-zinc-300 hover:border-black px-3.5 py-1.5 rounded-full transition-all cursor-pointer font-semibold"
                                     >
                                         <EditIcon className="w-3.5 h-3.5" />
-                                        <span>{isEditingCore ? "Cancel Edit" : "Edit Base Details"}</span>
+                                        <span>{isEditingCore ? "Cancel Editing" : "Edit Base Details"}</span>
                                     </button>
                                 </div>
 
                                 {!isEditingCore ? (
-                                    /* Read Only View of Base Product */
+                                    /* Read-Only Base View */
                                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-                                        {/* Main Product Image Carousel/Preview */}
+                                        {/* Gallery Preview */}
                                         <div className="lg:col-span-5 flex flex-col gap-3">
-                                            <div className="aspect-[4/3] bg-black border border-zinc-800 overflow-hidden relative group">
+                                            <div className="aspect-[4/3] bg-[#f4f4f5] border border-zinc-200 rounded-2xl overflow-hidden relative group">
                                                 {allCurrentImages.length > 0 ? (
                                                     <img
                                                         src={allCurrentImages[selectedImg]}
                                                         alt={product.title}
-                                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                                                        className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
                                                     />
                                                 ) : (
-                                                    <div className="w-full h-full flex items-center justify-center">
-                                                        <PackageIcon className="w-12 h-12 text-zinc-800" />
+                                                    <div className="w-full h-full flex items-center justify-center text-zinc-400">
+                                                        <PackageIcon className="w-12 h-12" />
                                                     </div>
                                                 )}
-                                                <span className="absolute bottom-2 right-2 text-[9px] font-mono uppercase bg-black/80 px-2 py-0.5 border border-zinc-800">
-                                                    Base Image {selectedImg + 1} of {allCurrentImages.length || 0}
+                                                <span className="absolute bottom-2.5 right-2.5 text-[9px] font-mono-code uppercase bg-black/75 text-white px-2 py-0.5 rounded-full backdrop-blur-xs">
+                                                    Photo {selectedImg + 1} of {allCurrentImages.length || 0}
                                                 </span>
                                             </div>
 
                                             {allCurrentImages.length > 1 && (
-                                                <div className="flex gap-2 overflow-x-auto pb-1">
+                                                <div className="flex gap-2 overflow-x-auto pb-1 no-scrollbar">
                                                     {allCurrentImages.map((imgUrl, i) => (
                                                         <button
                                                             key={i}
+                                                            type="button"
                                                             onClick={() => setSelectedImg(i)}
-                                                            className={`w-16 h-16 border transition-all cursor-pointer bg-black ${selectedImg === i ? "border-yellow-500 scale-95" : "border-zinc-800 opacity-50"
-                                                                }`}
+                                                            className={`w-16 h-16 rounded-xl border-2 transition-all cursor-pointer bg-[#f4f4f5] flex-shrink-0 overflow-hidden ${
+                                                                selectedImg === i
+                                                                    ? "border-black ring-2 ring-zinc-300 scale-95"
+                                                                    : "border-zinc-200 hover:border-zinc-400 opacity-60 hover:opacity-100"
+                                                            }`}
                                                         >
                                                             <img src={imgUrl} alt="" className="w-full h-full object-cover" />
                                                         </button>
@@ -664,86 +677,95 @@ export default function SellerProductModel() {
                                             )}
                                         </div>
 
-                                        {/* Main Product Meta Info */}
+                                        {/* Product Info */}
                                         <div className="lg:col-span-7 space-y-5">
                                             <div>
-                                                <span className="text-[10px] uppercase font-mono text-zinc-500 tracking-widest">Base Listing Title</span>
-                                                <h1 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-white mt-1">
+                                                <span className="text-[10px] uppercase font-mono-code text-zinc-400 tracking-widest block mb-0.5">
+                                                    Listing Title
+                                                </span>
+                                                <h2 className="text-2xl sm:text-3xl font-black uppercase tracking-tight text-zinc-950">
                                                     {product.title}
-                                                </h1>
+                                                </h2>
                                             </div>
 
-                                            <div className="flex items-baseline gap-4 bg-black/60 border border-zinc-800/80 p-4 w-fit">
-                                                <div>
-                                                    <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">Default Base Price</span>
-                                                    <div className="flex items-baseline gap-2 mt-0.5">
-                                                        <span className="text-2xl font-bold font-mono text-yellow-500">
-                                                            {mainSymbol}{mainFormattedPrice}
-                                                        </span>
-                                                        <span className="text-xs font-mono text-zinc-500">
-                                                            {product.price?.currency || "INR"}
-                                                        </span>
-                                                    </div>
+                                            <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-2xl w-fit">
+                                                <span className="text-[10px] font-mono-code uppercase tracking-widest text-zinc-400 block mb-0.5">
+                                                    Base Price
+                                                </span>
+                                                <div className="flex items-baseline gap-2 font-mono-code">
+                                                    <span className="text-2xl font-bold text-zinc-950">
+                                                        {mainSymbol}{mainFormattedPrice}
+                                                    </span>
+                                                    <span className="text-xs text-zinc-500 uppercase">
+                                                        {product.price?.currency || "INR"}
+                                                    </span>
                                                 </div>
                                             </div>
 
                                             <div>
-                                                <span className="text-[10px] uppercase font-mono text-zinc-500 tracking-widest">Description</span>
-                                                <p className="text-xs sm:text-sm text-zinc-400 leading-relaxed mt-1 font-light whitespace-pre-line border-l border-zinc-800 pl-3">
-                                                    {product.description}
+                                                <span className="text-[10px] uppercase font-mono-code text-zinc-400 tracking-widest block mb-0.5">
+                                                    Description
+                                                </span>
+                                                <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-light whitespace-pre-line border-l-2 border-zinc-200 pl-3">
+                                                    {product.description || "No description provided."}
                                                 </p>
                                             </div>
 
-                                            <div className="flex flex-wrap gap-4 pt-2">
-                                                <div className="bg-zinc-900/60 border border-zinc-800 px-4 py-2 text-center">
-                                                    <span className="text-[9px] uppercase font-mono text-zinc-500 block">Total Varieties</span>
-                                                    <span className="text-base font-bold font-mono text-white">{variants.length}</span>
+                                            <div className="flex flex-wrap gap-3 pt-2">
+                                                <div className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-center">
+                                                    <span className="text-[9px] uppercase font-mono-code text-zinc-400 block">
+                                                        Total Varieties
+                                                    </span>
+                                                    <span className="text-base font-bold font-mono-code text-zinc-950">
+                                                        {variants.length}
+                                                    </span>
                                                 </div>
-                                                <div className="bg-zinc-900/60 border border-zinc-800 px-4 py-2 text-center">
-                                                    <span className="text-[9px] uppercase font-mono text-zinc-500 block">Total Variety Stock</span>
-                                                    <span className="text-base font-bold font-mono text-emerald-400">
+                                                <div className="bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-2.5 text-center">
+                                                    <span className="text-[9px] uppercase font-mono-code text-zinc-400 block">
+                                                        Total Stock
+                                                    </span>
+                                                    <span className="text-base font-bold font-mono-code text-emerald-600">
                                                         {variants.reduce((acc, v) => acc + Number(v.stock || 0), 0)} units
                                                     </span>
                                                 </div>
                                             </div>
                                         </div>
-
                                     </div>
                                 ) : (
-                                    /* Form View to Edit Base Product Details & Upload Image Files */
+                                    /* Edit Form */
                                     <div className="space-y-6 max-w-3xl">
                                         <div>
-                                            <label className="block text-xs uppercase font-mono text-zinc-400 mb-1.5">
+                                            <label className="block text-xs uppercase font-mono-code text-zinc-600 mb-1.5 font-semibold">
                                                 Product Title
                                             </label>
                                             <input
                                                 type="text"
                                                 value={title}
                                                 onChange={(e) => setTitle(e.target.value)}
-                                                className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-white focus:border-yellow-500 focus:outline-none"
+                                                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-900 focus:bg-white focus:border-black focus:outline-none transition-all"
                                             />
                                         </div>
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-xs uppercase font-mono text-zinc-400 mb-1.5">
+                                                <label className="block text-xs uppercase font-mono-code text-zinc-600 mb-1.5 font-semibold">
                                                     Base Price Amount
                                                 </label>
                                                 <input
                                                     type="number"
                                                     value={priceAmount}
                                                     onChange={(e) => setPriceAmount(e.target.value)}
-                                                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-white font-mono focus:border-yellow-500 focus:outline-none"
+                                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-900 font-mono-code focus:bg-white focus:border-black focus:outline-none transition-all"
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-xs uppercase font-mono text-zinc-400 mb-1.5">
+                                                <label className="block text-xs uppercase font-mono-code text-zinc-600 mb-1.5 font-semibold">
                                                     Currency
                                                 </label>
                                                 <select
                                                     value={priceCurrency}
                                                     onChange={(e) => setPriceCurrency(e.target.value)}
-                                                    className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-white font-mono focus:border-yellow-500 focus:outline-none"
+                                                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-900 font-mono-code focus:bg-white focus:border-black focus:outline-none transition-all"
                                                 >
                                                     <option value="INR">INR (₹)</option>
                                                     <option value="USD">USD ($)</option>
@@ -755,29 +777,29 @@ export default function SellerProductModel() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs uppercase font-mono text-zinc-400 mb-1.5">
+                                            <label className="block text-xs uppercase font-mono-code text-zinc-600 mb-1.5 font-semibold">
                                                 Description
                                             </label>
                                             <textarea
                                                 rows={4}
                                                 value={description}
                                                 onChange={(e) => setDescription(e.target.value)}
-                                                className="w-full bg-black border border-zinc-800 px-4 py-3 text-sm text-white focus:border-yellow-500 focus:outline-none"
+                                                className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-900 focus:bg-white focus:border-black focus:outline-none transition-all"
                                             />
                                         </div>
 
-                                        {/* File Upload Section (Up to 7 Image Files) */}
+                                        {/* File Upload Section */}
                                         <div className="space-y-3 pt-2">
                                             <div className="flex items-center justify-between">
-                                                <label className="block text-xs uppercase font-mono text-zinc-400">
+                                                <label className="block text-xs uppercase font-mono-code text-zinc-600 font-semibold">
                                                     Product Image Files (Max 7)
                                                 </label>
-                                                <span className="text-[10px] font-mono text-yellow-500">
+                                                <span className="text-[10px] font-mono-code text-zinc-500">
                                                     {existingImages.length + newImageFiles.length} / 7 uploaded
                                                 </span>
                                             </div>
 
-                                            {/* Dropzone File Input */}
+                                            {/* Dropzone */}
                                             <div
                                                 onClick={() => fileInputRef.current?.click()}
                                                 onDragOver={(e) => e.preventDefault()}
@@ -785,7 +807,7 @@ export default function SellerProductModel() {
                                                     e.preventDefault();
                                                     if (e.dataTransfer.files) handleAddImageFiles(e.dataTransfer.files);
                                                 }}
-                                                className="border border-dashed border-zinc-800 hover:border-yellow-500/50 bg-black/50 p-6 text-center cursor-pointer transition-all rounded-sm flex flex-col items-center justify-center space-y-2"
+                                                className="border-2 border-dashed border-zinc-200 hover:border-black bg-zinc-50 p-6 text-center cursor-pointer transition-all rounded-2xl flex flex-col items-center justify-center space-y-2"
                                             >
                                                 <input
                                                     ref={fileInputRef}
@@ -795,36 +817,36 @@ export default function SellerProductModel() {
                                                     onChange={(e) => handleAddImageFiles(e.target.files)}
                                                     className="hidden"
                                                 />
-                                                <UploadIcon className="w-6 h-6 text-zinc-500" />
-                                                <p className="text-xs text-zinc-300 font-medium">Click or Drag &amp; Drop Image Files</p>
-                                                <p className="text-[10px] font-mono text-zinc-600 uppercase">PNG, JPG, WEBP up to 7 files</p>
+                                                <UploadIcon className="w-6 h-6 text-zinc-400" />
+                                                <p className="text-xs text-zinc-800 font-semibold">Click or Drag &amp; Drop Image Files</p>
+                                                <p className="text-[10px] font-mono-code text-zinc-400 uppercase">PNG, JPG, WEBP up to 7 photos</p>
                                             </div>
 
-                                            {/* Image Thumbnails preview */}
+                                            {/* Thumbnails preview */}
                                             {(existingImages.length > 0 || newImageFiles.length > 0) && (
-                                                <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 pt-2">
+                                                <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 pt-2">
                                                     {existingImages.map((img, idx) => (
-                                                        <div key={`existing-${idx}`} className="relative aspect-square border border-zinc-800 bg-black group overflow-hidden">
+                                                        <div key={`existing-${idx}`} className="relative aspect-square border border-zinc-200 bg-zinc-100 rounded-xl group overflow-hidden">
                                                             <img src={img?.url ?? img} alt="" className="w-full h-full object-cover" />
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleRemoveExistingImage(idx)}
-                                                                className="absolute top-1 right-1 bg-black/80 text-zinc-400 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                                className="absolute top-1 right-1 bg-white/90 text-zinc-700 hover:text-rose-600 p-1 rounded-full shadow-xs cursor-pointer"
                                                             >
                                                                 <XIcon className="w-3 h-3" />
                                                             </button>
                                                         </div>
                                                     ))}
                                                     {newImageFiles.map((img) => (
-                                                        <div key={img.id} className="relative aspect-square border border-yellow-500/50 bg-black group overflow-hidden">
+                                                        <div key={img.id} className="relative aspect-square border-2 border-black bg-zinc-100 rounded-xl group overflow-hidden">
                                                             <img src={img.url} alt="" className="w-full h-full object-cover" />
-                                                            <span className="absolute bottom-0 left-0 right-0 text-[7px] font-mono uppercase bg-yellow-500 text-black text-center py-0.5">
-                                                                New File
+                                                            <span className="absolute bottom-0 left-0 right-0 text-[8px] font-mono-code uppercase bg-black text-white text-center py-0.5">
+                                                                New
                                                             </span>
                                                             <button
                                                                 type="button"
                                                                 onClick={() => handleRemoveNewImageFile(img.id)}
-                                                                className="absolute top-1 right-1 bg-black/80 text-zinc-400 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                                className="absolute top-1 right-1 bg-white/90 text-zinc-700 hover:text-rose-600 p-1 rounded-full shadow-xs cursor-pointer"
                                                             >
                                                                 <XIcon className="w-3 h-3" />
                                                             </button>
@@ -839,14 +861,14 @@ export default function SellerProductModel() {
                                                 type="button"
                                                 disabled={saving}
                                                 onClick={handleSaveCoreDetails}
-                                                className="h-10 px-6 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                                                className="px-6 py-3 bg-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-widest rounded-full transition-all disabled:opacity-50 font-mono-code cursor-pointer shadow-md"
                                             >
-                                                {saving ? "Uploading & Saving..." : "Save Base Details & Images"}
+                                                {saving ? "Saving..." : "Save Base Details & Images"}
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsEditingCore(false)}
-                                                className="h-10 px-6 border border-zinc-800 hover:border-zinc-700 text-zinc-400 text-xs font-mono uppercase tracking-wider cursor-pointer"
+                                                className="px-6 py-3 border border-zinc-300 hover:border-black text-zinc-700 text-xs font-mono-code uppercase tracking-wider rounded-full cursor-pointer transition-colors"
                                             >
                                                 Cancel
                                             </button>
@@ -855,59 +877,60 @@ export default function SellerProductModel() {
                                 )}
                             </div>
 
-                            {/* SECTION 2: PRODUCT VARIETIES / VARIANTS LIST */}
+                            {/* ── SECTION 2: PRODUCT VARIETIES LIST ── */}
                             <div className="space-y-6">
-
-                                <div className="flex items-center justify-between border-b border-zinc-900 pb-4">
+                                <div className="flex items-center justify-between border-b border-zinc-200 pb-4">
                                     <div>
                                         <div className="flex items-center gap-2">
-                                            <LayersIcon className="w-4 h-4 text-yellow-500" />
-                                            <h2 className="text-lg font-black uppercase tracking-tight text-white">
+                                            <LayersIcon className="w-4 h-4 text-zinc-800" />
+                                            <h2 className="text-xl font-black uppercase tracking-tight text-zinc-950">
                                                 Product Varieties ({variants.length})
                                             </h2>
                                         </div>
                                         <p className="text-xs text-zinc-500 tracking-wide mt-0.5">
-                                            Manage color options, sizes, stock inventory, and specific pricing overrides for this product.
+                                            Manage color drops, sizing, inventory availability, and individual pricing overrides.
                                         </p>
                                     </div>
 
                                     <button
+                                        type="button"
                                         onClick={() => setShowAddVariantModal(true)}
-                                        className="h-9 px-4 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs uppercase tracking-wider flex items-center gap-2 transition-all cursor-pointer"
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-widest rounded-full transition-all shadow-xs font-mono-code cursor-pointer"
                                     >
                                         <PlusIcon className="w-3.5 h-3.5" />
                                         <span>Add Variety</span>
                                     </button>
                                 </div>
 
-                                {/* Empty state if no varieties added yet */}
+                                {/* Empty State if no varieties */}
                                 {variants.length === 0 ? (
-                                    <div className="border border-dashed border-zinc-800 bg-[#0e0e0e]/50 py-16 px-6 text-center space-y-4">
-                                        <div className="w-12 h-12 rounded-full border border-zinc-800 flex items-center justify-center mx-auto text-zinc-600">
+                                    <div className="border border-dashed border-zinc-300 bg-zinc-50/50 rounded-3xl py-14 px-6 text-center space-y-4">
+                                        <div className="w-12 h-12 rounded-full bg-zinc-200 flex items-center justify-center mx-auto text-zinc-500">
                                             <LayersIcon className="w-6 h-6" />
                                         </div>
-                                        <h3 className="text-sm font-bold uppercase tracking-wider text-white">
+                                        <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-950 font-mono-code">
                                             No Varieties Added Yet
                                         </h3>
-                                        <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-                                            Add varieties such as different colors (e.g. Red, Black), sizes (e.g. S, M, XL), or stock levels.
+                                        <p className="text-xs text-zinc-500 max-w-sm mx-auto font-normal">
+                                            Add varieties such as different colorways, sizes, or stock inventory levels.
                                         </p>
                                         <button
+                                            type="button"
                                             onClick={() => setShowAddVariantModal(true)}
-                                            className="px-5 py-2 bg-yellow-500 text-black font-bold text-xs uppercase tracking-wider hover:bg-yellow-400 transition-all inline-flex items-center gap-2 cursor-pointer"
+                                            className="px-5 py-2.5 bg-black text-white font-bold text-xs uppercase tracking-wider rounded-full hover:bg-zinc-800 transition-all inline-flex items-center gap-2 cursor-pointer font-mono-code"
                                         >
                                             <PlusIcon className="w-3.5 h-3.5" />
                                             <span>Add First Variety</span>
                                         </button>
                                     </div>
                                 ) : (
-                                    /* Grid of Product Varieties */
+                                    /* Grid of Varieties */
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                                         {variants.map((varItem, idx) => {
                                             let attrEntries = [];
                                             if (varItem.attributes instanceof Map) {
                                                 attrEntries = Array.from(varItem.attributes.entries());
-                                            } else if (typeof varItem.attributes === 'object' && varItem.attributes !== null) {
+                                            } else if (typeof varItem.attributes === "object" && varItem.attributes !== null) {
                                                 attrEntries = Object.entries(varItem.attributes);
                                             }
 
@@ -917,30 +940,34 @@ export default function SellerProductModel() {
                                                 ? `${varSymbol}${Number(varItem.price.amount).toLocaleString("en-IN")}`
                                                 : `${mainSymbol}${mainFormattedPrice}`;
 
-                                            const varImg = (varItem.images && varItem.images.length > 0)
-                                                ? (varItem.images[0]?.url ?? varItem.images[0])
-                                                : (allCurrentImages.length > 0 ? allCurrentImages[0] : null);
+                                            const varImg =
+                                                varItem.images && varItem.images.length > 0
+                                                    ? varItem.images[0]?.url ?? varItem.images[0]
+                                                    : allCurrentImages.length > 0
+                                                    ? allCurrentImages[0]
+                                                    : null;
 
                                             return (
                                                 <div
                                                     key={idx}
-                                                    className="bg-[#0e0e0e] border border-zinc-800 hover:border-zinc-700 p-5 flex flex-col justify-between space-y-4 group transition-all"
+                                                    className="bg-white border border-zinc-200 hover:border-black rounded-2xl p-5 flex flex-col justify-between space-y-4 shadow-xs transition-all"
                                                 >
                                                     <div className="space-y-4">
                                                         <div className="flex items-start justify-between gap-3">
-                                                            <div className="w-14 h-14 bg-black border border-zinc-800 overflow-hidden flex-shrink-0">
+                                                            <div className="w-14 h-14 bg-[#f4f4f5] border border-zinc-200 rounded-xl overflow-hidden flex-shrink-0">
                                                                 {varImg ? (
-                                                                    <img src={varImg} alt="" className="w-full h-full object-cover" />
+                                                                    <img src={varImg} alt="" className="w-full h-full object-cover object-top" />
                                                                 ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-zinc-700">
+                                                                    <div className="w-full h-full flex items-center justify-center text-zinc-400">
                                                                         <PackageIcon className="w-5 h-5" />
                                                                     </div>
                                                                 )}
                                                             </div>
 
                                                             <button
+                                                                type="button"
                                                                 onClick={() => handleDeleteVariant(idx)}
-                                                                className="text-zinc-600 hover:text-red-400 p-1 transition-colors cursor-pointer"
+                                                                className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
                                                                 title="Delete Variety"
                                                             >
                                                                 <TrashIcon className="w-4 h-4" />
@@ -948,74 +975,77 @@ export default function SellerProductModel() {
                                                         </div>
 
                                                         <div>
-                                                            <span className="text-[9px] uppercase font-mono tracking-widest text-zinc-500 block mb-1.5">
-                                                                Variety Specifications
+                                                            <span className="text-[10px] uppercase font-mono-code tracking-widest text-zinc-400 block mb-1.5">
+                                                                Specifications
                                                             </span>
                                                             <div className="flex flex-wrap gap-1.5">
                                                                 {attrEntries.length > 0 ? (
                                                                     attrEntries.map(([k, v], i) => (
                                                                         <span
                                                                             key={i}
-                                                                            className="text-[11px] font-mono bg-black border border-zinc-800 px-2.5 py-1 text-zinc-300"
+                                                                            className="text-[11px] font-mono-code bg-zinc-100 border border-zinc-200 rounded-full px-2.5 py-0.5 text-zinc-800"
                                                                         >
-                                                                            <span className="text-yellow-500 font-bold">{k}:</span> {v}
+                                                                            <span className="text-zinc-500 font-semibold">{k}:</span> {v}
                                                                         </span>
                                                                     ))
                                                                 ) : (
-                                                                    <span className="text-[11px] text-zinc-500 italic">No attributes defined</span>
+                                                                    <span className="text-[11px] text-zinc-400 italic">No attributes defined</span>
                                                                 )}
                                                             </div>
                                                         </div>
                                                     </div>
 
-                                                    <div className="pt-3 border-t border-zinc-900/80 space-y-3">
+                                                    <div className="pt-3 border-t border-zinc-100 space-y-3">
                                                         <div className="flex items-center justify-between">
                                                             <div>
-                                                                <span className="text-[9px] uppercase font-mono text-zinc-500 block mb-0.5">Availability</span>
-                                                                <span className={`text-[10px] font-mono font-bold uppercase px-2 py-0.5 border ${Number(varItem.stock) > 0
-                                                                    ? "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
-                                                                    : "text-red-400 bg-red-500/10 border-red-500/20"
-                                                                    }`}>
-                                                                    {Number(varItem.stock) > 0 ? `Available (${varItem.stock})` : "Not Available (Out of Stock)"}
+                                                                <span className="text-[9px] uppercase font-mono-code text-zinc-400 block mb-0.5">Availability</span>
+                                                                <span
+                                                                    className={`text-[10px] font-mono-code font-bold uppercase px-2.5 py-0.5 rounded-full border ${
+                                                                        Number(varItem.stock) > 0
+                                                                            ? "text-emerald-700 bg-emerald-50 border-emerald-200"
+                                                                            : "text-rose-700 bg-rose-50 border-rose-200"
+                                                                    }`}
+                                                                >
+                                                                    {Number(varItem.stock) > 0 ? `In Stock (${varItem.stock})` : "Out of Stock"}
                                                                 </span>
                                                             </div>
 
                                                             <div className="text-right">
-                                                                <span className="text-[9px] uppercase font-mono text-zinc-500 block mb-0.5">Pricing</span>
+                                                                <span className="text-[9px] uppercase font-mono-code text-zinc-400 block mb-0.5">Pricing</span>
                                                                 <div className="flex items-center gap-1.5 justify-end">
-                                                                    <span className="text-xs font-mono font-bold text-white">
+                                                                    <span className="text-xs font-mono-code font-bold text-zinc-950">
                                                                         {varPriceDisplay}
                                                                     </span>
                                                                     {!hasExplicitPrice && (
-                                                                        <span className="text-[8px] uppercase font-mono bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 px-1.5 py-0.5">
-                                                                            Inherited
+                                                                        <span className="text-[8px] uppercase font-mono-code bg-zinc-100 text-zinc-500 border border-zinc-200 px-1.5 py-0.5 rounded-full">
+                                                                            Base
                                                                         </span>
                                                                     )}
                                                                 </div>
                                                             </div>
                                                         </div>
 
-                                                        {/* Seller Quick Stock Adjuster */}
-                                                        <div className="flex items-center justify-between bg-black/60 border border-zinc-800 p-2">
-                                                            <span className="text-[9px] uppercase font-mono text-zinc-400">
-                                                                Quick Inventory:
+                                                        {/* Quick Stock Adjuster */}
+                                                        <div className="flex items-center justify-between bg-zinc-50 border border-zinc-200 rounded-xl p-2">
+                                                            <span className="text-[9px] uppercase font-mono-code text-zinc-500 font-semibold">
+                                                                Inventory:
                                                             </span>
                                                             <div className="flex items-center gap-1">
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleQuickUpdateStock(idx, Math.max(0, Number(varItem.stock || 0) - 1))}
-                                                                    className="w-6 h-6 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white font-mono text-xs flex items-center justify-center cursor-pointer"
+                                                                    className="w-6 h-6 bg-white border border-zinc-300 rounded-full text-zinc-700 hover:text-black hover:border-black font-mono-code text-xs flex items-center justify-center cursor-pointer"
                                                                     title="Decrease stock"
                                                                 >
                                                                     -
                                                                 </button>
-                                                                <span className="w-8 text-center text-xs font-mono font-bold text-white">
+                                                                <span className="w-8 text-center text-xs font-mono-code font-bold text-zinc-950">
                                                                     {varItem.stock || 0}
                                                                 </span>
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleQuickUpdateStock(idx, Number(varItem.stock || 0) + 1)}
-                                                                    className="w-6 h-6 bg-zinc-900 border border-zinc-800 text-zinc-300 hover:bg-zinc-800 hover:text-white font-mono text-xs flex items-center justify-center cursor-pointer"
+                                                                    className="w-6 h-6 bg-white border border-zinc-300 rounded-full text-zinc-700 hover:text-black hover:border-black font-mono-code text-xs flex items-center justify-center cursor-pointer"
                                                                     title="Increase stock"
                                                                 >
                                                                     +
@@ -1023,17 +1053,17 @@ export default function SellerProductModel() {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleQuickUpdateStock(idx, Number(varItem.stock) > 0 ? 0 : 10)}
-                                                                    className={`ml-2 text-[8px] uppercase font-mono px-2 py-1 border transition-all cursor-pointer ${Number(varItem.stock) > 0
-                                                                        ? "text-red-400 border-red-500/30 hover:bg-red-500/10"
-                                                                        : "text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/10"
-                                                                        }`}
+                                                                    className={`ml-2 text-[8px] uppercase font-mono-code px-2 py-0.5 rounded-full border transition-all cursor-pointer ${
+                                                                        Number(varItem.stock) > 0
+                                                                            ? "text-rose-700 border-rose-200 hover:bg-rose-50"
+                                                                            : "text-emerald-700 border-emerald-200 hover:bg-emerald-50"
+                                                                    }`}
                                                                 >
-                                                                    {Number(varItem.stock) > 0 ? "Mark Out of Stock" : "Mark In Stock"}
+                                                                    {Number(varItem.stock) > 0 ? "Set Out" : "Set In"}
                                                                 </button>
                                                             </div>
                                                         </div>
                                                     </div>
-
                                                 </div>
                                             );
                                         })}
@@ -1046,52 +1076,50 @@ export default function SellerProductModel() {
 
                 </div>
 
-                {/* ══════════════════════════════════════════════
-                    ADD NEW VARIETY MODAL (WITH FILE UPLOAD UP TO 7)
-                ══════════════════════════════════════════════ */}
+                {/* ─── ADD NEW VARIETY MODAL ──────────────────────────────────── */}
                 {showAddVariantModal && (
-                    <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-                        <div className="bg-[#0e0e0e] border border-zinc-800 w-full max-w-lg p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+                        <div className="bg-white border border-zinc-200 rounded-3xl w-full max-w-lg p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
 
-                            <div className="flex items-center justify-between border-b border-zinc-800 pb-4 sticky top-0 bg-[#0e0e0e] z-10">
+                            <div className="flex items-center justify-between border-b border-zinc-100 pb-4 sticky top-0 bg-white z-10">
                                 <div className="flex items-center gap-2">
-                                    <PlusIcon className="w-4 h-4 text-yellow-500" />
-                                    <h3 className="text-base font-black uppercase tracking-tight text-white">
+                                    <PlusIcon className="w-4 h-4 text-black" />
+                                    <h3 className="text-base font-black uppercase tracking-tight text-zinc-950 font-mono-code">
                                         Add New Product Variety
                                     </h3>
                                 </div>
                                 <button
+                                    type="button"
                                     onClick={() => setShowAddVariantModal(false)}
-                                    className="text-zinc-500 hover:text-white text-xs font-mono uppercase cursor-pointer"
+                                    className="w-8 h-8 rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-600 flex items-center justify-center transition-colors cursor-pointer text-xs"
                                 >
-                                    ✕ Close
+                                    ✕
                                 </button>
                             </div>
 
                             <form onSubmit={handleCreateVariant} className="space-y-5">
-
-                                {/* Fixed Product Variety Attributes Inputs */}
+                                {/* Variety Attributes Inputs */}
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <label className="text-xs uppercase font-mono text-zinc-400">
-                                            Variety Attributes Specification
+                                        <label className="text-xs uppercase font-mono-code text-zinc-600 font-semibold">
+                                            Variety Attributes
                                         </label>
-                                        <span className="text-[10px] font-mono text-zinc-500 uppercase">
-                                            Fixed Product Schema
+                                        <span className="text-[10px] font-mono-code text-zinc-400 uppercase">
+                                            Fixed Schema
                                         </span>
                                     </div>
 
                                     {newVarAttributes.map((attr, idx) => (
-                                        <div key={idx} className="flex items-center gap-3 bg-black border border-zinc-800 p-2.5">
-                                            <div className="w-1/3 bg-zinc-900 px-3 py-2 text-xs font-mono font-bold text-yellow-500 uppercase border border-zinc-800 truncate">
+                                        <div key={idx} className="flex items-center gap-3 bg-zinc-50 border border-zinc-200 rounded-xl p-2.5">
+                                            <div className="w-1/3 bg-white px-3 py-2 text-xs font-mono-code font-bold text-zinc-900 uppercase border border-zinc-200 rounded-lg truncate">
                                                 {attr.key}
                                             </div>
                                             <input
                                                 type="text"
-                                                placeholder={`Enter ${attr.key} (e.g., Navy Blue, XL)`}
+                                                placeholder={`Enter ${attr.key} (e.g. Olive, L)`}
                                                 value={attr.value}
                                                 onChange={(e) => handleAttributeChange(idx, "value", e.target.value)}
-                                                className="w-2/3 bg-[#0e0e0e] border border-zinc-800 px-3 py-2 text-xs text-white focus:border-yellow-500 focus:outline-none font-mono"
+                                                className="w-2/3 bg-white border border-zinc-200 rounded-lg px-3 py-2 text-xs text-zinc-900 focus:border-black focus:outline-none font-mono-code"
                                             />
                                         </div>
                                     ))}
@@ -1099,7 +1127,7 @@ export default function SellerProductModel() {
 
                                 {/* Stock Quantity */}
                                 <div>
-                                    <label className="block text-xs uppercase font-mono text-zinc-400 mb-1.5">
+                                    <label className="block text-xs uppercase font-mono-code text-zinc-600 mb-1.5 font-semibold">
                                         Stock Quantity
                                     </label>
                                     <input
@@ -1107,18 +1135,18 @@ export default function SellerProductModel() {
                                         min="0"
                                         value={newVarStock}
                                         onChange={(e) => setNewVarStock(e.target.value)}
-                                        className="w-full bg-black border border-zinc-800 px-3 py-2.5 text-xs text-white font-mono focus:border-yellow-500 focus:outline-none"
+                                        className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs text-zinc-900 font-mono-code focus:bg-white focus:border-black focus:outline-none"
                                     />
                                 </div>
 
                                 {/* Optional Price Override */}
                                 <div className="space-y-1">
                                     <div className="flex items-center justify-between">
-                                        <label className="block text-xs uppercase font-mono text-zinc-400">
-                                            Variant Price (Optional)
+                                        <label className="block text-xs uppercase font-mono-code text-zinc-600 font-semibold">
+                                            Variety Price (Optional)
                                         </label>
-                                        <span className="text-[9px] font-mono text-yellow-500">
-                                            Fallback to Base: {mainSymbol}{mainFormattedPrice}
+                                        <span className="text-[9px] font-mono-code text-zinc-400">
+                                            Base: {mainSymbol}{mainFormattedPrice}
                                         </span>
                                     </div>
                                     <div className="grid grid-cols-[1fr_auto] gap-2">
@@ -1127,12 +1155,12 @@ export default function SellerProductModel() {
                                             placeholder="Leave blank to inherit base price"
                                             value={newVarPriceAmount}
                                             onChange={(e) => setNewVarPriceAmount(e.target.value)}
-                                            className="w-full bg-black border border-zinc-800 px-3 py-2.5 text-xs text-white font-mono focus:border-yellow-500 focus:outline-none"
+                                            className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs text-zinc-900 font-mono-code focus:bg-white focus:border-black focus:outline-none"
                                         />
                                         <select
                                             value={newVarPriceCurrency}
                                             onChange={(e) => setNewVarPriceCurrency(e.target.value)}
-                                            className="bg-black border border-zinc-800 px-3 py-2.5 text-xs text-white font-mono focus:border-yellow-500 focus:outline-none"
+                                            className="bg-zinc-50 border border-zinc-200 rounded-xl px-3 py-2.5 text-xs text-zinc-900 font-mono-code focus:bg-white focus:border-black focus:outline-none"
                                         >
                                             <option value="INR">INR (₹)</option>
                                             <option value="USD">USD ($)</option>
@@ -1143,13 +1171,13 @@ export default function SellerProductModel() {
                                     </div>
                                 </div>
 
-                                {/* Variety Image Files Upload (Up to 7) */}
+                                {/* Variety Image Upload */}
                                 <div className="space-y-2">
                                     <div className="flex items-center justify-between">
-                                        <label className="block text-xs uppercase font-mono text-zinc-400">
-                                            Variety Image Files (Up to 7)
+                                        <label className="block text-xs uppercase font-mono-code text-zinc-600 font-semibold">
+                                            Variety Images (Up to 7)
                                         </label>
-                                        <span className="text-[10px] font-mono text-zinc-500">
+                                        <span className="text-[10px] font-mono-code text-zinc-400">
                                             {newVarImageFiles.length} / 7
                                         </span>
                                     </div>
@@ -1161,7 +1189,7 @@ export default function SellerProductModel() {
                                             e.preventDefault();
                                             if (e.dataTransfer.files) handleAddVariantImageFiles(e.dataTransfer.files);
                                         }}
-                                        className="border border-dashed border-zinc-800 hover:border-yellow-500/50 bg-black/50 p-4 text-center cursor-pointer transition-all rounded-sm flex flex-col items-center justify-center space-y-1"
+                                        className="border-2 border-dashed border-zinc-200 hover:border-black bg-zinc-50 p-4 text-center cursor-pointer transition-all rounded-2xl flex flex-col items-center justify-center space-y-1"
                                     >
                                         <input
                                             ref={variantFileInputRef}
@@ -1171,20 +1199,20 @@ export default function SellerProductModel() {
                                             onChange={(e) => handleAddVariantImageFiles(e.target.files)}
                                             className="hidden"
                                         />
-                                        <UploadIcon className="w-5 h-5 text-zinc-500" />
-                                        <p className="text-xs text-zinc-300 font-medium">Click or Drag &amp; Drop Variety Image Files</p>
-                                        <p className="text-[9px] font-mono text-zinc-600 uppercase">Select up to 7 images</p>
+                                        <UploadIcon className="w-5 h-5 text-zinc-400" />
+                                        <p className="text-xs text-zinc-800 font-semibold">Click or Drag &amp; Drop Variety Images</p>
+                                        <p className="text-[9px] font-mono-code text-zinc-400 uppercase">Select up to 7 photos</p>
                                     </div>
 
                                     {newVarImageFiles.length > 0 && (
                                         <div className="grid grid-cols-5 gap-2 pt-1">
-                                            {newVarImageFiles.map(img => (
-                                                <div key={img.id} className="relative aspect-square border border-yellow-500/40 bg-black group overflow-hidden">
+                                            {newVarImageFiles.map((img) => (
+                                                <div key={img.id} className="relative aspect-square border-2 border-black bg-zinc-100 rounded-xl group overflow-hidden">
                                                     <img src={img.url} alt="" className="w-full h-full object-cover" />
                                                     <button
                                                         type="button"
                                                         onClick={() => handleRemoveVariantImageFile(img.id)}
-                                                        className="absolute top-1 right-1 bg-black/80 text-zinc-400 hover:text-red-400 p-1 opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                                                        className="absolute top-1 right-1 bg-white/90 text-zinc-700 hover:text-rose-600 p-1 rounded-full shadow-xs cursor-pointer"
                                                     >
                                                         <XIcon className="w-3 h-3" />
                                                     </button>
@@ -1194,27 +1222,42 @@ export default function SellerProductModel() {
                                     )}
                                 </div>
 
-                                <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-800">
+                                <div className="flex items-center justify-end gap-3 pt-3 border-t border-zinc-100">
                                     <button
                                         type="button"
                                         onClick={() => setShowAddVariantModal(false)}
-                                        className="px-4 py-2 border border-zinc-800 text-zinc-400 hover:text-white text-xs font-mono uppercase cursor-pointer"
+                                        className="px-5 py-2.5 border border-zinc-300 hover:border-black text-zinc-700 text-xs font-mono-code uppercase rounded-full cursor-pointer transition-colors"
                                     >
                                         Cancel
                                     </button>
                                     <button
                                         type="submit"
                                         disabled={saving}
-                                        className="px-5 py-2 bg-yellow-500 hover:bg-yellow-400 text-black font-bold text-xs uppercase tracking-wider transition-all disabled:opacity-50 cursor-pointer"
+                                        className="px-6 py-2.5 bg-black hover:bg-zinc-800 text-white font-bold text-xs uppercase tracking-widest rounded-full transition-all disabled:opacity-50 cursor-pointer shadow-md font-mono-code"
                                     >
-                                        {saving ? "Saving Variety..." : "Save Variety"}
+                                        {saving ? "Saving..." : "Save Variety"}
                                     </button>
                                 </div>
-
                             </form>
+
                         </div>
                     </div>
                 )}
+
+                {/* ─── Snitch Store Footer (Matching Home.jsx) ────────────────── */}
+                <footer className="mt-16 border-t border-zinc-200 bg-white py-10 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-2 font-mono-code">
+                    <div className="flex items-center justify-center gap-2">
+                        <span className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold text-black">
+                            S
+                        </span>
+                        <span className="font-bold text-zinc-900 tracking-widest uppercase">
+                            SNITCH STUDIO
+                        </span>
+                    </div>
+                    <p className="text-[11px] text-zinc-400">
+                        Seller dashboard for independent fashion creators and verified streetwear brands.
+                    </p>
+                </footer>
 
             </main>
         </>

@@ -1,5 +1,5 @@
-import { addItem, setLoading, setItem } from "../state/cart.slice";
-import { addItemToCart, getCart } from "../service/cart.api";
+import { setLoading, setItem, incrementCartItem, decrementCartItem } from "../state/cart.slice";
+import { addItemToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity } from "../service/cart.api";
 import { useDispatch, useSelector } from "react-redux";
 
 export const useChat = () => {
@@ -34,7 +34,28 @@ export const useChat = () => {
         }
     }
 
-    return { handleAddToItem, handleGetCart, cartItems, cartLoading };
+    async function handleIncreamentQuantity({ productId, variantId }) {
+        const data = await IncrementItemCartQuantity({ productId, variantId });
+        dispatch(incrementCartItem({ productId, variantId }));
+        return data;
+    }
+
+    async function handleDecrementQuantity({ productId, variantId }) {
+        const data = await DecrementItemCartQuantity({ productId, variantId });
+        dispatch(decrementCartItem({ productId, variantId }));
+        return data;
+    }
+
+    return {
+        handleAddToItem,
+        handleGetCart,
+        handleIncreamentQuantity,
+        handleIncrementQuantity: handleIncreamentQuantity,
+        handleDecrementQuantity,
+        handleDecreamentQuantity: handleDecrementQuantity,
+        cartItems,
+        cartLoading,
+    };
 };
 
 export const useCart = useChat;

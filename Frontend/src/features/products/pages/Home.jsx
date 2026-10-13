@@ -689,95 +689,6 @@ export default function Home() {
             <main className="min-h-screen w-full bg-[#fcfcfd] text-zinc-900 selection:bg-black selection:text-white">
 
                 {/* ══════════════════════════════════════════════════════════
-                    1. TOP NAVIGATION BAR (As depicted in mockup header)
-                    [ (O) Snitch ] -------- [ Search ] -------- [ (C) ]
-                ══════════════════════════════════════════════════════════ */}
-                <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-zinc-200">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
-
-                        {/* LEFT: Snitch Brand Pill Logo */}
-                        <Link
-                            to="/"
-                            className="flex items-center gap-2 group flex-shrink-0 cursor-pointer"
-                        >
-                            <span className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center font-black text-sm text-black group-hover:bg-black group-hover:text-white transition-all shadow-sm">
-                                S
-                            </span>
-                            <span className="font-extrabold text-[15px] tracking-[0.25em] uppercase text-black font-mono-code">
-                                SNITCH
-                            </span>
-                        </Link>
-
-                        {/* CENTER: Rounded Search Bar (Mockup Search Box) */}
-                        <div className="flex-1 max-w-md mx-2 sm:mx-6">
-                            <div className="relative flex items-center">
-                                <SearchIcon className="absolute left-3.5 text-zinc-400 w-4 h-4 pointer-events-none" />
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Search"
-                                    className="w-full h-10 pl-10 pr-9 bg-[#f4f4f5] hover:bg-[#ebebed] focus:bg-white border border-zinc-300 focus:border-black rounded-full text-xs sm:text-sm text-zinc-900 placeholder:text-zinc-500 focus:outline-none transition-all"
-                                />
-                                {searchTerm && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setSearchTerm("")}
-                                        className="absolute right-3 text-zinc-400 hover:text-black p-1 cursor-pointer"
-                                    >
-                                        <XIcon className="w-3.5 h-3.5" />
-                                    </button>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* RIGHT: Cart / Bag Circle Button (Mockup 'C' Icon) + Seller/User Links */}
-                        <div className="flex items-center gap-3 flex-shrink-0">
-                            {user && user.role === "seller" && (
-                                <Link
-                                    to="/seller/dashboard"
-                                    className="hidden sm:inline-flex items-center text-[11px] font-bold uppercase tracking-wider text-black hover:bg-black hover:text-white border border-black px-3 py-1.5 rounded-full transition-colors font-mono-code"
-                                >
-                                    Dashboard
-                                </Link>
-                            )}
-
-                            {/* Cart Circle Badge (Matches 'C' circle in mockup wireframe) */}
-                            <Link
-                                to="/cart"
-                                title="Shopping Bag"
-                                className="relative w-9 h-9 rounded-full border border-zinc-300 hover:border-black flex items-center justify-center bg-white hover:bg-zinc-50 transition-all cursor-pointer shadow-xs"
-                            >
-                                <BagIcon className="w-4 h-4 text-zinc-800" />
-                                {cartItems.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] bg-black text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1 font-mono-code">
-                                        {cartItems.length}
-                                    </span>
-                                )}
-                            </Link>
-
-                            {/* User Profile avatar or initials */}
-                            {user ? (
-                                <div
-                                    title={user.email}
-                                    className="w-8 h-8 rounded-full bg-zinc-900 text-white text-xs font-bold flex items-center justify-center font-mono-code uppercase"
-                                >
-                                    {user.email?.charAt(0) || "U"}
-                                </div>
-                            ) : (
-                                <Link
-                                    to="/login"
-                                    className="text-xs font-semibold text-zinc-700 hover:text-black uppercase tracking-wider"
-                                >
-                                    Login
-                                </Link>
-                            )}
-                        </div>
-
-                    </div>
-                </header>
-
-                {/* ══════════════════════════════════════════════════════════
                     2. MAIN CONTAINER: Exact Mockup Layout Hierarchy
                     - Ads with images (Carousel Banner with 5 dots)
                     - Capsule Category Pills (Shirt, Pants, Girls clothes)
@@ -785,7 +696,7 @@ export default function Home() {
                     - Girls Category Grid (SHIRTS, TROUSERS, T-SHIRTS, JEANS, CARGOS)
                     - Product Catalog Grid (Tall cards, Heart, +, Title, Price)
                 ══════════════════════════════════════════════════════════ */}
-                <div className="max-w-7xl mx-auto px-4 sm:px-8 py-6 space-y-10">
+                <div className="max-w-screen mx-auto px-4 sm:px-8 py-6 space-y-10">
 
                     {/* ──────────────────────────────────────────────────────────
                         SECTION A: "Ads with images" (Hero Banner Carousel)
