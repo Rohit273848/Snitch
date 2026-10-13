@@ -1,8 +1,6 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { useChat } from "../hook/useChat.js";
-import { setItem } from "../state/cart.slice.js";
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
 function FontLoader() {
@@ -109,16 +107,15 @@ function CheckIcon({ className = "w-4 h-4" }) {
 
 // ─── Main Cart Page Component ─────────────────────────────────────────────────
 export default function CartPage() {
-
-    const dispatch = useDispatch();
     
-    const { handleGetCart, handleIncreamentQuantity, handleDecrementQuantity, cartItems, cartLoading } = useChat();
+    const { handleGetCart, handleIncreamentQuantity, handleDecrementQuantity, handleDeleteCartItem, cartItems, cartLoading } = useChat();
 
     const [error, setError] = useState(null);
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState(null);
     const [couponError, setCouponError] = useState("");
     const [updatingItemId, setUpdatingItemId] = useState(null);
+    const [deletingItemId, setDeletingItemId] = useState(null);
 
     useEffect(() => {
         handleGetCart().catch((err) => {
@@ -218,10 +215,30 @@ export default function CartPage() {
         }
     };
 
-    // Remove single item from cart state
-    const handleRemoveItem = (itemIndex) => {
-        const updated = items.filter((_, idx) => idx !== itemIndex);
-        dispatch(setItem(updated));
+    // Remove single item from cart via API
+    const handleRemoveItem = async (item, itemIndex) => {
+        const product = item.product || {};
+        const productId = product._id || (typeof item.product === "string" ? item.product : item.productId);
+        const variantId = item.variant?._id || (typeof item.variant === "string" ? item.variant : item.variantId);
+        const itemId = item._id;
+
+        const activeId = itemId || (variantId ? `${productId}-${variantId}` : productId) || itemIndex;
+        setDeletingItemId(activeId);
+        setError(null);
+
+        try {
+            await handleDeleteCartItem({
+                productId,
+                variantId,
+                itemId,
+                itemIndex,
+            });
+        } catch (err) {
+            console.error("Failed to delete item from cart:", err);
+            setError(err?.response?.data?.message || "Failed to remove item from bag");
+        } finally {
+            setDeletingItemId(null);
+        }
     };
 
     return (
@@ -469,14 +486,29 @@ export default function CartPage() {
                                                             </div>
 
                                                             {/* Remove Item Button */}
-                                                            <button
-                                                                type="button"
-                                                                onClick={() => handleRemoveItem(index)}
-                                                                className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer"
-                                                                title="Remove from bag"
-                                                            >
-                                                                <TrashIcon className="w-4 h-4" />
-                                                            </button>
+                                                            {(() => {
+                                                                const pId = product._id || (typeof item.product === "string" ? item.product : item.productId);
+                                                                const vId = item.variant?._id || (typeof item.variant === "string" ? item.variant : item.variantId);
+                                                                const itemActiveId = item._id || (vId ? `${pId}-${vId}` : pId) || index;
+                                                                const isDeleting = deletingItemId === itemActiveId;
+
+                                                                return (
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleRemoveItem(item, index)}
+                                                                        disabled={isDeleting || updatingItemId === (item._id || pId)}
+                                                                        className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                        title="Remove from bag"
+                                                                        aria-label="Remove item from bag"
+                                                                    >
+                                                                        {isDeleting ? (
+                                                                            <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                                                                        ) : (
+                                                                            <TrashIcon className="w-4 h-4" />
+                                                                        )}
+                                                                    </button>
+                                                                );
+                                                            })()}
                                                         </div>
 
                                                         {/* Variety Attributes (Color, Size) */}
@@ -510,8 +542,8 @@ export default function CartPage() {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleDecreaseQuantity(item)}
-                                                                    disabled={updatingItemId === (item._id || product._id)}
-                                                                    className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50"
+                                                                    disabled={updatingItemId === (item._id || product._id) || Boolean(deletingItemId)}
+                                                                    className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                                     title="Decrease quantity"
                                                                 >
                                                                     <MinusIcon className="w-3.5 h-3.5" />
@@ -522,8 +554,8 @@ export default function CartPage() {
                                                                 <button
                                                                     type="button"
                                                                     onClick={() => handleIncreaseQuantity(item)}
-                                                                    disabled={updatingItemId === (item._id || product._id)}
-                                                                    className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50"
+                                                                    disabled={updatingItemId === (item._id || product._id) || Boolean(deletingItemId)}
+                                                                    className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
                                                                     title="Increase quantity"
                                                                 >
                                                                     <PlusIcon className="w-3.5 h-3.5" />

@@ -872,10 +872,7 @@ export default function CreateProduct() {
                   return (
                     <div
                       key={vIdx}
-                      className={`p-4 rounded-2xl border transition-all space-y-3 ${
-                        isDuplicate
-                          ? "border-rose-300 bg-rose-50/50"
-                          : "border-zinc-200 bg-zinc-50/50 hover:border-zinc-300"
+                      className={`p-4 rounded-2xl border transition-all space-y-3 ${ "border-zinc-200 bg-zinc-50/50 hover:border-zinc-300"
                       }`}
                     >
                       <div className="flex items-center justify-between">
@@ -883,11 +880,7 @@ export default function CreateProduct() {
                           <span className="text-xs font-mono-code font-bold uppercase text-zinc-900">
                             Variety #{vIdx + 1}
                           </span>
-                          {isDuplicate && (
-                            <span className="text-[9px] font-mono-code uppercase bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full font-bold">
-                              Duplicate
-                            </span>
-                          )}
+                          
                         </div>
 
                         <div className="flex items-center gap-3">

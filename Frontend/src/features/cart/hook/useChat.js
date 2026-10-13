@@ -1,5 +1,5 @@
-import { setLoading, setItem, incrementCartItem, decrementCartItem } from "../state/cart.slice";
-import { addItemToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity } from "../service/cart.api";
+import { setLoading, setItem, incrementCartItem, decrementCartItem, removeCartItem } from "../state/cart.slice";
+import { addItemToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity, removeCartItem as removeCartItemApi } from "../service/cart.api";
 import { useDispatch, useSelector } from "react-redux";
 
 export const useChat = () => {
@@ -46,6 +46,16 @@ export const useChat = () => {
         return data;
     }
 
+    async function handleDeleteCartItem({ productId, variantId, itemId, itemIndex }) {
+        const data = await removeCartItemApi({ productId, variantId, itemId });
+        if (data?.cart?.items) {
+            dispatch(setItem(data.cart.items));
+        } else {
+            dispatch(removeCartItem({ productId, variantId, itemId }));
+        }
+        return data;
+    }
+
     return {
         handleAddToItem,
         handleGetCart,
@@ -53,6 +63,9 @@ export const useChat = () => {
         handleIncrementQuantity: handleIncreamentQuantity,
         handleDecrementQuantity,
         handleDecreamentQuantity: handleDecrementQuantity,
+        handleDeleteCartItem,
+        handleRemoveCartItem: handleDeleteCartItem,
+        handleRemoveItem: handleDeleteCartItem,
         cartItems,
         cartLoading,
     };

@@ -33,3 +33,24 @@ export async function DecrementItemCartQuantity({ productId, variantId }) {
     const response = await cartApiInstance.post(url);
     return response.data;
 }
+
+export async function removeCartItem({ productId, variantId, itemId }) {
+    let url;
+    if (productId && variantId) {
+        url = `/remove/${productId}/${variantId}`;
+    } else if (productId) {
+        url = `/remove/${productId}`;
+    } else if (itemId) {
+        url = `/item-id/${itemId}`;
+    } else {
+        throw new Error("Product ID or Item ID is required to remove cart item");
+    }
+
+    const response = await cartApiInstance.delete(url, {
+        params: { itemId },
+        data: { productId, variantId, itemId }
+    });
+    return response.data;
+}
+
+export const deleteCartItem = removeCartItem;

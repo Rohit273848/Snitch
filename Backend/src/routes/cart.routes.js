@@ -1,8 +1,8 @@
 import { Router } from "express";
-import { validateAddToCart, validateIncrementCartItemQuantity, validateDecrementCartItemQuantity } from "../validator/cart.validator.js";
+import { validateAddToCart, validateIncrementCartItemQuantity, validateDecrementCartItemQuantity, validateRemoveCartItem } from "../validator/cart.validator.js";
 import { validate } from "../middleweres/validate.js";
 import { authenticateUser } from "../middleweres/auth.middleweres.js";
-import { addToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity } from "../controllers/cart.controller.js";
+import { addToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity, removeCartItem } from "../controllers/cart.controller.js";
 
 const router = Router();
 
@@ -21,5 +21,16 @@ router.post("/quantity/decrement/:productId/:variantId", authenticateUser, valid
 router.post("/quantity/decrement/:productId", authenticateUser, validateDecrementCartItemQuantity, validate, DecrementItemCartQuantity);
 router.patch("/quantity/decrement/:productId/:variantId", authenticateUser, validateDecrementCartItemQuantity, validate, DecrementItemCartQuantity);
 router.patch("/quantity/decrement/:productId", authenticateUser, validateDecrementCartItemQuantity, validate, DecrementItemCartQuantity);
+
+// Remove / Delete item routes
+router.delete("/remove/:productId/:variantId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.delete("/remove/:productId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.delete("/item/:productId/:variantId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.delete("/item/:productId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.delete("/item-id/:itemId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.post("/remove/:productId/:variantId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.post("/remove/:productId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.delete("/:productId/:variantId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+router.delete("/:productId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
 
 export default router;
