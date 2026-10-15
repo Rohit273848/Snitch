@@ -24,21 +24,38 @@ export default function PaymentStep({
     currencySymbol = "₹",
     onBackToAddress,
     onPlaceOrder,
+    isProcessing: externalProcessing = false,
+    paymentResult = null,
 }) {
     const [selectedMethod, setSelectedMethod] = useState("upi");
-    const [isProcessing, setIsProcessing] = useState(false);
+    const [localProcessing, setLocalProcessing] = useState(false);
     const [isSuccess, setIsSuccess] = useState(false);
 
-    const handlePay = () => {
-        setIsProcessing(true);
-        setTimeout(() => {
-            setIsProcessing(false);
-            setIsSuccess(true);
-            if (onPlaceOrder) onPlaceOrder();
-        }, 1200);
+    const isConfirmed = isSuccess || Boolean(paymentResult);
+    const processing = localProcessing || externalProcessing;
+
+    const handlePay = async () => {
+        if (selectedMethod === "cod") {
+            setLocalProcessing(true);
+            setTimeout(() => {
+                setLocalProcessing(false);
+                setIsSuccess(true);
+            }, 1000);
+            return;
+        }
+
+        if (onPlaceOrder) {
+            await onPlaceOrder({ method: selectedMethod });
+        } else {
+            setLocalProcessing(true);
+            setTimeout(() => {
+                setLocalProcessing(false);
+                setIsSuccess(true);
+            }, 1200);
+        }
     };
 
-    if (isSuccess) {
+    if (isConfirmed) {
         return (
             <div className="bg-white border border-zinc-200 rounded-3xl p-10 sm:p-14 text-center space-y-6 shadow-xs animate-in zoom-in-95">
                 <div className="w-20 h-20 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600">
@@ -56,15 +73,42 @@ export default function PaymentStep({
                         {selectedAddress?.city}, {selectedAddress?.state} - {selectedAddress?.pincode}.
                     </p>
                 </div>
-                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 max-w-sm mx-auto text-left text-xs font-mono-code space-y-1">
+                <div className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 max-w-sm mx-auto text-left text-xs font-mono-code space-y-1.5">
                     <div className="flex justify-between text-zinc-500">
                         <span>Payment Method:</span>
-                        <span className="font-bold text-zinc-900 uppercase">{selectedMethod}</span>
+                        <span className="font-bold text-zinc-900 uppercase">
+                            {paymentResult ? "Online (Razorpay)" : selectedMethod}
+                        </span>
                     </div>
-                    <div className="flex justify-between text-zinc-500">
+                    {paymentResult?.paymentId && (
+                        <div className="flex justify-between text-zinc-500">
+                            <span>Payment ID:</span>
+                            <span className="font-bold text-zinc-900 text-[11px] font-mono truncate max-w-[170px]">
+                                {paymentResult.paymentId}
+                            </span>
+                        </div>
+                    )}
+                    {paymentResult?.orderId && (
+                        <div className="flex justify-between text-zinc-500">
+                            <span>Order ID:</span>
+                            <span className="font-bold text-zinc-900 text-[11px] font-mono truncate max-w-[170px]">
+                                {paymentResult.orderId}
+                            </span>
+                        </div>
+                    )}
+                    <div className="flex justify-between text-zinc-500 pt-1 border-t border-zinc-200">
                         <span>Total Paid:</span>
                         <span className="font-bold text-zinc-900">{currencySymbol}{totalPrice.toLocaleString("en-IN")}</span>
                     </div>
+                </div>
+                <div className="pt-2">
+                    <a
+                        href="/"
+                        className="inline-flex items-center gap-2 px-8 py-3.5 bg-black hover:bg-zinc-800 text-white rounded-full text-xs font-black uppercase tracking-wider transition-all shadow-md hover:shadow-lg font-mono-code"
+                    >
+                        <span>Continue Shopping</span>
+                        <span>→</span>
+                    </a>
                 </div>
             </div>
         );
@@ -165,10 +209,10 @@ export default function PaymentStep({
                 <button
                     type="button"
                     onClick={handlePay}
-                    disabled={isProcessing}
+                    disabled={processing}
                     className="inline-flex items-center gap-2 px-8 py-3.5 bg-black hover:bg-zinc-800 text-white rounded-full text-xs font-black uppercase tracking-wider transition-all shadow-md hover:shadow-lg disabled:opacity-50 cursor-pointer"
                 >
-                    {isProcessing ? (
+                    {processing ? (
                         <>
                             <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                             <span>Processing Payment...</span>

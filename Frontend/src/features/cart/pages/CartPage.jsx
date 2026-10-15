@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 import { useChat } from "../hook/useChat.js";
 import AddressStep from "../components/AddressStep.jsx";
 import PaymentStep from "../components/PaymentStep.jsx";
+import { useRazorpay } from "react-razorpay";
+import { useSelector } from "react-redux";
+
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
 function FontLoader() {
@@ -118,7 +121,7 @@ function CheckIcon({ className = "w-4 h-4" }) {
 
 // ─── Main Cart Page Component ─────────────────────────────────────────────────
 export default function CartPage() {
-    
+
     const {
         handleGetCart,
         handleIncreamentQuantity,
@@ -130,6 +133,7 @@ export default function CartPage() {
         handleDeleteAddress,
         handleSelectAddress,
         setStep,
+        handleCreateCartOrder,
         cartItems,
         cartLoading,
         cartTotalPrice,
@@ -145,6 +149,8 @@ export default function CartPage() {
     const [couponError, setCouponError] = useState("");
     const [updatingItemId, setUpdatingItemId] = useState(null);
     const [deletingItemId, setDeletingItemId] = useState(null);
+    const [isCheckingOut, setIsCheckingOut] = useState(false);
+    const [paymentResult, setPaymentResult] = useState(null);
 
     useEffect(() => {
         handleGetCart().catch((err) => {
@@ -154,6 +160,10 @@ export default function CartPage() {
             console.error("Failed to load addresses", err);
         });
     }, []);
+
+    const user = useSelector(state => state.auth?.user || state.user);
+
+    const { error: razorpayLoadError, isLoading: isRazorpayLoading, Razorpay } = useRazorpay();
 
     // Safe array of items
     const items = Array.isArray(cartItems) ? cartItems : [];
@@ -276,6 +286,97 @@ export default function CartPage() {
         }
     };
 
+    async function handleCheckout(extraOpts = {}) {
+        if (isCheckingOut) return;
+
+        // 1. Pre-validation checks
+        if (!items || items.length === 0) {
+            setError("Your shopping bag is empty.");
+            setStep(1);
+            return;
+        }
+
+        if (!shippingAddress) {
+            setError("Please select or add a delivery address to proceed.");
+            setStep(2);
+            return;
+        }
+
+        if (!Razorpay) {
+            setError("Payment gateway is initializing. Please wait a moment and try again.");
+            return;
+        }
+
+        setIsCheckingOut(true);
+        setError(null);
+
+        try {
+            // 2. Create Razorpay order on backend
+            const order = await handleCreateCartOrder({
+                amount: finalTotal,
+                currency: cartCurrency || "INR",
+            });
+
+            if (!order || !order.id) {
+                throw new Error("Unable to create payment order. Please try again.");
+            }
+
+            console.log("Created Razorpay Order:", order);
+
+            // 3. Configure Razorpay checkout options
+            const rzpKey = order.key || import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_ToIKmjCL74Px1s";
+            const orderAmountInPaise = order.amount || Math.round(Number(finalTotal) * 100);
+
+            const options = {
+                key: rzpKey,
+                amount: orderAmountInPaise,
+                currency: order.currency || cartCurrency || "INR",
+                name: "Snitch",
+                description: `Payment for Order #${order.id}`,
+                order_id: order.id,
+                prefill: {
+                    name: user?.fullname || shippingAddress?.fullName || "",
+                    email: user?.email || "",
+                    contact: user?.contact || shippingAddress?.phone || "",
+                },
+                theme: {
+                    color: "#000000",
+                },
+                modal: {
+                    ondismiss: () => {
+                        setIsCheckingOut(false);
+                        console.log("Razorpay checkout modal closed by user");
+                    },
+                    escape: true,
+                    backdropclose: false,
+                },
+                handler: (response) => {
+                    console.log("Payment successful:", response);
+                    setPaymentResult({
+                        paymentId: response.razorpay_payment_id,
+                        orderId: response.razorpay_order_id,
+                        signature: response.razorpay_signature,
+                    });
+                    setIsCheckingOut(false);
+                    setStep(3);
+                },
+            };
+
+            const razorpayInstance = new Razorpay(options);
+
+            razorpayInstance.on("payment.failed", (failedResponse) => {
+                console.error("Payment failed:", failedResponse.error);
+                setError(failedResponse.error?.description || "Payment failed or was canceled. Please try again.");
+                setIsCheckingOut(false);
+            });
+
+            razorpayInstance.open();
+        } catch (err) {
+            console.error("Failed to initiate payment:", err);
+            setError(err?.response?.data?.message || err.message || "Failed to initiate payment. Please try again.");
+            setIsCheckingOut(false);
+        }
+    }
     return (
         <>
             <FontLoader />
@@ -340,11 +441,10 @@ export default function CartPage() {
                             <button
                                 type="button"
                                 onClick={() => setStep(1)}
-                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
-                                    currentStep === 1
-                                        ? "bg-black text-white shadow-xs"
-                                        : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
-                                }`}
+                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${currentStep === 1
+                                    ? "bg-black text-white shadow-xs"
+                                    : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                                    }`}
                             >
                                 1. Bag ({totalQuantity})
                             </button>
@@ -353,13 +453,12 @@ export default function CartPage() {
                                 type="button"
                                 onClick={() => items.length > 0 && setStep(2)}
                                 disabled={items.length === 0}
-                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                                    currentStep === 2
-                                        ? "bg-black text-white shadow-xs"
-                                        : shippingAddress
+                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${currentStep === 2
+                                    ? "bg-black text-white shadow-xs"
+                                    : shippingAddress
                                         ? "bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100"
                                         : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
-                                }`}
+                                    }`}
                             >
                                 2. Address {shippingAddress && "✓"}
                             </button>
@@ -368,11 +467,10 @@ export default function CartPage() {
                                 type="button"
                                 onClick={() => items.length > 0 && shippingAddress && setStep(3)}
                                 disabled={items.length === 0 || !shippingAddress}
-                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
-                                    currentStep === 3
-                                        ? "bg-black text-white shadow-xs"
-                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
-                                }`}
+                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${currentStep === 3
+                                    ? "bg-black text-white shadow-xs"
+                                    : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                                    }`}
                             >
                                 3. Payment
                             </button>
@@ -507,236 +605,238 @@ export default function CartPage() {
                                             </span>
                                         </div>
 
-                                {/* Items List Cards */}
-                                <div className="space-y-3">
-                                    {items.map((item, index) => {
-                                        const product = item.product || {};
+                                        {/* Items List Cards */}
+                                        <div className="space-y-3">
+                                            {items.map((item, index) => {
+                                                const product = item.product || {};
 
-                                        // Find variant if ID exists (prioritize pre-populated variant from aggregation)
-                                        const variant =
-                                            (typeof item.variant === "object" && item.variant !== null)
-                                                ? item.variant
-                                                : product.variants?.find((v) => String(v._id) === String(item.variant)) || null;
+                                                // Find variant if ID exists (prioritize pre-populated variant from aggregation)
+                                                const variant =
+                                                    (typeof item.variant === "object" && item.variant !== null)
+                                                        ? item.variant
+                                                        : product.variants?.find((v) => String(v._id) === String(item.variant)) || null;
 
-                                        // Resolve image
-                                        const coverImg =
-                                            variant?.images?.[0]?.url ||
-                                            variant?.images?.[0] ||
-                                            product.images?.find((img) => img?.isCover)?.url ||
-                                            product.images?.[0]?.url ||
-                                            product.images?.[0] ||
-                                            "";
+                                                // Resolve image
+                                                const coverImg =
+                                                    variant?.images?.[0]?.url ||
+                                                    variant?.images?.[0] ||
+                                                    product.images?.find((img) => img?.isCover)?.url ||
+                                                    product.images?.[0]?.url ||
+                                                    product.images?.[0] ||
+                                                    "";
 
-                                        // Pricing (use precalculated unitPrice and itemTotal from backend aggregate, fallback to live prices)
-                                        const itemPrice = Number(
-                                            item.unitPrice ?? variant?.price?.amount ?? product.price?.amount ?? item.price?.amount ?? 0
-                                        );
-                                        const itemCurrency =
-                                            item.currency || item.price?.currency || product.price?.currency || "INR";
-                                        const itemSymbol = currencySymbol[itemCurrency] || "₹";
-                                        const qty = Number(item.quantity || 1);
-                                        const lineTotal = Number(item.itemTotal ?? (itemPrice * qty));
+                                                // Pricing (use precalculated unitPrice and itemTotal from backend aggregate, fallback to live prices)
+                                                const itemPrice = Number(
+                                                    item.unitPrice ?? variant?.price?.amount ?? product.price?.amount ?? item.price?.amount ?? 0
+                                                );
+                                                const itemCurrency =
+                                                    item.currency || item.price?.currency || product.price?.currency || "INR";
+                                                const itemSymbol = currencySymbol[itemCurrency] || "₹";
+                                                const qty = Number(item.quantity || 1);
+                                                const lineTotal = Number(item.itemTotal ?? (itemPrice * qty));
 
-                                        // Variant attributes
-                                        const attributesObj = variant?.attributes || {};
-                                        let attrEntries = [];
-                                        if (attributesObj instanceof Map) {
-                                            attrEntries = Array.from(attributesObj.entries());
-                                        } else if (typeof attributesObj === "object") {
-                                            attrEntries = Object.entries(attributesObj);
-                                        }
+                                                // Variant attributes
+                                                const attributesObj = variant?.attributes || {};
+                                                let attrEntries = [];
+                                                if (attributesObj instanceof Map) {
+                                                    attrEntries = Array.from(attributesObj.entries());
+                                                } else if (typeof attributesObj === "object") {
+                                                    attrEntries = Object.entries(attributesObj);
+                                                }
 
-                                        return (
-                                            <div
-                                                key={item._id || `${product._id}-${index}`}
-                                                className="group bg-white border border-zinc-200 hover:border-zinc-300 rounded-2xl p-4 sm:p-5 transition-all shadow-xs flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
-                                            >
-                                                {/* Product Image Thumbnail */}
-                                                <Link
-                                                    to={product._id ? `/product/${product._id}` : "#"}
-                                                    className="w-24 sm:w-28 aspect-[3/4] rounded-xl overflow-hidden bg-[#f4f4f5] border border-zinc-100 flex-shrink-0 relative cursor-pointer"
-                                                >
-                                                    {coverImg ? (
-                                                        <img
-                                                            src={coverImg}
-                                                            alt={product.title || "Product"}
-                                                            className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
-                                                        />
-                                                    ) : (
-                                                        <div className="w-full h-full flex items-center justify-center text-zinc-400">
-                                                            <BagIcon className="w-6 h-6" />
-                                                        </div>
-                                                    )}
-                                                </Link>
+                                                return (
+                                                    <div
+                                                        key={item._id || `${product._id}-${index}`}
+                                                        className="group bg-white border border-zinc-200 hover:border-zinc-300 rounded-2xl p-4 sm:p-5 transition-all shadow-xs flex flex-col sm:flex-row gap-4 sm:gap-6 items-start"
+                                                    >
+                                                        {/* Product Image Thumbnail */}
+                                                        <Link
+                                                            to={product._id ? `/product/${product._id}` : "#"}
+                                                            className="w-24 sm:w-28 aspect-[3/4] rounded-xl overflow-hidden bg-[#f4f4f5] border border-zinc-100 flex-shrink-0 relative cursor-pointer"
+                                                        >
+                                                            {coverImg ? (
+                                                                <img
+                                                                    src={coverImg}
+                                                                    alt={product.title || "Product"}
+                                                                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500"
+                                                                />
+                                                            ) : (
+                                                                <div className="w-full h-full flex items-center justify-center text-zinc-400">
+                                                                    <BagIcon className="w-6 h-6" />
+                                                                </div>
+                                                            )}
+                                                        </Link>
 
-                                                {/* Product Info & Controls */}
-                                                <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch space-y-3">
-                                                    <div>
-                                                        <div className="flex items-start justify-between gap-3">
+                                                        {/* Product Info & Controls */}
+                                                        <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch space-y-3">
                                                             <div>
-                                                                {/* Category tag */}
-                                                                <span className="text-[10px] font-mono-code uppercase tracking-wider text-zinc-400 font-semibold block mb-0.5">
-                                                                    {product.category || "SNITCH DROP"}
-                                                                </span>
+                                                                <div className="flex items-start justify-between gap-3">
+                                                                    <div>
+                                                                        {/* Category tag */}
+                                                                        <span className="text-[10px] font-mono-code uppercase tracking-wider text-zinc-400 font-semibold block mb-0.5">
+                                                                            {product.category || "SNITCH DROP"}
+                                                                        </span>
 
-                                                                {/* Product Title */}
-                                                                <Link
-                                                                    to={product._id ? `/product/${product._id}` : "#"}
-                                                                    className="text-sm sm:text-base font-bold text-zinc-950 uppercase tracking-tight hover:text-black line-clamp-1 block transition-colors"
-                                                                >
-                                                                    {product.title || "Curated Snitch Item"}
-                                                                </Link>
+                                                                        {/* Product Title */}
+                                                                        <Link
+                                                                            to={product._id ? `/product/${product._id}` : "#"}
+                                                                            className="text-sm sm:text-base font-bold text-zinc-950 uppercase tracking-tight hover:text-black line-clamp-1 block transition-colors"
+                                                                        >
+                                                                            {product.title || "Curated Snitch Item"}
+                                                                        </Link>
+                                                                    </div>
+
+                                                                    {/* Remove Item Button */}
+                                                                    {(() => {
+                                                                        const pId = product._id || (typeof item.product === "string" ? item.product : item.productId);
+                                                                        const vId = item.variant?._id || (typeof item.variant === "string" ? item.variant : item.variantId);
+                                                                        const itemActiveId = item._id || (vId ? `${pId}-${vId}` : pId) || index;
+                                                                        const isDeleting = deletingItemId === itemActiveId;
+
+                                                                        return (
+                                                                            <button
+                                                                                type="button"
+                                                                                onClick={() => handleRemoveItem(item, index)}
+                                                                                disabled={isDeleting || updatingItemId === (item._id || pId)}
+                                                                                className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                                title="Remove from bag"
+                                                                                aria-label="Remove item from bag"
+                                                                            >
+                                                                                {isDeleting ? (
+                                                                                    <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
+                                                                                ) : (
+                                                                                    <TrashIcon className="w-4 h-4" />
+                                                                                )}
+                                                                            </button>
+                                                                        );
+                                                                    })()}
+                                                                </div>
+
+                                                                {/* Variety Attributes (Color, Size) */}
+                                                                {attrEntries.length > 0 && (
+                                                                    <div className="flex flex-wrap gap-1.5 mt-2">
+                                                                        {attrEntries.map(([k, v], i) => (
+                                                                            <span
+                                                                                key={i}
+                                                                                className="text-[10px] font-mono-code bg-zinc-100 border border-zinc-200 px-2.5 py-0.5 rounded-full text-zinc-700 uppercase"
+                                                                            >
+                                                                                <span className="text-zinc-400">{k}:</span> {String(v)}
+                                                                            </span>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+
+                                                                {/* Stock Status */}
+                                                                <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-600 font-medium font-mono-code">
+                                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                                                    <span>In Stock</span>
+                                                                </div>
                                                             </div>
 
-                                                            {/* Remove Item Button */}
-                                                            {(() => {
-                                                                const pId = product._id || (typeof item.product === "string" ? item.product : item.productId);
-                                                                const vId = item.variant?._id || (typeof item.variant === "string" ? item.variant : item.variantId);
-                                                                const itemActiveId = item._id || (vId ? `${pId}-${vId}` : pId) || index;
-                                                                const isDeleting = deletingItemId === itemActiveId;
+                                                            {/* Bottom Row: Quantity Stepper & Price Calculation */}
+                                                            <div className="pt-3 border-t border-zinc-100 flex items-center justify-between flex-wrap gap-3">
 
-                                                                return (
-                                                                    <button
-                                                                        type="button"
-                                                                        onClick={() => handleRemoveItem(item, index)}
-                                                                        disabled={isDeleting || updatingItemId === (item._id || pId)}
-                                                                        className="text-zinc-400 hover:text-rose-600 p-1.5 rounded-full hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                        title="Remove from bag"
-                                                                        aria-label="Remove item from bag"
-                                                                    >
-                                                                        {isDeleting ? (
-                                                                            <div className="w-4 h-4 border-2 border-rose-500 border-t-transparent rounded-full animate-spin" />
-                                                                        ) : (
-                                                                            <TrashIcon className="w-4 h-4" />
-                                                                        )}
-                                                                    </button>
-                                                                );
-                                                            })()}
-                                                        </div>
+                                                                {/* Stepper (+ / -) */}
+                                                                <div className="flex items-center gap-2">
+                                                                    <span className="text-xs font-mono-code text-zinc-500 mr-1">Qty:</span>
+                                                                    <div className="flex items-center border border-zinc-200 rounded-full bg-white p-0.5">
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleDecreaseQuantity(item)}
+                                                                            disabled={updatingItemId === (item._id || product._id) || Boolean(deletingItemId)}
+                                                                            className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                            title="Decrease quantity"
+                                                                        >
+                                                                            <MinusIcon className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                        <span className="w-8 text-center text-xs font-bold font-mono-code text-zinc-900">
+                                                                            {qty}
+                                                                        </span>
+                                                                        <button
+                                                                            type="button"
+                                                                            onClick={() => handleIncreaseQuantity(item)}
+                                                                            disabled={updatingItemId === (item._id || product._id) || Boolean(deletingItemId)}
+                                                                            className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                                                                            title="Increase quantity"
+                                                                        >
+                                                                            <PlusIcon className="w-3.5 h-3.5" />
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
 
-                                                        {/* Variety Attributes (Color, Size) */}
-                                                        {attrEntries.length > 0 && (
-                                                            <div className="flex flex-wrap gap-1.5 mt-2">
-                                                                {attrEntries.map(([k, v], i) => (
-                                                                    <span
-                                                                        key={i}
-                                                                        className="text-[10px] font-mono-code bg-zinc-100 border border-zinc-200 px-2.5 py-0.5 rounded-full text-zinc-700 uppercase"
-                                                                    >
-                                                                        <span className="text-zinc-400">{k}:</span> {String(v)}
+                                                                {/* Price Block */}
+                                                                <div className="text-right">
+                                                                    <span className="text-[11px] font-mono-code text-zinc-400 block">
+                                                                        {itemSymbol}{itemPrice.toLocaleString("en-IN")} each
                                                                     </span>
-                                                                ))}
+                                                                    <span className="text-base sm:text-lg font-bold font-mono-code text-zinc-950">
+                                                                        {itemSymbol}{lineTotal.toLocaleString("en-IN")}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                        )}
 
-                                                        {/* Stock Status */}
-                                                        <div className="flex items-center gap-1.5 mt-2 text-[11px] text-emerald-600 font-medium font-mono-code">
-                                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                                            <span>In Stock</span>
                                                         </div>
                                                     </div>
+                                                );
+                                            })}
+                                        </div>
 
-                                                    {/* Bottom Row: Quantity Stepper & Price Calculation */}
-                                                    <div className="pt-3 border-t border-zinc-100 flex items-center justify-between flex-wrap gap-3">
-
-                                                        {/* Stepper (+ / -) */}
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-xs font-mono-code text-zinc-500 mr-1">Qty:</span>
-                                                            <div className="flex items-center border border-zinc-200 rounded-full bg-white p-0.5">
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleDecreaseQuantity(item)}
-                                                                    disabled={updatingItemId === (item._id || product._id) || Boolean(deletingItemId)}
-                                                                    className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                    title="Decrease quantity"
-                                                                >
-                                                                    <MinusIcon className="w-3.5 h-3.5" />
-                                                                </button>
-                                                                <span className="w-8 text-center text-xs font-bold font-mono-code text-zinc-900">
-                                                                    {qty}
-                                                                </span>
-                                                                <button
-                                                                    type="button"
-                                                                    onClick={() => handleIncreaseQuantity(item)}
-                                                                    disabled={updatingItemId === (item._id || product._id) || Boolean(deletingItemId)}
-                                                                    className="w-7 h-7 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
-                                                                    title="Increase quantity"
-                                                                >
-                                                                    <PlusIcon className="w-3.5 h-3.5" />
-                                                                </button>
-                                                            </div>
-                                                        </div>
-
-                                                        {/* Price Block */}
-                                                        <div className="text-right">
-                                                            <span className="text-[11px] font-mono-code text-zinc-400 block">
-                                                                {itemSymbol}{itemPrice.toLocaleString("en-IN")} each
-                                                            </span>
-                                                            <span className="text-base sm:text-lg font-bold font-mono-code text-zinc-950">
-                                                                {itemSymbol}{lineTotal.toLocaleString("en-IN")}
-                                                            </span>
-                                                        </div>
-                                                    </div>
-
-                                                </div>
+                                        {/* Trust & Perks Strip */}
+                                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
+                                            <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
+                                                <ShieldCheckIcon className="w-4 h-4 mx-auto text-zinc-700" />
+                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">100% Genuine</p>
+                                                <p className="text-[9px] text-zinc-400">Direct from Snitch</p>
                                             </div>
-                                        );
-                                    })}
-                                </div>
+                                            <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
+                                                <RefreshIcon className="w-4 h-4 mx-auto text-zinc-700" />
+                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">7-Day Return</p>
+                                                <p className="text-[9px] text-zinc-400">Easy exchanges</p>
+                                            </div>
+                                            <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
+                                                <TruckIcon className="w-4 h-4 mx-auto text-zinc-700" />
+                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">Fast Shipping</p>
+                                                <p className="text-[9px] text-zinc-400">2-4 business days</p>
+                                            </div>
+                                            <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
+                                                <TagIcon className="w-4 h-4 mx-auto text-zinc-700" />
+                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">Best Price</p>
+                                                <p className="text-[9px] text-zinc-400">Exclusive drops</p>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
 
-                                {/* Trust & Perks Strip */}
-                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4">
-                                    <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
-                                        <ShieldCheckIcon className="w-4 h-4 mx-auto text-zinc-700" />
-                                        <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">100% Genuine</p>
-                                        <p className="text-[9px] text-zinc-400">Direct from Snitch</p>
-                                    </div>
-                                    <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
-                                        <RefreshIcon className="w-4 h-4 mx-auto text-zinc-700" />
-                                        <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">7-Day Return</p>
-                                        <p className="text-[9px] text-zinc-400">Easy exchanges</p>
-                                    </div>
-                                    <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
-                                        <TruckIcon className="w-4 h-4 mx-auto text-zinc-700" />
-                                        <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">Fast Shipping</p>
-                                        <p className="text-[9px] text-zinc-400">2-4 business days</p>
-                                    </div>
-                                    <div className="p-3 bg-white border border-zinc-200 rounded-xl text-center space-y-1">
-                                        <TagIcon className="w-4 h-4 mx-auto text-zinc-700" />
-                                        <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">Best Price</p>
-                                        <p className="text-[9px] text-zinc-400">Exclusive drops</p>
-                                    </div>
-                                </div>
-                            </>
-                        )}
+                                {/* STEP 2: ADDRESS LAYER */}
+                                {currentStep === 2 && (
+                                    <AddressStep
+                                        addresses={addresses}
+                                        selectedAddress={shippingAddress}
+                                        onSelectAddress={handleSelectAddress}
+                                        onCreateAddress={handleCreateAddress}
+                                        onUpdateAddress={handleUpdateAddress}
+                                        onDeleteAddress={handleDeleteAddress}
+                                        onBackToBag={() => setStep(1)}
+                                        onProceedToPayment={handleCheckout}
+                                        isLoading={cartLoading || isCheckingOut}
+                                    />
+                                )}
 
-                        {/* STEP 2: ADDRESS LAYER */}
-                        {currentStep === 2 && (
-                            <AddressStep
-                                addresses={addresses}
-                                selectedAddress={shippingAddress}
-                                onSelectAddress={handleSelectAddress}
-                                onCreateAddress={handleCreateAddress}
-                                onUpdateAddress={handleUpdateAddress}
-                                onDeleteAddress={handleDeleteAddress}
-                                onBackToBag={() => setStep(1)}
-                                onProceedToPayment={() => setStep(3)}
-                                isLoading={cartLoading}
-                            />
-                        )}
+                                {/* STEP 3: PAYMENT LAYER */}
+                                {currentStep === 3 && (
+                                    <PaymentStep
+                                        selectedAddress={shippingAddress}
+                                        items={items}
+                                        totalPrice={finalTotal}
+                                        currencySymbol={symbol}
+                                        onBackToAddress={() => setStep(2)}
+                                        onPlaceOrder={handleCheckout}
+                                        isProcessing={isCheckingOut}
+                                        paymentResult={paymentResult}
+                                    />
+                                )}
 
-                        {/* STEP 3: PAYMENT LAYER */}
-                        {currentStep === 3 && (
-                            <PaymentStep
-                                selectedAddress={shippingAddress}
-                                items={items}
-                                totalPrice={finalTotal}
-                                currencySymbol={symbol}
-                                onBackToAddress={() => setStep(2)}
-                                onPlaceOrder={() => console.log("Order placed")}
-                            />
-                        )}
-
-                    </div>
+                            </div>
 
                             {/* ─── RIGHT COLUMN: Order Summary (4 cols) ────────────── */}
                             <div className="lg:col-span-4">
@@ -903,12 +1003,12 @@ export default function CartPage() {
                                                     alert("Please select or add a delivery address to proceed.");
                                                     return;
                                                 }
-                                                setStep(3);
+                                                handleCheckout();
                                             }}
-                                            disabled={!shippingAddress}
+                                            disabled={!shippingAddress || isCheckingOut}
                                             className="w-full py-4 bg-black hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
                                         >
-                                            <span>Proceed To Payment</span>
+                                            <span>{isCheckingOut ? "Preparing Payment..." : "Proceed To Payment"}</span>
                                             <span className="text-sm">→</span>
                                         </button>
                                     )}
@@ -916,11 +1016,18 @@ export default function CartPage() {
                                     {currentStep === 3 && (
                                         <button
                                             type="button"
-                                            onClick={() => alert(`Processing payment of ${symbol}${finalTotal.toLocaleString("en-IN")}...`)}
-                                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
+                                            onClick={() => handleCheckout()}
+                                            disabled={isCheckingOut || Boolean(paymentResult)}
+                                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
                                         >
-                                            <span>Pay {symbol}{finalTotal.toLocaleString("en-IN")}</span>
-                                            <span className="text-sm">✓</span>
+                                            <span>
+                                                {paymentResult
+                                                    ? "Order Confirmed ✓"
+                                                    : isCheckingOut
+                                                    ? "Opening Razorpay..."
+                                                    : `Pay ${symbol}${finalTotal.toLocaleString("en-IN")}`}
+                                            </span>
+                                            {!paymentResult && <span className="text-sm">✓</span>}
                                         </button>
                                     )}
 

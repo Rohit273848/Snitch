@@ -23,6 +23,13 @@ if (!process.env.IMAGEKIT_PRIVATE_KEY) {
     throw new Error("Missing ImageKit Private Key")
 }
 
+if(!process.env.RAZORPAY_KEY_ID){
+    throw new Error("Missing RAZORPAY_KEY_ID")
+}
+
+if(!process.env.RAZORPAY_KEY_SECRET){
+  throw new Error("Missing RAZORPAY_KEY_SECRET")
+}
 
 
 export const config = {
@@ -34,5 +41,8 @@ export const config = {
     NODE_ENV: process.env.NODE_ENV,
     CLIENT_URL: process.env.CLIENT_URL,
     SERVER_URL: process.env.SERVER_URL,
-    IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY
+    IMAGEKIT_PRIVATE_KEY: process.env.IMAGEKIT_PRIVATE_KEY,
+    RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID,
+    RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET,
+    RAZORPAY_KEY_Secret: process.env.RAZORPAY_KEY_SECRET,
 }

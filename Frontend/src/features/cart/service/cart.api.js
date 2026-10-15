@@ -85,3 +85,8 @@ export async function clearCartAddress() {
     const response = await cartApiInstance.delete("/address/select");
     return response.data;
 }
+
+export async function createCartOrder(orderData = {}) {
+    const response = await cartApiInstance.post("/payment/create/order", orderData);
+    return response.data;
+}

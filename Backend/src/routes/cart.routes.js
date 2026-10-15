@@ -2,7 +2,8 @@ import { Router } from "express";
 import { validateAddToCart, validateIncrementCartItemQuantity, validateDecrementCartItemQuantity, validateRemoveCartItem } from "../validator/cart.validator.js";
 import { validate } from "../middleweres/validate.js";
 import { authenticateUser } from "../middleweres/auth.middleweres.js";
-import { addToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity, removeCartItem } from "../controllers/cart.controller.js";
+import { addToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity, removeCartItem,
+    createOrderController } from "../controllers/cart.controller.js";
 import {
     getUserAddresses,
     createAddress,
@@ -55,5 +56,10 @@ router.post("/remove/:productId/:variantId", authenticateUser, validateRemoveCar
 router.post("/remove/:productId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
 router.delete("/:productId/:variantId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
 router.delete("/:productId", authenticateUser, validateRemoveCartItem, validate, removeCartItem);
+
+//Payment 
+
+router.post("/payment/create/order",authenticateUser,createOrderController);
+
 
 export default router;

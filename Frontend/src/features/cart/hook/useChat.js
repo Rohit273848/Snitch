@@ -23,6 +23,7 @@ import {
     deleteAddress as deleteAddressApi,
     selectCartAddress as selectCartAddressApi,
     clearCartAddress as clearCartAddressApi,
+    createCartOrder as createCartOrderApi
 } from "../service/cart.api";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -155,6 +156,15 @@ export const useChat = () => {
         }
     }
 
+    async function handleCreateCartOrder(orderData) {
+        const data = await createCartOrderApi(orderData);
+        if (!data?.order) return null;
+        return {
+            ...data.order,
+            key: data.key,
+        };
+    }
+
     function setStep(step) {
         dispatch(setCartStep(step));
     }
@@ -174,6 +184,7 @@ export const useChat = () => {
         handleUpdateAddress,
         handleDeleteAddress,
         handleSelectAddress,
+        handleCreateCartOrder,
         setStep,
         cartItems,
         cartLoading,

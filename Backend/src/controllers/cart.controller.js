@@ -3,6 +3,8 @@ import cartModel from "../models/cart.model.js";
 import productModel from "../models/product.model.js";
 import addressModel from "../models/address.model.js";
 import { stockOfVariant } from "../dao/product.dao.js";
+import { createOrder } from "../services/payment.service.js";
+import { config } from "../config/config.js";
 
 /**
  * Controller to add a product variety to cart or increase quantity if it already exists
@@ -599,3 +601,46 @@ export const removeCartItem = async (req, res) => {
 };
 
 export const deleteCartItem = removeCartItem;
+
+
+export const createOrderController = async (req, res) => {
+    try {
+        const userId = req.user?._id || req.user?.id;
+        let amount = req.body?.amount ? Number(req.body.amount) : null;
+        let currency = req.body?.currency || "INR";
+
+        // If amount was not specified in request, calculate total from the user's cart
+        if (!amount || amount <= 0) {
+            const cart = await cartModel.findOne({ user: userId });
+            if (cart && cart.items && cart.items.length > 0) {
+                const calculatedTotal = cart.items.reduce((acc, item) => {
+                    const itemPrice = item?.price?.amount || 0;
+                    return acc + (itemPrice * item.quantity);
+                }, 0);
+                if (calculatedTotal > 0) {
+                    amount = calculatedTotal;
+                }
+            }
+        }
+
+        // Default fallback if cart is empty or total is 0
+        if (!amount || amount <= 0) {
+            amount = 100;
+        }
+
+        const order = await createOrder({ amount, currency });
+
+        return res.status(200).json({
+            message: "Payment order created successfully",
+            success: true,
+            order,
+            key: config.RAZORPAY_KEY_ID,
+        });
+    } catch (error) {
+        console.error("Error creating payment order:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.error?.description || error.message || "Failed to create payment order",
+        });
+    }
+};
