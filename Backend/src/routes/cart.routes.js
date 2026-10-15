@@ -3,12 +3,35 @@ import { validateAddToCart, validateIncrementCartItemQuantity, validateDecrement
 import { validate } from "../middleweres/validate.js";
 import { authenticateUser } from "../middleweres/auth.middleweres.js";
 import { addToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity, removeCartItem } from "../controllers/cart.controller.js";
+import {
+    getUserAddresses,
+    createAddress,
+    updateAddress,
+    deleteAddress,
+    selectCartAddress,
+    clearCartAddress,
+} from "../controllers/address.controller.js";
+import {
+    validateCreateAddress,
+    validateUpdateAddress,
+    validateAddressIdParam,
+} from "../validator/address.validator.js";
 
 const router = Router();
 
 router.get("/", authenticateUser, getCart);
 router.post("/add/:productId/:variantId", authenticateUser, validateAddToCart, validate, addToCart);
 router.post("/add/:productId", authenticateUser, validateAddToCart, validate, addToCart);
+
+// Address layer in cart routes
+router.get("/address", authenticateUser, getUserAddresses);
+router.post("/address", authenticateUser, validateCreateAddress, validate, createAddress);
+router.put("/address/:addressId", authenticateUser, validateUpdateAddress, validate, updateAddress);
+router.patch("/address/:addressId", authenticateUser, validateUpdateAddress, validate, updateAddress);
+router.delete("/address/:addressId", authenticateUser, validateAddressIdParam, validate, deleteAddress);
+router.post("/address/select/:addressId", authenticateUser, validateAddressIdParam, validate, selectCartAddress);
+router.post("/address/select", authenticateUser, selectCartAddress);
+router.delete("/address/select", authenticateUser, clearCartAddress);
 
 // Quantity increment routes
 router.post("/quantity/increment/:productId/:variantId", authenticateUser, validateIncrementCartItemQuantity, validate, IncrementItemCartQuantity);

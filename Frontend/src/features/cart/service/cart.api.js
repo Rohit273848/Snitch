@@ -54,3 +54,34 @@ export async function removeCartItem({ productId, variantId, itemId }) {
 }
 
 export const deleteCartItem = removeCartItem;
+
+// ─── Address Layer APIs ────────────────────────────────────────────────────────
+export async function getAddresses() {
+    const response = await cartApiInstance.get("/address");
+    return response.data;
+}
+
+export async function createAddress(addressData) {
+    const response = await cartApiInstance.post("/address", addressData);
+    return response.data;
+}
+
+export async function updateAddress(addressId, addressData) {
+    const response = await cartApiInstance.put(`/address/${addressId}`, addressData);
+    return response.data;
+}
+
+export async function deleteAddress(addressId) {
+    const response = await cartApiInstance.delete(`/address/${addressId}`);
+    return response.data;
+}
+
+export async function selectCartAddress(addressId) {
+    const response = await cartApiInstance.post(`/address/select/${addressId}`);
+    return response.data;
+}
+
+export async function clearCartAddress() {
+    const response = await cartApiInstance.delete("/address/select");
+    return response.data;
+}

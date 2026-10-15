@@ -322,6 +322,7 @@ export async function updateSellerProduct(req, res) {
                     }
 
                     const formattedVariant = {
+                        ...(v._id || v.id ? { _id: v._id || v.id } : {}),
                         stock: Number(v.stock || 0),
                         attributes: attrsObj,
                         images: validImages

@@ -1,6 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { useChat } from "../hook/useChat.js";
+import AddressStep from "../components/AddressStep.jsx";
+import PaymentStep from "../components/PaymentStep.jsx";
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
 function FontLoader() {
@@ -18,6 +20,15 @@ function FontLoader() {
 const currencySymbol = { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" };
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
+function MapPinIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+        </svg>
+    );
+}
+
 function ArrowLeftIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
@@ -108,7 +119,25 @@ function CheckIcon({ className = "w-4 h-4" }) {
 // ─── Main Cart Page Component ─────────────────────────────────────────────────
 export default function CartPage() {
     
-    const { handleGetCart, handleIncreamentQuantity, handleDecrementQuantity, handleDeleteCartItem, cartItems, cartLoading } = useChat();
+    const {
+        handleGetCart,
+        handleIncreamentQuantity,
+        handleDecrementQuantity,
+        handleDeleteCartItem,
+        handleGetAddresses,
+        handleCreateAddress,
+        handleUpdateAddress,
+        handleDeleteAddress,
+        handleSelectAddress,
+        setStep,
+        cartItems,
+        cartLoading,
+        cartTotalPrice,
+        cartCurrency,
+        shippingAddress,
+        addresses,
+        currentStep,
+    } = useChat();
 
     const [error, setError] = useState(null);
     const [couponCode, setCouponCode] = useState("");
@@ -121,6 +150,9 @@ export default function CartPage() {
         handleGetCart().catch((err) => {
             setError(err?.response?.data?.message || "Failed to load cart items");
         });
+        handleGetAddresses().catch((err) => {
+            console.error("Failed to load addresses", err);
+        });
     }, []);
 
     // Safe array of items
@@ -128,13 +160,16 @@ export default function CartPage() {
 
     // Calculate total items count and total price
     const totalQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
-    const subtotalPrice = items.reduce((sum, item) => {
-        const priceAmount = Number(item.price?.amount || item.product?.price?.amount || 0);
-        const qty = Number(item.quantity || 1);
-        return sum + priceAmount * qty;
-    }, 0);
+    const subtotalPrice = useMemo(() => {
+        return items.reduce((sum, item) => {
+            const lineTotal = item.itemTotal != null
+                ? Number(item.itemTotal)
+                : Number(item.unitPrice ?? item.variant?.price?.amount ?? item.product?.price?.amount ?? item.price?.amount ?? 0) * (Number(item.quantity) || 1);
+            return sum + lineTotal;
+        }, 0);
+    }, [items]);
 
-    const currency = items[0]?.price?.currency || items[0]?.product?.price?.currency || "INR";
+    const currency = cartCurrency || items[0]?.currency || items[0]?.price?.currency || items[0]?.product?.price?.currency || "INR";
     const symbol = currencySymbol[currency] || "₹";
 
     // Discount calculation
@@ -301,18 +336,46 @@ export default function CartPage() {
                         </div>
 
                         {/* Stepper Progress */}
-                        <div className="flex items-center gap-2 font-mono-code text-[11px]">
-                            <span className="px-3 py-1 bg-black text-white font-bold rounded-full">
+                        <div className="flex items-center gap-1.5 sm:gap-2 font-mono-code text-[11px]">
+                            <button
+                                type="button"
+                                onClick={() => setStep(1)}
+                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer ${
+                                    currentStep === 1
+                                        ? "bg-black text-white shadow-xs"
+                                        : "bg-zinc-100 text-zinc-600 hover:bg-zinc-200"
+                                }`}
+                            >
                                 1. Bag ({totalQuantity})
-                            </span>
+                            </button>
                             <span className="text-zinc-300">→</span>
-                            <span className="px-3 py-1 bg-zinc-100 text-zinc-500 rounded-full">
-                                2. Address
-                            </span>
+                            <button
+                                type="button"
+                                onClick={() => items.length > 0 && setStep(2)}
+                                disabled={items.length === 0}
+                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                                    currentStep === 2
+                                        ? "bg-black text-white shadow-xs"
+                                        : shippingAddress
+                                        ? "bg-emerald-50 text-emerald-800 border border-emerald-200 hover:bg-emerald-100"
+                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                                }`}
+                            >
+                                2. Address {shippingAddress && "✓"}
+                            </button>
                             <span className="text-zinc-300">→</span>
-                            <span className="px-3 py-1 bg-zinc-100 text-zinc-500 rounded-full">
+                            <button
+                                type="button"
+                                onClick={() => items.length > 0 && shippingAddress && setStep(3)}
+                                disabled={items.length === 0 || !shippingAddress}
+                                className={`px-3 py-1 rounded-full font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
+                                    currentStep === 3
+                                        ? "bg-black text-white shadow-xs"
+                                        : "bg-zinc-100 text-zinc-500 hover:bg-zinc-200"
+                                }`}
+                            >
                                 3. Payment
-                            </span>
+                            </button>
                         </div>
                     </div>
 
@@ -389,31 +452,71 @@ export default function CartPage() {
                     {items.length > 0 && (
                         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
-                            {/* ─── LEFT COLUMN: Cart Items (8 cols) ───────────────── */}
+                            {/* ─── LEFT COLUMN: Dynamic step content (8 cols) ───────────────── */}
                             <div className="lg:col-span-8 space-y-4">
 
-                                {/* Free Shipping Notification Bar */}
-                                <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between gap-3 text-xs">
-                                    <div className="flex items-center gap-2.5">
-                                        <TruckIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
-                                        <span className="text-zinc-700 font-medium">
-                                            <strong>Free Express Shipping</strong> unlocked on your bag!
-                                        </span>
-                                    </div>
-                                    <span className="font-mono-code text-[11px] uppercase tracking-wider text-emerald-600 font-bold hidden sm:inline">
-                                        FAST DISPATCH
-                                    </span>
-                                </div>
+                                {/* STEP 1: SHOPPING BAG ITEMS */}
+                                {currentStep === 1 && (
+                                    <>
+                                        {/* Delivery address status bar */}
+                                        {shippingAddress ? (
+                                            <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 text-xs font-mono-code">
+                                                <div className="flex items-center gap-2">
+                                                    <MapPinIcon className="w-4 h-4 text-zinc-700 flex-shrink-0" />
+                                                    <span className="text-zinc-700">
+                                                        Deliver to: <strong className="text-zinc-950">{shippingAddress.fullName}</strong> ({shippingAddress.city} - {shippingAddress.pincode})
+                                                    </span>
+                                                    <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-zinc-200 text-zinc-700">
+                                                        {shippingAddress.addressType || "HOME"}
+                                                    </span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setStep(2)}
+                                                    className="text-xs font-bold uppercase underline hover:text-black cursor-pointer text-zinc-600 self-start sm:self-auto"
+                                                >
+                                                    Change Address
+                                                </button>
+                                            </div>
+                                        ) : (
+                                            <div className="p-3.5 rounded-xl bg-amber-50/70 border border-amber-200 flex items-center justify-between gap-3 text-xs font-mono-code">
+                                                <div className="flex items-center gap-2 text-amber-900">
+                                                    <MapPinIcon className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                                                    <span>Select a delivery address to calculate exact delivery timeline</span>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setStep(2)}
+                                                    className="px-3 py-1 rounded-full bg-black hover:bg-zinc-800 text-white text-[11px] font-bold uppercase cursor-pointer transition-colors"
+                                                >
+                                                    Choose Address
+                                                </button>
+                                            </div>
+                                        )}
+
+                                        {/* Free Shipping Notification Bar */}
+                                        <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 flex items-center justify-between gap-3 text-xs">
+                                            <div className="flex items-center gap-2.5">
+                                                <TruckIcon className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                                                <span className="text-zinc-700 font-medium">
+                                                    <strong>Free Express Shipping</strong> unlocked on your bag!
+                                                </span>
+                                            </div>
+                                            <span className="font-mono-code text-[11px] uppercase tracking-wider text-emerald-600 font-bold hidden sm:inline">
+                                                FAST DISPATCH
+                                            </span>
+                                        </div>
 
                                 {/* Items List Cards */}
                                 <div className="space-y-3">
                                     {items.map((item, index) => {
                                         const product = item.product || {};
 
-                                        // Find variant if ID exists
+                                        // Find variant if ID exists (prioritize pre-populated variant from aggregation)
                                         const variant =
-                                            product.variants?.find((v) => String(v._id) === String(item.variant)) ||
-                                            (typeof item.variant === "object" ? item.variant : null);
+                                            (typeof item.variant === "object" && item.variant !== null)
+                                                ? item.variant
+                                                : product.variants?.find((v) => String(v._id) === String(item.variant)) || null;
 
                                         // Resolve image
                                         const coverImg =
@@ -424,15 +527,15 @@ export default function CartPage() {
                                             product.images?.[0] ||
                                             "";
 
-                                        // Pricing
+                                        // Pricing (use precalculated unitPrice and itemTotal from backend aggregate, fallback to live prices)
                                         const itemPrice = Number(
-                                            item.price?.amount || variant?.price?.amount || product.price?.amount || 0
+                                            item.unitPrice ?? variant?.price?.amount ?? product.price?.amount ?? item.price?.amount ?? 0
                                         );
                                         const itemCurrency =
-                                            item.price?.currency || product.price?.currency || "INR";
+                                            item.currency || item.price?.currency || product.price?.currency || "INR";
                                         const itemSymbol = currencySymbol[itemCurrency] || "₹";
                                         const qty = Number(item.quantity || 1);
-                                        const lineTotal = itemPrice * qty;
+                                        const lineTotal = Number(item.itemTotal ?? (itemPrice * qty));
 
                                         // Variant attributes
                                         const attributesObj = variant?.attributes || {};
@@ -603,8 +706,37 @@ export default function CartPage() {
                                         <p className="text-[9px] text-zinc-400">Exclusive drops</p>
                                     </div>
                                 </div>
+                            </>
+                        )}
 
-                            </div>
+                        {/* STEP 2: ADDRESS LAYER */}
+                        {currentStep === 2 && (
+                            <AddressStep
+                                addresses={addresses}
+                                selectedAddress={shippingAddress}
+                                onSelectAddress={handleSelectAddress}
+                                onCreateAddress={handleCreateAddress}
+                                onUpdateAddress={handleUpdateAddress}
+                                onDeleteAddress={handleDeleteAddress}
+                                onBackToBag={() => setStep(1)}
+                                onProceedToPayment={() => setStep(3)}
+                                isLoading={cartLoading}
+                            />
+                        )}
+
+                        {/* STEP 3: PAYMENT LAYER */}
+                        {currentStep === 3 && (
+                            <PaymentStep
+                                selectedAddress={shippingAddress}
+                                items={items}
+                                totalPrice={finalTotal}
+                                currencySymbol={symbol}
+                                onBackToAddress={() => setStep(2)}
+                                onPlaceOrder={() => console.log("Order placed")}
+                            />
+                        )}
+
+                    </div>
 
                             {/* ─── RIGHT COLUMN: Order Summary (4 cols) ────────────── */}
                             <div className="lg:col-span-4">
@@ -731,15 +863,66 @@ export default function CartPage() {
                                         </span>
                                     </div>
 
+                                    {/* Shipping Address Summary in Order Details */}
+                                    {shippingAddress && (
+                                        <div className="p-3.5 rounded-xl bg-zinc-50 border border-zinc-200 text-xs font-mono-code space-y-1">
+                                            <div className="flex items-center justify-between">
+                                                <span className="text-[10px] uppercase font-bold text-zinc-500">Shipping To</span>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setStep(2)}
+                                                    className="text-[10px] uppercase text-zinc-700 underline font-bold cursor-pointer hover:text-black"
+                                                >
+                                                    Change
+                                                </button>
+                                            </div>
+                                            <p className="font-bold text-zinc-900">{shippingAddress.fullName}</p>
+                                            <p className="text-zinc-500 text-[11px] truncate">
+                                                {shippingAddress.city}, {shippingAddress.state} - {shippingAddress.pincode}
+                                            </p>
+                                        </div>
+                                    )}
+
                                     {/* Checkout Action Button */}
-                                    <button
-                                        type="button"
-                                        onClick={() => alert("Proceeding to checkout with secure gateway.")}
-                                        className="w-full py-4 bg-black hover:bg-zinc-800 active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
-                                    >
-                                        <span>Proceed To Checkout</span>
-                                        <span className="text-sm">→</span>
-                                    </button>
+                                    {currentStep === 1 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setStep(2)}
+                                            className="w-full py-4 bg-black hover:bg-zinc-800 active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
+                                        >
+                                            <span>Proceed To Address</span>
+                                            <span className="text-sm">→</span>
+                                        </button>
+                                    )}
+
+                                    {currentStep === 2 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                if (!shippingAddress) {
+                                                    alert("Please select or add a delivery address to proceed.");
+                                                    return;
+                                                }
+                                                setStep(3);
+                                            }}
+                                            disabled={!shippingAddress}
+                                            className="w-full py-4 bg-black hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
+                                        >
+                                            <span>Proceed To Payment</span>
+                                            <span className="text-sm">→</span>
+                                        </button>
+                                    )}
+
+                                    {currentStep === 3 && (
+                                        <button
+                                            type="button"
+                                            onClick={() => alert(`Processing payment of ${symbol}${finalTotal.toLocaleString("en-IN")}...`)}
+                                            className="w-full py-4 bg-emerald-600 hover:bg-emerald-700 active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
+                                        >
+                                            <span>Pay {symbol}{finalTotal.toLocaleString("en-IN")}</span>
+                                            <span className="text-sm">✓</span>
+                                        </button>
+                                    )}
 
                                     {/* Security Guarantee Note */}
                                     <div className="pt-2 border-t border-zinc-100 flex items-center justify-center gap-2 text-zinc-500 text-[11px] font-mono-code">

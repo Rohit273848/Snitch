@@ -29,7 +29,12 @@ const cartSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
-    items: [cartItemSchema]
+    items: [cartItemSchema],
+    shippingAddress: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "address",
+        default: null
+    }
 }, { timestamps: true });
 
 const cartModel = mongoose.model('cart', cartSchema);

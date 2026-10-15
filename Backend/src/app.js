@@ -8,6 +8,7 @@ import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
+import addressRoutes from "./routes/address.routes.js";
 import { config } from "./config/config.js";
 
 
@@ -63,6 +64,7 @@ app.get("/", (req, res) => {
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/cart', cartRoutes);
+app.use('/api/address', addressRoutes);
 
 // Global error handler middleware
 app.use((err, req, res, next) => {
