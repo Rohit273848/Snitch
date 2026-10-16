@@ -55,8 +55,8 @@ export const useChat = () => {
         try {
             const effectiveVariantId = variantId || variatyId;
             const data = await addItemToCart({ productId, variantId: effectiveVariantId, quantity });
-            if (data?.cart?.items) {
-                dispatch(setItem(data.cart.items));
+            if (data?.cart) {
+                dispatch(setItem(data.cart));
             }
             return data;
         } finally {
@@ -66,20 +66,28 @@ export const useChat = () => {
 
     async function handleIncreamentQuantity({ productId, variantId }) {
         const data = await IncrementItemCartQuantity({ productId, variantId });
-        dispatch(incrementCartItem({ productId, variantId }));
+        if (data?.cart) {
+            dispatch(setItem(data.cart));
+        } else {
+            dispatch(incrementCartItem({ productId, variantId }));
+        }
         return data;
     }
 
     async function handleDecrementQuantity({ productId, variantId }) {
         const data = await DecrementItemCartQuantity({ productId, variantId });
-        dispatch(decrementCartItem({ productId, variantId }));
+        if (data?.cart) {
+            dispatch(setItem(data.cart));
+        } else {
+            dispatch(decrementCartItem({ productId, variantId }));
+        }
         return data;
     }
 
     async function handleDeleteCartItem({ productId, variantId, itemId, itemIndex }) {
         const data = await removeCartItemApi({ productId, variantId, itemId });
-        if (data?.cart?.items) {
-            dispatch(setItem(data.cart.items));
+        if (data?.cart) {
+            dispatch(setItem(data.cart));
         } else {
             dispatch(removeCartItem({ productId, variantId, itemId }));
         }

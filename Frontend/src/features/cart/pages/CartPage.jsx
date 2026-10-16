@@ -174,8 +174,25 @@ export default function CartPage() {
 
     const { error: razorpayLoadError, isLoading: isRazorpayLoading, Razorpay } = useRazorpay();
 
-    // Safe array of items
-    const items = Array.isArray(cartItems) ? cartItems : [];
+    // Safe array of items (filters out phantom or orphaned items)
+    const items = useMemo(() => {
+        if (!Array.isArray(cartItems)) return [];
+        return cartItems.filter((item) => {
+            const hasProduct = Boolean(
+                item &&
+                (item.product?._id || (typeof item.product === "string" && item.product.trim()) || item.productId)
+            );
+            const hasId = Boolean(item && (item._id || item.productId || item.product?._id));
+            return hasProduct && hasId;
+        });
+    }, [cartItems]);
+
+    // If bag becomes empty while on address/payment step, reset to bag step
+    useEffect(() => {
+        if (items.length === 0 && currentStep !== 1) {
+            setStep(1);
+        }
+    }, [items.length, currentStep, setStep]);
 
     // Calculate total items count and total price
     const totalQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);

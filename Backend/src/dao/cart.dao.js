@@ -166,8 +166,8 @@ export async function getCartDetails(userId) {
                             as: 'item',
                             cond: {
                                 $and: [
-                                    { $ne: ['$$item._id', null] },
-                                    { $ne: ['$$item.product', null] }
+                                    { $gt: [{ $ifNull: ['$$item._id', null] }, null] },
+                                    { $gt: [{ $ifNull: ['$$item.product._id', null] }, null] }
                                 ]
                             }
                         }
@@ -184,6 +184,15 @@ export async function getCartDetails(userId) {
             currency: 'INR',
             shippingAddress: null
         };
+
+        if (cart && Array.isArray(cart.items)) {
+            cart.items = cart.items.filter(
+                (item) => Boolean(item && item._id && item.product && item.product._id)
+            );
+            if (cart.items.length === 0) {
+                cart.totalPrice = 0;
+            }
+        }
 
         return cart;
  }

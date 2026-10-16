@@ -114,13 +114,14 @@ export const addToCart = async (req, res) => {
         }
 
         await cart.save();
+        const updatedCart = await getCartDetails(userId);
 
         return res.status(200).json({
             success: true,
             message: existingItemIndex > -1
                 ? "Product quantity increased in cart"
                 : "Product added to cart successfully",
-            cart,
+            cart: updatedCart,
         });
     } catch (error) {
         console.error("addToCart error:", error);
@@ -239,11 +240,12 @@ export const IncrementItemCartQuantity = async (req, res) => {
 
         currentItem.quantity += 1;
         await cart.save();
+        const updatedCart = await getCartDetails(userId);
 
         return res.status(200).json({
             success: true,
             message: "Cart item quantity successfully incremented",
-            cart,
+            cart: updatedCart,
         });
     } catch (error) {
         console.error("IncrementItemCartQuantity error:", error);
@@ -310,13 +312,14 @@ export const DecrementItemCartQuantity = async (req, res) => {
         }
 
         await cart.save();
+        const updatedCart = await getCartDetails(userId);
 
         return res.status(200).json({
             success: true,
             message: wasRemoved
                 ? "Item removed from cart"
                 : "Cart item quantity successfully decremented",
-            cart,
+            cart: updatedCart,
         });
     } catch (error) {
         console.error("DecrementItemCartQuantity error:", error);
@@ -405,12 +408,12 @@ export const removeCartItem = async (req, res) => {
         // Remove item from cart
         cart.items.splice(itemIndex, 1);
         await cart.save();
-        await cart.populate("items.product");
+        const updatedCart = await getCartDetails(userId);
 
         return res.status(200).json({
             success: true,
             message: "Item removed from cart successfully",
-            cart,
+            cart: updatedCart,
         });
     } catch (error) {
         console.error("removeCartItem error:", error);

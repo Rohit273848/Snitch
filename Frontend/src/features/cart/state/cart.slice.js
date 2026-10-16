@@ -14,17 +14,32 @@ const cartSlice = createSlice({
     reducers:{
         setItem:(state,action)=>{
             const payload = action.payload;
+            const filterValidItems = (arr) => {
+                if (!Array.isArray(arr)) return [];
+                return arr.filter((item) => {
+                    if (!item) return false;
+                    const hasProduct = Boolean(
+                        item.product?._id ||
+                        (typeof item.product === "string" && item.product.trim().length > 0) ||
+                        item.productId
+                    );
+                    const hasId = Boolean(item._id || item.productId || item.product?._id);
+                    return hasProduct && hasId;
+                });
+            };
+
             if (Array.isArray(payload)) {
-                state.items = payload;
+                state.items = filterValidItems(payload);
             } else if (payload && Array.isArray(payload.items)) {
-                state.items = payload.items;
-                state.totalPrice = Number(payload.totalPrice || 0);
+                state.items = filterValidItems(payload.items);
+                state.totalPrice = state.items.length === 0 ? 0 : Number(payload.totalPrice || 0);
                 state.currency = payload.currency || "INR";
                 if (payload.shippingAddress !== undefined) {
                     state.shippingAddress = payload.shippingAddress;
                 }
             } else {
                 state.items = [];
+                state.totalPrice = 0;
             }
         },
         addItem:(state,action)=>{

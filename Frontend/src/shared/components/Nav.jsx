@@ -37,8 +37,10 @@ export default function Nav() {
     const cartItems = useSelector((state) => state.cart?.items || []);
 
     const totalQuantity = Array.isArray(cartItems)
-        ? cartItems.reduce((sum, item) => sum + (item.quantity || 1), 0)
-        : (cartItems?.length || 0);
+        ? cartItems
+            .filter((item) => item && (item.product?._id || item.product) && (item._id || item.productId))
+            .reduce((sum, item) => sum + (Number(item.quantity) || 1), 0)
+        : 0;
 
     const handleSearchChange = (val) => {
         setSearchTerm(val);
