@@ -7,6 +7,10 @@ import SellerProductModel from "../features/products/pages/SellerProductModel.js
 import Home from "../features/products/pages/Home.jsx"
 import ProductModal from "../features/products/pages/ProductModal.jsx"
 import CartPage from "../features/cart/pages/CartPage.jsx"
+import OrdersListPage from "../features/orders/pages/OrdersListPage.jsx"
+import OrderTrackingPage from "../features/orders/pages/OrderTrackingPage.jsx"
+import OrderSuccessPage from "../features/orders/pages/OrderSuccessPage.jsx"
+import SellerOrdersPage from "../features/orders/pages/SellerOrdersPage.jsx"
 import Protected from "../features/auth/components/Protected.jsx"
 import SellerProtected from "../features/auth/components/SellerProtected.jsx"
 import Nav from "../shared/components/Nav.jsx"
@@ -44,6 +48,18 @@ export const router = createBrowserRouter([
                 path: "/chat",
                 element: <Protected><CartPage /></Protected>,
             },
+            {
+                path: "/orders",
+                element: <Protected><OrdersListPage /></Protected>,
+            },
+            {
+                path: "/orders/:id",
+                element: <Protected><OrderTrackingPage /></Protected>,
+            },
+            {
+                path: "/order-success/:id",
+                element: <Protected><OrderSuccessPage /></Protected>,
+            },
         ]
     },
     
@@ -61,6 +77,12 @@ export const router = createBrowserRouter([
                 path: "dashboard",
                 element: <SellerProtected>
                     <SellerProduct />
+                </SellerProtected>
+            },
+            {
+                path: "orders",
+                element: <SellerProtected>
+                    <SellerOrdersPage />
                 </SellerProtected>
             },
             {

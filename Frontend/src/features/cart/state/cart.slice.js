@@ -169,6 +169,11 @@ const cartSlice = createSlice({
         setCartStep: (state, action) => {
             state.currentStep = action.payload;
         },
+        clearCart: (state) => {
+            state.items = [];
+            state.totalPrice = 0;
+            state.currentStep = 1;
+        },
     }
 })
 
@@ -185,5 +190,6 @@ export const {
     updateAddressState,
     removeAddressState,
     setCartStep,
+    clearCart,
 } = cartSlice.actions;
 export default cartSlice.reducer;

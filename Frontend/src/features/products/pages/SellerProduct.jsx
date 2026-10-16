@@ -62,6 +62,15 @@ function TrashIcon({ className = "w-4 h-4" }) {
     );
 }
 
+function TruckIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round"
+                d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.25h-3.75a1.125 1.125 0 00-1.125 1.125v6.75" />
+        </svg>
+    );
+}
+
 function SearchIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
@@ -308,25 +317,32 @@ export default function SellerProduct() {
             <main className="min-h-screen w-full bg-[#fcfcfd] text-zinc-900 selection:bg-black selection:text-white pb-20">
 
                 {/* ─── Breadcrumb & Top Bar ──────────────────────────────────── */}
-                <div className="border-b border-zinc-200 bg-white/70 backdrop-blur-xs">
-                    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between text-xs font-mono-code text-zinc-600">
+                {/* Studio Top Navigation Bar */}
+                <header className="sticky top-0 z-30 bg-white/95 backdrop-blur-md border-b border-zinc-200">
+                    <div className="max-w-7xl mx-auto px-4 sm:px-8 py-3.5 flex items-center justify-between gap-4">
+                        {/* Left: Return to Storefront */}
                         <Link
                             to="/"
-                            className="inline-flex items-center gap-2 hover:text-black font-semibold transition-colors group cursor-pointer"
+                            className="inline-flex items-center gap-2 text-xs font-mono-code text-zinc-600 hover:text-black font-semibold transition-colors group cursor-pointer"
                         >
                             <ArrowLeftIcon className="w-4 h-4 transition-transform group-hover:-translate-x-1" />
                             <span>Return to Storefront</span>
                         </Link>
 
-                        {/* Status Indicator */}
-                        <div className="flex items-center gap-2 text-zinc-500">
-                            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="font-medium text-[11px] uppercase tracking-wider">
-                                Seller Studio Active
+                        {/* Right: Studio Segmented Tabs */}
+                        <div className="flex items-center gap-2 sm:gap-2.5 font-mono-code text-xs">
+                            <span className="px-3.5 py-1.5 rounded-full bg-black text-white font-bold shadow-xs">
+                                Products Catalog
                             </span>
+                            <Link
+                                to="/seller/orders"
+                                className="px-3.5 py-1.5 rounded-full border border-zinc-200 hover:border-black text-zinc-600 hover:text-black transition-colors font-medium cursor-pointer"
+                            >
+                                Orders & Fulfillment
+                            </Link>
                         </div>
                     </div>
-                </div>
+                </header>
 
                 {/* ─── Main Content Container ─────────────────────────────────── */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 pb-12 fade-in-entry space-y-8">
@@ -349,6 +365,13 @@ export default function SellerProduct() {
 
                         {/* Top Action & Create CTA */}
                         <div className="flex items-center gap-3 flex-wrap">
+                            <Link
+                                to="/seller/orders"
+                                className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-zinc-300 hover:border-black text-xs font-bold uppercase tracking-wider transition-all font-mono-code cursor-pointer"
+                            >
+                                <TruckIcon className="w-4 h-4" />
+                                <span>Orders & Tracking</span>
+                            </Link>
                             <Link
                                 to="/seller/create-product"
                                 className="inline-flex items-center gap-2 px-6 py-3 bg-black hover:bg-zinc-800 text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all shadow-md hover:shadow-lg font-mono-code cursor-pointer active:scale-95"

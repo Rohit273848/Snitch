@@ -107,11 +107,20 @@ export default function Nav() {
                 </form>
 
                 {/* ─── RIGHT: Dashboard / Cart Bag / User Avatar ────────────── */}
-                <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
+                <div className="flex items-center gap-2.5 sm:gap-3 flex-shrink-0">
+                    {/* Orders Pill Button */}
+                    <Link
+                        to="/orders"
+                        className="inline-flex items-center text-[11px] font-bold uppercase tracking-wider text-zinc-700 hover:text-black hover:border-black border border-zinc-300 px-3 py-1.5 rounded-full transition-colors font-mono"
+                        style={{ fontFamily: "'JetBrains Mono', monospace" }}
+                    >
+                        ORDERS
+                    </Link>
+
                     {/* Dashboard Pill Button */}
                     <Link
                         to="/seller/dashboard"
-                        className="inline-flex items-center text-[11px] font-bold uppercase tracking-wider text-black hover:bg-black hover:text-white border border-black px-4 py-1.5 rounded-full transition-colors font-mono"
+                        className="inline-flex items-center text-[11px] font-bold uppercase tracking-wider text-black hover:bg-black hover:text-white border border-black px-3.5 py-1.5 rounded-full transition-colors font-mono"
                         style={{ fontFamily: "'JetBrains Mono', monospace" }}
                     >
                         DASHBOARD

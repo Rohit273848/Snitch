@@ -1,10 +1,16 @@
 import React, { useEffect, useState, useMemo } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useChat } from "../hook/useChat.js";
 import AddressStep from "../components/AddressStep.jsx";
 import PaymentStep from "../components/PaymentStep.jsx";
 import { useRazorpay } from "react-razorpay";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { clearCart } from "../state/cart.slice.js";
+import {
+    createRazorpayOrder,
+    verifyPaymentAndPlaceOrder,
+    placeCodOrder,
+} from "../../orders/services/order.api.js";
 
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
@@ -143,6 +149,8 @@ export default function CartPage() {
         currentStep,
     } = useChat();
 
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [error, setError] = useState(null);
     const [couponCode, setCouponCode] = useState("");
     const [appliedCoupon, setAppliedCoupon] = useState(null);
@@ -151,6 +159,7 @@ export default function CartPage() {
     const [deletingItemId, setDeletingItemId] = useState(null);
     const [isCheckingOut, setIsCheckingOut] = useState(false);
     const [paymentResult, setPaymentResult] = useState(null);
+    const [confirmedOrder, setConfirmedOrder] = useState(null);
 
     useEffect(() => {
         handleGetCart().catch((err) => {
@@ -289,6 +298,8 @@ export default function CartPage() {
     async function handleCheckout(extraOpts = {}) {
         if (isCheckingOut) return;
 
+        const method = extraOpts.method || "upi";
+
         // 1. Pre-validation checks
         if (!items || items.length === 0) {
             setError("Your shopping bag is empty.");
@@ -302,42 +313,68 @@ export default function CartPage() {
             return;
         }
 
-        if (!Razorpay) {
-            setError("Payment gateway is initializing. Please wait a moment and try again.");
-            return;
-        }
-
         setIsCheckingOut(true);
         setError(null);
 
+        // ─── COD Flow ────────────────────────────────────────────────────────
+        if (method === "cod") {
+            try {
+                const res = await placeCodOrder({
+                    addressId: shippingAddress._id,
+                    addressData: shippingAddress,
+                    discount: discountAmount,
+                    shippingFee: 0,
+                });
+
+                if (res?.success && res?.order) {
+                    dispatch(clearCart());
+                    setConfirmedOrder(res.order);
+                    navigate(`/order-success/${res.order._id}`);
+                } else {
+                    throw new Error(res?.message || "Failed to place Cash on Delivery order.");
+                }
+            } catch (err) {
+                console.error("COD checkout error:", err);
+                setError(err?.response?.data?.message || err.message || "Failed to place COD order. Please try again.");
+            } finally {
+                setIsCheckingOut(false);
+            }
+            return;
+        }
+
+        // ─── Online Razorpay Flow ──────────────────────────────────────────
+        if (!Razorpay) {
+            setError("Payment gateway is initializing. Please wait a moment and try again.");
+            setIsCheckingOut(false);
+            return;
+        }
+
         try {
             // 2. Create Razorpay order on backend
-            const order = await handleCreateCartOrder({
+            const orderData = await createRazorpayOrder({
                 amount: finalTotal,
                 currency: cartCurrency || "INR",
             });
 
-            if (!order || !order.id) {
+            if (!orderData || !orderData.order || !orderData.order.id) {
                 throw new Error("Unable to create payment order. Please try again.");
             }
 
-            console.log("Created Razorpay Order:", order);
+            const rzpOrder = orderData.order;
+            const rzpKey = orderData.key || import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_ToIKmjCL74Px1s";
 
             // 3. Configure Razorpay checkout options
-            const rzpKey = order.key || import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_ToIKmjCL74Px1s";
-            const orderAmountInPaise = order.amount || Math.round(Number(finalTotal) * 100);
-
             const options = {
                 key: rzpKey,
-                amount: orderAmountInPaise,
-                currency: order.currency || cartCurrency || "INR",
+                amount: rzpOrder.amount,
+                currency: rzpOrder.currency || cartCurrency || "INR",
                 name: "Snitch",
-                description: `Payment for Order #${order.id}`,
-                order_id: order.id,
+                description: `Payment for Order #${rzpOrder.id}`,
+                order_id: rzpOrder.id,
                 prefill: {
-                    name: user?.fullname || shippingAddress?.fullName || "",
+                    name: shippingAddress?.fullName || user?.fullname || "",
                     email: user?.email || "",
-                    contact: user?.contact || shippingAddress?.phone || "",
+                    contact: shippingAddress?.phone || user?.contact || "",
                 },
                 theme: {
                     color: "#000000",
@@ -350,15 +387,34 @@ export default function CartPage() {
                     escape: true,
                     backdropclose: false,
                 },
-                handler: (response) => {
-                    console.log("Payment successful:", response);
-                    setPaymentResult({
-                        paymentId: response.razorpay_payment_id,
-                        orderId: response.razorpay_order_id,
-                        signature: response.razorpay_signature,
-                    });
-                    setIsCheckingOut(false);
-                    setStep(3);
+                handler: async (response) => {
+                    console.log("Payment successful at gateway, verifying on server:", response);
+                    setIsCheckingOut(true);
+                    try {
+                        const verifyRes = await verifyPaymentAndPlaceOrder({
+                            razorpay_order_id: response.razorpay_order_id,
+                            razorpay_payment_id: response.razorpay_payment_id,
+                            razorpay_signature: response.razorpay_signature,
+                            addressId: shippingAddress._id,
+                            addressData: shippingAddress,
+                            paymentMethod: method,
+                            discount: discountAmount,
+                            shippingFee: 0,
+                        });
+
+                        if (verifyRes?.success && verifyRes?.order) {
+                            dispatch(clearCart());
+                            setConfirmedOrder(verifyRes.order);
+                            navigate(`/order-success/${verifyRes.order._id}`);
+                        } else {
+                            throw new Error(verifyRes?.message || "Payment verification failed.");
+                        }
+                    } catch (verifyErr) {
+                        console.error("Payment verification failed on server:", verifyErr);
+                        setError(verifyErr?.response?.data?.message || verifyErr.message || "Payment verification failed. Please contact support.");
+                    } finally {
+                        setIsCheckingOut(false);
+                    }
                 },
             };
 
@@ -817,7 +873,7 @@ export default function CartPage() {
                                         onUpdateAddress={handleUpdateAddress}
                                         onDeleteAddress={handleDeleteAddress}
                                         onBackToBag={() => setStep(1)}
-                                        onProceedToPayment={handleCheckout}
+                                        onProceedToPayment={() => setStep(3)}
                                         isLoading={cartLoading || isCheckingOut}
                                     />
                                 )}
@@ -833,6 +889,7 @@ export default function CartPage() {
                                         onPlaceOrder={handleCheckout}
                                         isProcessing={isCheckingOut}
                                         paymentResult={paymentResult}
+                                        confirmedOrder={confirmedOrder}
                                     />
                                 )}
 
@@ -1000,15 +1057,15 @@ export default function CartPage() {
                                             type="button"
                                             onClick={() => {
                                                 if (!shippingAddress) {
-                                                    alert("Please select or add a delivery address to proceed.");
+                                                    setError("Please select or add a delivery address to proceed.");
                                                     return;
                                                 }
-                                                handleCheckout();
+                                                setStep(3);
                                             }}
                                             disabled={!shippingAddress || isCheckingOut}
                                             className="w-full py-4 bg-black hover:bg-zinc-800 disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.99] text-white font-extrabold text-xs uppercase tracking-widest rounded-full transition-all cursor-pointer shadow-md hover:shadow-lg flex items-center justify-center gap-2 font-mono-code"
                                         >
-                                            <span>{isCheckingOut ? "Preparing Payment..." : "Proceed To Payment"}</span>
+                                            <span>Continue To Payment</span>
                                             <span className="text-sm">→</span>
                                         </button>
                                     )}
