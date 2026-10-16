@@ -40,6 +40,14 @@ passport.use(
     )
 );
 
+// Normalize repeated or leading double slashes in req.url e.g. //api/orders -> /api/orders (Express 5 strict routing)
+app.use((req, res, next) => {
+    if (req.url.startsWith("//")) {
+        req.url = req.url.replace(/^\/+/, "/");
+    }
+    next();
+});
+
 const allowedOrigins = [
     config.CLIENT_URL?.replace(/\/$/, ""),
     "http://localhost:5173",
@@ -49,7 +57,13 @@ const allowedOrigins = [
 app.use(
     cors({
         origin: (origin, callback) => {
-            if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
+            if (
+                !origin ||
+                allowedOrigins.includes(origin) ||
+                allowedOrigins.includes(origin.replace(/\/$/, "")) ||
+                origin.endsWith(".vercel.app") ||
+                origin.includes("localhost")
+            ) {
                 return callback(null, true);
             }
             return callback(new Error(`CORS blocked request from origin: ${origin}`));
