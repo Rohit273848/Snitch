@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+ import React, { useEffect, useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getOrderById, cancelOrder } from "../services/order.api.js";
 
@@ -203,8 +203,8 @@ export default function OrderTrackingPage() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [order, setOrder] = useState(DEFAULT_REFERENCE_ORDER);
-    const [loading, setLoading] = useState(false);
+    const [order, setOrder] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [copiedTracking, setCopiedTracking] = useState(false);
     const [copiedTransaction, setCopiedTransaction] = useState(false);
     const [copiedOrderRef, setCopiedOrderRef] = useState(false);
@@ -217,58 +217,173 @@ export default function OrderTrackingPage() {
 
     // ─── Fetch Order from API / DB if available ───────────────────────────────
     useEffect(() => {
-        if (!id) return;
+        if (!id) {
+            setOrder(DEFAULT_REFERENCE_ORDER);
+            setLoading(false);
+            return;
+        }
         setLoading(true);
 
         getOrderById(id)
             .then((res) => {
                 if (res?.order) {
                     const dbOrd = res.order;
-                    setOrder((prev) => ({
-                        ...prev,
-                        _id: dbOrd._id || prev._id,
-                        orderNumber: dbOrd.orderNumber || prev.orderNumber,
-                        status: dbOrd.orderStatus || prev.status,
-                        courier: dbOrd.tracking?.carrier || prev.courier,
-                        trackingNumber: dbOrd.tracking?.trackingNumber || prev.trackingNumber,
+
+                    // 1. Map items dynamically for this specific order
+                    const mappedItems = Array.isArray(dbOrd.items) && dbOrd.items.length > 0
+                        ? dbOrd.items.map((item, idx) => {
+                              // Resolve cover image from item or populated product
+                              let itemImg = item.coverImage || "";
+                              if (!itemImg && item.product) {
+                                  if (Array.isArray(item.product.images) && item.product.images.length > 0) {
+                                      const cover = item.product.images.find((im) => im && (im.isCover || im.isPrimary)) || item.product.images[0];
+                                      itemImg = typeof cover === "string" ? cover : (cover?.url || "");
+                                  } else if (typeof item.product.image === "string") {
+                                      itemImg = item.product.image;
+                                  }
+                              }
+                              if (!itemImg) {
+                                  itemImg = "/editorial/overshirt_olive_piece.jpg";
+                              }
+
+                              // Determine item shipment status based on overall orderStatus
+                              let itemStatus = "READY TO SHIP";
+                              const oStatus = (dbOrd.orderStatus || "").toUpperCase();
+                              if (oStatus === "CANCELLED") itemStatus = "CANCELLED";
+                              else if (oStatus === "DELIVERED") itemStatus = "DELIVERED";
+                              else if (oStatus === "OUT_FOR_DELIVERY") itemStatus = "OUT FOR DELIVERY";
+                              else if (oStatus === "SHIPPED" || oStatus === "IN_TRANSIT") itemStatus = "IN TRANSIT";
+                              else if (oStatus === "PROCESSING" || oStatus === "PACKED") itemStatus = "PACKED";
+                              else if (oStatus === "CONFIRMED") itemStatus = "READY TO SHIP";
+                              else if (oStatus === "PLACED") itemStatus = "PROCESSING ORDER";
+
+                              const unitPrice = Number(item.unitPrice || 0);
+                              const quantity = Number(item.quantity || 1);
+                              const lineTotal = Number(item.itemTotal != null ? item.itemTotal : unitPrice * quantity);
+
+                              return {
+                                  id: item._id || (item.product?._id ? `${item.product._id}-${idx}` : `${dbOrd._id}-${idx}`),
+                                  productId: item.product?._id || (typeof item.product === "string" ? item.product : null),
+                                  title: item.title || item.product?.title || "Velmora Tailored Piece",
+                                  status: itemStatus,
+                                  quantity,
+                                  unitPrice: `₹${unitPrice.toLocaleString("en-IN")}`,
+                                  lineTotal: `₹${lineTotal.toLocaleString("en-IN")}`,
+                                  image: itemImg,
+                                  variant: item.variant || null,
+                              };
+                          })
+                        : DEFAULT_REFERENCE_ORDER.items;
+
+                    // 2. Map tracking activity events
+                    const mappedLogs = Array.isArray(dbOrd.tracking?.events) && dbOrd.tracking.events.length > 0
+                        ? [...dbOrd.tracking.events].reverse().map((ev, idx) => ({
+                              id: ev._id || `act-${idx}`,
+                              type: ev.status === "CONFIRMED" || (ev.title && ev.title.toLowerCase().includes("payment")) ? "payment" : "order",
+                              title: ev.title || "Status Updated",
+                              description: ev.description || "",
+                              location: ev.location ? ev.location.toUpperCase() : "VELMORA LOGISTICS HUB",
+                              time: ev.timestamp
+                                  ? new Date(ev.timestamp).toLocaleDateString("en-US", {
+                                        day: "numeric",
+                                        month: "short",
+                                        hour: "2-digit",
+                                        minute: "2-digit",
+                                    }).toUpperCase()
+                                  : "",
+                          }))
+                        : DEFAULT_REFERENCE_ORDER.activityLogs;
+
+                    const formattedPlacedDate = dbOrd.createdAt
+                        ? new Date(dbOrd.createdAt).toLocaleDateString("en-US", {
+                              day: "numeric",
+                              month: "short",
+                              year: "numeric",
+                          })
+                        : DEFAULT_REFERENCE_ORDER.placedDate;
+
+                    const subtotalNum = Number(dbOrd.pricing?.subtotal || 0);
+                    const discountNum = Number(dbOrd.pricing?.discount || 0);
+                    const shippingNum = Number(dbOrd.pricing?.shippingFee || 0);
+                    const totalNum = Number(dbOrd.pricing?.totalAmount || (subtotalNum - discountNum + shippingNum));
+
+                    setOrder({
+                        _id: dbOrd._id || id,
+                        orderNumber: dbOrd.orderNumber || "SN-ORDER",
+                        placedDate: formattedPlacedDate,
+                        status: dbOrd.orderStatus || "CONFIRMED",
+                        courier: dbOrd.tracking?.carrier || "Velmora Express Courier",
+                        trackingNumber: dbOrd.tracking?.trackingNumber || "SNTRK-PENDING",
                         estimatedDelivery: dbOrd.tracking?.estimatedDelivery
                             ? new Date(dbOrd.tracking.estimatedDelivery).toLocaleDateString("en-US", {
                                   weekday: "short",
                                   day: "numeric",
                                   month: "short",
                               })
-                            : prev.estimatedDelivery,
+                            : DEFAULT_REFERENCE_ORDER.estimatedDelivery,
+                        items: mappedItems,
+                        activityLogs: mappedLogs,
                         shippingAddress: dbOrd.shippingAddress
                             ? {
                                   addressType: dbOrd.shippingAddress.addressType || "HOME",
-                                  fullName: dbOrd.shippingAddress.fullName || prev.shippingAddress.fullName,
-                                  phone: dbOrd.shippingAddress.phone ? `+91 ${dbOrd.shippingAddress.phone}` : prev.shippingAddress.phone,
-                                  street: dbOrd.shippingAddress.street || prev.shippingAddress.street,
-                                  cityStateZip: `${dbOrd.shippingAddress.city || "jalgoan"}, ${dbOrd.shippingAddress.state || "Maharashtra"} - ${dbOrd.shippingAddress.pincode || "425508"}`,
+                                  fullName: dbOrd.shippingAddress.fullName || DEFAULT_REFERENCE_ORDER.shippingAddress.fullName,
+                                  phone: dbOrd.shippingAddress.phone ? `+91 ${String(dbOrd.shippingAddress.phone).replace(/^\+?91\s*/, "")}` : DEFAULT_REFERENCE_ORDER.shippingAddress.phone,
+                                  street: dbOrd.shippingAddress.street || DEFAULT_REFERENCE_ORDER.shippingAddress.street,
+                                  cityStateZip: `${dbOrd.shippingAddress.city || ""}, ${dbOrd.shippingAddress.state || ""} - ${dbOrd.shippingAddress.pincode || ""}`.replace(/^,\s*|-\s*$/g, ""),
                                   country: dbOrd.shippingAddress.country || "India",
                               }
-                            : prev.shippingAddress,
+                            : DEFAULT_REFERENCE_ORDER.shippingAddress,
                         payment: dbOrd.payment
                             ? {
-                                  method: dbOrd.payment.method === "upi" ? "Online (Razorpay)" : prev.payment.method,
-                                  subtotal: `₹${Number(dbOrd.pricing?.subtotal || 1013).toLocaleString("en-IN")}`,
-                                  discount: dbOrd.pricing?.discount ? `-₹${Number(dbOrd.pricing.discount).toLocaleString("en-IN")}` : "-₹101",
-                                  shipping: "FREE",
-                                  total: `₹${Number(dbOrd.pricing?.totalAmount || 912).toLocaleString("en-IN")}`,
-                                  transactionId: dbOrd.payment.razorpayPaymentId || prev.payment.transactionId,
-                                  isPaid: dbOrd.payment.status === "completed" || true,
+                                  method: dbOrd.payment.method === "cod" ? "Cash on Delivery" : "Online (Razorpay)",
+                                  subtotal: `₹${subtotalNum.toLocaleString("en-IN")}`,
+                                  discount: discountNum > 0 ? `-₹${discountNum.toLocaleString("en-IN")}` : "₹0",
+                                  shipping: shippingNum > 0 ? `₹${shippingNum.toLocaleString("en-IN")}` : "FREE",
+                                  total: `₹${totalNum.toLocaleString("en-IN")}`,
+                                  transactionId: dbOrd.payment.razorpayPaymentId || dbOrd.payment.razorpayOrderId || "COD-VERIFIED",
+                                  isPaid: dbOrd.payment.status === "completed" || dbOrd.payment.method !== "cod",
                               }
-                            : prev.payment,
-                    }));
+                            : DEFAULT_REFERENCE_ORDER.payment,
+                    });
+                } else {
+                    setOrder(DEFAULT_REFERENCE_ORDER);
                 }
             })
             .catch((err) => {
                 console.warn("Using supplied reference order values:", err?.message);
+                setOrder(DEFAULT_REFERENCE_ORDER);
             })
             .finally(() => {
                 setLoading(false);
             });
     }, [id]);
+
+    // ─── Milestone Calculation based on current order status ──────────────────
+    const getMilestoneIndex = (status) => {
+        switch ((status || "").toUpperCase()) {
+            case "PLACED":
+                return 0;
+            case "CONFIRMED":
+                return 1;
+            case "PROCESSING":
+            case "PACKED":
+                return 2;
+            case "SHIPPED":
+            case "IN_TRANSIT":
+                return 3;
+            case "OUT_FOR_DELIVERY":
+                return 4;
+            case "DELIVERED":
+                return 5;
+            case "CANCELLED":
+                return -1;
+            default:
+                return 1;
+        }
+    };
+
+    const activeMilestoneIndex = getMilestoneIndex(order?.status);
+    const isCancelled = order?.status === "CANCELLED";
 
     // ─── Copy Utilities ───────────────────────────────────────────────────────
     const handleCopy = (text, setCopiedFn) => {
@@ -282,12 +397,12 @@ export default function OrderTrackingPage() {
     const handleConfirmCancel = async () => {
         setCancelling(true);
         try {
-            if (order._id) {
+            if (order?._id) {
                 await cancelOrder(order._id, cancelReason).catch(() => {});
             }
-            setOrder((prev) => ({ ...prev, status: "CANCELLED" }));
+            setOrder((prev) => (prev ? { ...prev, status: "CANCELLED" } : null));
             setShowCancelModal(false);
-            setToastMessage("Order cancellation confirmed. Full refund of ₹912 initiated to your UPI account.");
+            setToastMessage(`Order cancellation confirmed. Full refund of ${order?.payment?.total || "amount"} initiated to your original payment method.`);
             setTimeout(() => setToastMessage(""), 5000);
         } catch (err) {
             console.error("Cancel order error:", err);
@@ -296,6 +411,32 @@ export default function OrderTrackingPage() {
             setCancelling(false);
         }
     };
+
+    if (loading && !order) {
+        return (
+            <div className="min-h-screen bg-[#FBF9F5] flex flex-col items-center justify-center space-y-4 font-interface-sans text-[#171717]">
+                <div className="w-9 h-9 border-2 border-[#171717] border-t-transparent rounded-full animate-spin" />
+                <span className="text-[11px] uppercase tracking-[0.22em] font-semibold text-[#737373]">
+                    RETRIEVING ORDER MANIFEST...
+                </span>
+            </div>
+        );
+    }
+
+    if (!order) {
+        return (
+            <div className="min-h-screen bg-[#FBF9F5] flex flex-col items-center justify-center space-y-4 font-interface-sans text-[#171717]">
+                <h2 className="font-editorial-serif text-3xl font-normal text-[#171717]">Order Not Found</h2>
+                <p className="text-xs text-[#737373]">We could not locate this order manifest in our records.</p>
+                <Link
+                    to="/orders"
+                    className="mt-2 px-5 py-2.5 bg-[#171717] text-[#FBF9F5] text-[10px] font-semibold uppercase tracking-[0.18em]"
+                >
+                    BACK TO MY ORDERS
+                </Link>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#FBF9F5] text-[#171717] selection:bg-[#171717] selection:text-[#FBF9F5] antialiased">
@@ -477,7 +618,7 @@ export default function OrderTrackingPage() {
                                     </p>
                                 </div>
                                 <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-[#737373]">
-                                    MILESTONE 2 OF 6
+                                    {isCancelled ? "ORDER CANCELLED" : `MILESTONE ${Math.min(6, activeMilestoneIndex + 1)} OF 6`}
                                 </span>
                             </div>
 
@@ -486,23 +627,40 @@ export default function OrderTrackingPage() {
                                 {/* Horizontal Connecting Line */}
                                 <div className="hidden sm:block absolute top-7 left-8 right-8 h-0.5 bg-[#ECE7DD] -z-0" />
                                 <div
-                                    className="hidden sm:block absolute top-7 left-8 h-0.5 bg-[#171717] transition-all duration-500 -z-0"
-                                    style={{ width: "20%" }}
+                                    className={`hidden sm:block absolute top-7 left-8 h-0.5 transition-all duration-500 -z-0 ${
+                                        isCancelled ? "bg-[#9E2A2B]" : "bg-[#171717]"
+                                    }`}
+                                    style={{
+                                        width: isCancelled
+                                            ? "100%"
+                                            : `${Math.min(100, Math.max(0, (activeMilestoneIndex / (MILESTONE_STAGES.length - 1)) * 100))}%`,
+                                    }}
                                 />
 
                                 <div className="grid grid-cols-2 sm:grid-cols-6 gap-6 sm:gap-2 relative z-10 text-center">
                                     {MILESTONE_STAGES.map((stage, idx) => {
-                                        const isCompleted = idx === 0; // Order Placed is complete
-                                        const isCurrent = idx === 1; // Confirmed is active milestone
-                                        const isUpcoming = idx > 1; // Remaining are upcoming
+                                        const isCompleted = !isCancelled && (idx < activeMilestoneIndex || (activeMilestoneIndex === 5 && idx === 5));
+                                        const isCurrent = !isCancelled && idx === activeMilestoneIndex;
+                                        const isUpcoming = isCancelled || idx > activeMilestoneIndex;
                                         const StageIcon = stage.icon;
+
+                                        let subtext = "Upcoming";
+                                        if (isCancelled) {
+                                            subtext = "Cancelled";
+                                        } else if (isCurrent) {
+                                            subtext = "Active Milestone";
+                                        } else if (isCompleted) {
+                                            subtext = idx === 0 ? (order.placedDate || "Completed") : "Completed";
+                                        }
 
                                         return (
                                             <div key={stage.key} className="flex flex-col items-center space-y-2">
                                                 {/* Milestone Circle */}
                                                 <div
                                                     className={`w-9 h-9 rounded-full flex items-center justify-center transition-all ${
-                                                        isCompleted
+                                                        isCancelled
+                                                            ? "bg-[#FDF2F2] border border-[#F8D7DA] text-[#9E2A2B]"
+                                                            : isCompleted
                                                             ? "bg-[#171717] text-[#FBF9F5] shadow-xs"
                                                             : isCurrent
                                                             ? "bg-[#4A5340] text-[#FBF9F5] ring-4 ring-[#EAEFE6] shadow-sm"
@@ -520,13 +678,15 @@ export default function OrderTrackingPage() {
                                                                 ? "text-[#171717]"
                                                                 : isCompleted
                                                                 ? "text-[#171717]"
+                                                                : isCancelled
+                                                                ? "text-[#9E2A2B]"
                                                                 : "text-[#8A857B]"
                                                         }`}
                                                     >
                                                         {stage.label}
                                                     </span>
                                                     <span className="text-[10px] text-[#737373] block mt-0.5 tracking-wide">
-                                                        {stage.subtext}
+                                                        {subtext}
                                                     </span>
                                                 </div>
                                             </div>
@@ -592,7 +752,7 @@ export default function OrderTrackingPage() {
                             </div>
                         </div>
 
-                        {/* ─── 3. ITEMS IN THIS SHIPMENT (1) ──────────────────── */}
+                        {/* ─── 3. ITEMS IN THIS SHIPMENT ──────────────────── */}
                         <div className="bg-[#FBF9F5] border border-[#ECE7DD] p-6 sm:p-7 space-y-6 shadow-xs">
                             <div className="flex items-center justify-between border-b border-[#ECE7DD] pb-4">
                                 <h3 className="font-editorial-serif text-2xl font-normal text-[#171717]">
@@ -606,10 +766,10 @@ export default function OrderTrackingPage() {
                             <div className="space-y-4">
                                 {order.items.map((item, idx) => (
                                     <div
-                                        key={idx}
-                                        className="p-5 bg-[#F5F2EB] border border-[#ECE7DD] flex flex-col sm:flex-row sm:items-center justify-between gap-5"
+                                        key={item.id || idx}
+                                        className="p-5 bg-[#F5F2EB] border border-[#ECE7DD] flex flex-col sm:flex-row sm:items-center justify-between gap-5 transition-all"
                                     >
-                                        <div className="flex items-center gap-5">
+                                        <div className="flex items-start sm:items-center gap-5">
                                             <div className="w-20 h-20 bg-[#EAE5D9] border border-[#ECE7DD] flex-shrink-0 overflow-hidden">
                                                 <img
                                                     src={item.image}
@@ -622,12 +782,50 @@ export default function OrderTrackingPage() {
                                             </div>
 
                                             <div className="space-y-1">
-                                                <span className="text-[9px] uppercase tracking-[0.22em] font-semibold text-[#737373] block">
+                                                <span className={`text-[9px] uppercase tracking-[0.22em] font-semibold block ${
+                                                    item.status === "CANCELLED"
+                                                        ? "text-[#9E2A2B]"
+                                                        : item.status === "DELIVERED"
+                                                        ? "text-[#4A5340]"
+                                                        : "text-[#737373]"
+                                                }`}>
                                                     {item.status}
                                                 </span>
-                                                <h4 className="font-editorial-serif text-2xl font-normal text-[#171717]">
-                                                    {item.title}
-                                                </h4>
+
+                                                {item.productId ? (
+                                                    <Link
+                                                        to={`/product/${item.productId}`}
+                                                        className="font-editorial-serif text-2xl font-normal text-[#171717] hover:text-[#4A5340] hover:underline transition-colors block"
+                                                    >
+                                                        {item.title}
+                                                    </Link>
+                                                ) : (
+                                                    <h4 className="font-editorial-serif text-2xl font-normal text-[#171717]">
+                                                        {item.title}
+                                                    </h4>
+                                                )}
+
+                                                {/* Variant details (Size, Color, SKU) */}
+                                                {item.variant && (item.variant.size || item.variant.color || item.variant.sku) && (
+                                                    <div className="flex flex-wrap items-center gap-2 pt-0.5 pb-1">
+                                                        {item.variant.size && (
+                                                            <span className="px-2 py-0.5 bg-[#EAE5D9] text-[#171717] text-[10px] font-semibold uppercase tracking-wider border border-[#D5CEBF]">
+                                                                Size: {item.variant.size}
+                                                            </span>
+                                                        )}
+                                                        {item.variant.color && (
+                                                            <span className="px-2 py-0.5 bg-[#EAE5D9] text-[#525252] text-[10px] font-semibold uppercase tracking-wider border border-[#D5CEBF]">
+                                                                Color: {item.variant.color}
+                                                            </span>
+                                                        )}
+                                                        {item.variant.sku && (
+                                                            <span className="text-[10px] text-[#737373] font-mono">
+                                                                SKU: {item.variant.sku}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                )}
+
                                                 <p className="text-xs text-[#737373] tracking-wide">
                                                     Quantity: {item.quantity}
                                                 </p>

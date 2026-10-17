@@ -8,17 +8,17 @@ export const DEFAULT_ENSEMBLE_ITEMS = [
             _id: "velmora-overshirt",
             title: "The Field Overshirt",
             category: "Outerwear",
-            price: { amount: 240, currency: "USD" },
+            price: { amount: 2490, currency: "INR" },
             images: [{ url: "/editorial/overshirt_olive_piece.jpg", isCover: true }],
         },
         title: "The Field Overshirt",
         color: "Muted Olive",
         size: "M",
         fabric: "100% Textured Cotton • Portuguese Mill",
-        unitPrice: 240,
-        price: { amount: 240, currency: "USD" },
+        unitPrice: 2490,
+        price: { amount: 2490, currency: "INR" },
         quantity: 1,
-        itemTotal: 240,
+        itemTotal: 2490,
         inStock: true,
         image: "/editorial/overshirt_olive_piece.jpg",
     },
@@ -29,17 +29,17 @@ export const DEFAULT_ENSEMBLE_ITEMS = [
             _id: "velmora-supima-tee",
             title: "Heavyweight Supima Tee",
             category: "Knitwear",
-            price: { amount: 90, currency: "USD" },
+            price: { amount: 1290, currency: "INR" },
             images: [{ url: "/editorial/supima_tee_piece.jpg", isCover: true }],
         },
         title: "Heavyweight Supima Tee",
         color: "Chalk White",
         size: "M",
         fabric: "280 GSM Supima Jersey • Organic",
-        unitPrice: 90,
-        price: { amount: 90, currency: "USD" },
+        unitPrice: 1290,
+        price: { amount: 1290, currency: "INR" },
         quantity: 1,
-        itemTotal: 90,
+        itemTotal: 1290,
         inStock: true,
         image: "/editorial/supima_tee_piece.jpg",
     },
@@ -50,17 +50,17 @@ export const DEFAULT_ENSEMBLE_ITEMS = [
             _id: "velmora-pleated-trouser",
             title: "Relaxed Pleated Trouser",
             category: "Trousers",
-            price: { amount: 210, currency: "USD" },
+            price: { amount: 2890, currency: "INR" },
             images: [{ url: "/editorial/pleated_trouser_piece.jpg", isCover: true }],
         },
         title: "Relaxed Pleated Trouser",
         color: "Deep Charcoal",
         size: "32",
         fabric: "Italian Super 120s Wool • Tailored Cuff",
-        unitPrice: 210,
-        price: { amount: 210, currency: "USD" },
+        unitPrice: 2890,
+        price: { amount: 2890, currency: "INR" },
         quantity: 1,
-        itemTotal: 210,
+        itemTotal: 2890,
         inStock: true,
         image: "/editorial/pleated_trouser_piece.jpg",
     },
@@ -99,7 +99,11 @@ const cartSlice = createSlice({
             } else if (payload && Array.isArray(payload.items)) {
                 state.items = filterValidItems(payload.items);
                 state.totalPrice = state.items.length === 0 ? 0 : Number(payload.totalPrice || 0);
-                state.currency = payload.currency || "USD";
+                const firstItemCurrency = payload.items.find((i) => i?.price?.currency || i?.product?.price?.currency);
+                state.currency =
+                    payload.currency && payload.currency !== "USD"
+                        ? payload.currency
+                        : firstItemCurrency?.price?.currency || firstItemCurrency?.product?.price?.currency || payload.currency || "INR";
                 if (payload.shippingAddress !== undefined) {
                     state.shippingAddress = payload.shippingAddress;
                 }
@@ -226,7 +230,8 @@ const cartSlice = createSlice({
         },
         resetToDefaultEnsemble: (state) => {
             state.items = DEFAULT_ENSEMBLE_ITEMS;
-            state.totalPrice = 540;
+            state.totalPrice = 6670;
+            state.currency = "INR";
             state.currentStep = 1;
         },
         setShippingAddress: (state, action) => {

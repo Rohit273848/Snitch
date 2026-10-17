@@ -187,6 +187,7 @@ export const getMyOrdersController = async (req, res) => {
 export const getOrderByIdController = async (req, res) => {
     try {
         const userId = req.user?._id || req.user?.id;
+        const isSeller = req.user?.role === "seller";
         const { orderId } = req.params;
 
         if (!orderId) {
@@ -196,7 +197,7 @@ export const getOrderByIdController = async (req, res) => {
             });
         }
 
-        const order = await getOrderByIdOrNumber(orderId, userId);
+        const order = await getOrderByIdOrNumber(orderId, isSeller ? null : userId);
 
         if (!order) {
             return res.status(404).json({

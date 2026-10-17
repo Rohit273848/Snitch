@@ -21,7 +21,7 @@ import {
 } from "../../orders/services/order.api.js";
 
 // ─── Currency symbol helper ──────────────────────────────────────────────────
-const currencySymbol = { USD: "$", INR: "₹", EUR: "€", GBP: "£", JPY: "¥" };
+const currencySymbol = { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" };
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 function MinusIcon({ className = "w-3 h-3" }) {
@@ -164,9 +164,15 @@ export default function CartPage() {
             const color = item.color || item.variant?.attributes?.Color || matchedEnsemble?.color || "Muted Olive";
             const size = item.size || item.variant?.attributes?.Size || matchedEnsemble?.size || "M";
             const fabric = item.fabric || matchedEnsemble?.fabric || "100% Textured Cotton • Portuguese Mill";
-            const unitPrice = Number(item.unitPrice ?? item.price?.amount ?? product.price?.amount ?? matchedEnsemble?.unitPrice ?? 240);
+            const unitPrice = Number(item.unitPrice ?? item.price?.amount ?? product.price?.amount ?? matchedEnsemble?.unitPrice ?? 2490);
             const quantity = Number(item.quantity || 1);
             const lineTotal = Number(item.itemTotal ?? unitPrice * quantity);
+            const itemCurrency =
+                item.price?.currency ||
+                product.price?.currency ||
+                matchedEnsemble?.price?.currency ||
+                (cartCurrency && cartCurrency !== "USD" ? cartCurrency : "INR");
+            const itemSymbol = currencySymbol[itemCurrency] || "₹";
             const image =
                 item.image ||
                 product.images?.find((img) => img?.isCover)?.url ||
@@ -185,10 +191,12 @@ export default function CartPage() {
                 unitPrice,
                 quantity,
                 lineTotal,
+                itemCurrency,
+                itemSymbol,
                 image,
             };
         });
-    }, [cartItems]);
+    }, [cartItems, cartCurrency]);
 
     // Quantity calculations
     const totalQuantity = items.reduce((sum, item) => sum + (Number(item.quantity) || 1), 0);
@@ -196,8 +204,14 @@ export default function CartPage() {
     const discountAmount = appliedDiscount ? Math.round((subtotal * appliedDiscount.percent) / 100) : 0;
     const finalTotal = Math.max(0, subtotal - discountAmount);
 
-    const currency = cartCurrency || "USD";
-    const symbol = currencySymbol[currency] || "$";
+    // Dynamic currency resolution: check items first, then cart state, defaulting strictly to INR
+    const itemWithCurrency = items.find((it) => it.itemCurrency || it.price?.currency || it.product?.price?.currency);
+    const activeCurrency =
+        cartCurrency && cartCurrency !== "USD"
+            ? cartCurrency
+            : itemWithCurrency?.itemCurrency || itemWithCurrency?.price?.currency || itemWithCurrency?.product?.price?.currency || cartCurrency || "INR";
+    const currency = activeCurrency;
+    const symbol = currencySymbol[activeCurrency] || "₹";
 
     // Handle Quantity Step
     const handleIncrease = async (item) => {
@@ -480,7 +494,7 @@ export default function CartPage() {
                                 onClick={() => dispatch(resetToDefaultEnsemble())}
                                 className="w-full sm:w-auto px-6 py-3.5 bg-[#1A1917] hover:bg-[#32312D] text-[#FBF9F5] text-[11px] font-semibold tracking-[0.2em] uppercase transition-all cursor-pointer"
                             >
-                                RESTORE ENSEMBLE ($540)
+                                RESTORE ENSEMBLE (₹6,670)
                             </button>
                             <Link
                                 to="/"
@@ -529,7 +543,7 @@ export default function CartPage() {
                                                                 {item.title}
                                                             </h3>
                                                             <span className="font-interface-sans text-sm sm:text-lg font-normal text-[#1A1917] flex-shrink-0">
-                                                                {symbol}{item.unitPrice}
+                                                                {item.itemSymbol || symbol}{Number(item.unitPrice).toLocaleString("en-IN")}
                                                             </span>
                                                         </div>
 
@@ -660,7 +674,7 @@ export default function CartPage() {
                                 <div className="space-y-3.5 text-xs text-[#5A564D]">
                                     <div className="flex justify-between">
                                         <span>Subtotal ({totalQuantity} pieces)</span>
-                                        <span className="text-[#1A1917] font-medium">{symbol}{subtotal.toFixed(2)}</span>
+                                        <span className="text-[#1A1917] font-medium">{symbol}{subtotal.toLocaleString("en-IN")}</span>
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span>Shipping</span>
@@ -668,7 +682,7 @@ export default function CartPage() {
                                             <span className="px-2 py-0.5 rounded-full bg-[#E8EFE5] text-[#3F4B34] text-[9px] font-bold tracking-widest uppercase">
                                                 COMPLIMENTARY
                                             </span>
-                                            <span className="text-[#1A1917] font-medium">{symbol}0.00</span>
+                                            <span className="text-[#1A1917] font-medium">{symbol}0</span>
                                         </div>
                                     </div>
                                     <div className="flex justify-between">
@@ -683,7 +697,7 @@ export default function CartPage() {
                                     {appliedDiscount && (
                                         <div className="flex justify-between text-[#4A5340] font-semibold">
                                             <span>Atelier Voucher ({appliedDiscount.code})</span>
-                                            <span>-{symbol}{discountAmount.toFixed(2)}</span>
+                                            <span>-{symbol}{discountAmount.toLocaleString("en-IN")}</span>
                                         </div>
                                     )}
                                 </div>
@@ -699,7 +713,7 @@ export default function CartPage() {
                                         </span>
                                     </div>
                                     <span className="font-editorial-serif text-3xl sm:text-4xl font-normal text-[#1A1917]">
-                                        {symbol}{finalTotal.toFixed(2)}
+                                        {symbol}{finalTotal.toLocaleString("en-IN")}
                                     </span>
                                 </div>
 
@@ -779,7 +793,7 @@ export default function CartPage() {
                                             disabled={isCheckingOut}
                                             className="w-full py-4 bg-[#1A1917] hover:bg-[#32312D] disabled:opacity-50 text-[#FBF9F5] font-interface-sans text-xs sm:text-[13px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-98 shadow-sm cursor-pointer flex items-center justify-center gap-2"
                                         >
-                                            <span>{isCheckingOut ? "PROCESSING..." : `PAY ${symbol}${finalTotal.toFixed(2)} VIA RAZORPAY`}</span>
+                                            <span>{isCheckingOut ? "PROCESSING..." : `PAY ${symbol}${finalTotal.toLocaleString("en-IN")} VIA RAZORPAY`}</span>
                                             <span className="text-sm">→</span>
                                         </button>
                                     )}
@@ -950,10 +964,10 @@ export default function CartPage() {
                                 REGION &amp; CURRENCY
                             </h4>
                             <p className="text-xs font-semibold text-[#1A1917]">
-                                UNITED STATES (USD $)
+                                INDIA (INR ₹)
                             </p>
                             <p className="text-[11px] text-[#6C685F] leading-normal">
-                                Duties &amp; local sales taxes calculated at checkout.
+                                All domestic atelier taxes included at dispatch.
                             </p>
                         </div>
 
