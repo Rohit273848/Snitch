@@ -1,48 +1,28 @@
 import React, { useEffect, useState, useMemo, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useProduct } from "../hook/useProduct.js";
 import { useSelector } from "react-redux";
-
-// ─── Google Fonts loader ──────────────────────────────────────────────────────
-function FontLoader() {
-    useEffect(() => {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href =
-            "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap";
-        document.head.appendChild(link);
-    }, []);
-    return null;
-}
 
 // ─── Currency symbol helper ──────────────────────────────────────────────────
 const currencySymbol = { INR: "₹", USD: "$", EUR: "€", GBP: "£", JPY: "¥" };
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
-function SearchIcon({ className = "w-4 h-4" }) {
-    return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
-        </svg>
-    );
-}
-
 function HeartIcon({ filled = false, className = "w-4 h-4" }) {
     if (filled) {
         return (
-            <svg className={className} viewBox="0 0 24 24" fill="#e11d48" stroke="#e11d48" strokeWidth="1.5">
+            <svg className={className} viewBox="0 0 24 24" fill="#8B263E" stroke="#8B263E" strokeWidth="1.5">
                 <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
             </svg>
         );
     }
     return (
-        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+        <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
             <path strokeLinecap="round" strokeLinejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
         </svg>
     );
 }
 
-function PlusIcon({ className = "w-4 h-4" }) {
+function PlusIcon({ className = "w-3.5 h-3.5" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
@@ -50,31 +30,47 @@ function PlusIcon({ className = "w-4 h-4" }) {
     );
 }
 
-function ChevronLeftIcon({ className = "w-5 h-5" }) {
+function ChevronLeftIcon({ className = "w-4 h-4" }) {
     return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
         </svg>
     );
 }
 
-function ChevronRightIcon({ className = "w-5 h-5" }) {
+function ChevronRightIcon({ className = "w-4 h-4" }) {
     return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
     );
 }
 
-function BagIcon({ className = "w-5 h-5" }) {
+function WeaveIcon({ className = "w-5 h-5" }) {
     return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 10.5V6a3.75 3.75 0 10-7.5 0v4.5m11.356-1.993l1.263 12c.07.665-.45 1.243-1.119 1.243H4.25c-.67 0-1.19-.578-1.12-1.243l1.264-12A1.125 1.125 0 015.513 7.5h12.974c.576 0 1.059.435 1.125 1.007z" />
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5M6.75 3.75v16.5M12 3.75v16.5m5.25-16.5v16.5" />
         </svg>
     );
 }
 
-function XIcon({ className = "w-4 h-4" }) {
+function RulerIcon({ className = "w-5 h-5" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04a.996.996 0 000-1.41l-2.34-2.34a.996.996 0 00-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
+        </svg>
+    );
+}
+
+function ShieldIcon({ className = "w-5 h-5" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+        </svg>
+    );
+}
+
+function XIcon({ className = "w-3.5 h-3.5" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
@@ -82,189 +78,81 @@ function XIcon({ className = "w-4 h-4" }) {
     );
 }
 
-function SortIcon({ className = "w-4 h-4" }) {
-    return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5-3L16.5 21m0 0L12 16.5m4.5 4.5V7.5" />
-        </svg>
-    );
-}
-
-function PackageIcon({ className = "w-8 h-8" }) {
-    return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round"
-                d="M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z" />
-        </svg>
-    );
-}
-
-// ─── Hero Carousel Banners ("Ads with images") ────────────────────────────────
-const HERO_BANNERS = [
+// ─── Editorial Looks Carousel Data (Split Hero Left Box) ─────────────────────
+const EDITORIAL_LOOKS = [
     {
-        id: "banner-1",
-        tag: "AUTUMN DROP '26",
-        title: "NEW STREETWEAR ARRIVALS",
-        subtitle: "Luxury Boxy Cuts, Oversized Drops & Heavyweight Fabrics",
-        offer: "FLAT 40% OFF",
-        image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?auto=format&fit=crop&w=1600&q=80",
-        cta: "EXPLORE DROP",
-        category: "all",
+        lookNumber: "01",
+        totalLooks: "03",
+        title: "LOOK 01 / TRANSITIONAL OUTERWEAR",
+        cloth: "Cloth: 100% Organic Melton & Combed Slub Cotton",
+        atelier: "AUTUMN / BORDEAUX ATELIER",
+        ensemblePrice: 6670,
+        primaryTarget: "snitch-overshirt",
     },
     {
-        id: "banner-2",
-        tag: "DENIM ARCHIVE",
-        title: "THE DENIM REVOLUTION",
-        subtitle: "Vintage Washes, Relaxed Straight Cuts & Baggy Fits",
-        offer: "STARTING ₹899",
-        image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d?auto=format&fit=crop&w=1600&q=80",
-        cta: "SHOP JEANS",
-        category: "jeans",
+        lookNumber: "02",
+        totalLooks: "03",
+        title: "LOOK 02 / STRUCTURED MINIMALISM",
+        cloth: "Cloth: 280 GSM Supima Cotton & Italian Super 120s Wool",
+        atelier: "MILAN / NAVIGLI ATELIER",
+        ensemblePrice: 4180,
+        primaryTarget: "snitch-supima-tee",
     },
     {
-        id: "banner-3",
-        tag: "RESORT WEAR",
-        title: "CUBAN COLLARS & RESORT EDIT",
-        subtitle: "Signature Printed Silhouettes Designed for Sun & Night",
-        offer: "TRENDING NOW",
-        image: "https://images.unsplash.com/photo-1469334031218-e382a71b716b?auto=format&fit=crop&w=1600&q=80",
-        cta: "VIEW SHIRTS",
-        category: "shirt",
-    },
-    {
-        id: "banner-4",
-        tag: "SNITCH FOR HER",
-        title: "GIRLS STREETWEAR EDIT",
-        subtitle: "Parachute Pants, Baby Tees & Effortless Layering",
-        offer: "EXCLUSIVE CAPSULE",
-        image: "https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1600&q=80",
-        cta: "DISCOVER GIRLS",
-        category: "girls",
-    },
-    {
-        id: "banner-5",
-        tag: "LIMITED EDITION",
-        title: "WEEKEND VAULT EXCLUSIVES",
-        subtitle: "Handpicked drops from our verified independent sellers",
-        offer: "LIMITED STOCK",
-        image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?auto=format&fit=crop&w=1600&q=80",
-        cta: "SHOP THE VAULT",
-        category: "cargo",
+        lookNumber: "03",
+        totalLooks: "03",
+        title: "LOOK 03 / RELAXED SARTORIAL",
+        cloth: "Cloth: Double Pleated Melton Wool & Linen Blend",
+        atelier: "LISBON / CHIADO ATELIER",
+        ensemblePrice: 5380,
+        primaryTarget: "snitch-pleated-trouser",
     },
 ];
 
-// ─── Category Capsules (under ads carousel) ──────────────────────────────────
-const CATEGORY_CAPSULES = [
-    {
-        id: "cap-shirt",
-        label: "Shirt with image",
-        name: "Shirts",
-        category: "shirt",
-        image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-        id: "cap-pents",
-        label: "pents with image",
-        name: "Pants & Trousers",
-        category: "trouser",
-        image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-        id: "cap-girl-1",
-        label: "girl any cloths name with image",
-        name: "Dresses & Tops",
-        category: "dress",
-        image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=400&q=80",
-    },
-    {
-        id: "cap-girl-2",
-        label: "gitl any cloths name with image",
-        name: "Co-Ords & Cargos",
-        category: "cargo",
-        image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=400&q=80",
-    },
-];
-
-// ─── Mens Category Row Items ──────────────────────────────────────────────────
-const MENS_CATEGORIES = [
-    {
-        id: "mens-shirts",
-        label: "SHIRTS",
-        category: "shirt",
-        gender: "mens",
-        image: "https://images.unsplash.com/photo-1596755094514-f87e34085b2c?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "mens-trousers",
-        label: "TROUSERS",
-        category: "trouser",
-        gender: "mens",
-        image: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "mens-tshirts",
-        label: "T-SHIRTS",
-        category: "tshirt",
-        gender: "mens",
-        image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "mens-jeans",
-        label: "JEANS",
-        category: "jeans",
-        gender: "mens",
-        image: "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "mens-cargos",
-        label: "CARGOS",
-        category: "cargo",
-        gender: "mens",
-        image: "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=600&q=80",
-    },
-];
-
-// ─── Girls Category Row Items ─────────────────────────────────────────────────
-const GIRLS_CATEGORIES = [
-    {
-        id: "girls-shirts",
-        label: "SHIRTS",
-        category: "shirt",
-        gender: "girls",
-        image: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "girls-trousers",
-        label: "TROUSERS",
-        category: "trouser",
-        gender: "girls",
-        image: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "girls-tshirts",
-        label: "T-SHIRTS",
-        category: "tshirt",
-        gender: "girls",
-        image: "https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "girls-jeans",
-        label: "JEANS",
-        category: "jeans",
-        gender: "girls",
-        image: "https://images.unsplash.com/photo-1582552938357-32b906df40cb?auto=format&fit=crop&w=600&q=80",
-    },
-    {
-        id: "girls-cargos",
-        label: "CARGOS",
-        category: "cargo",
-        gender: "girls",
-        image: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=600&q=80",
-    },
-];
-
-// ─── Curated Snitch Catalog Products (Matching Mockup Grid) ───────────────────
+// ─── Curated Snitch Fallback Catalog ──────────────────────────────────────────
 const CURATED_SNITCH_PRODUCTS = [
+    {
+        _id: "snitch-overshirt",
+        title: "The Field Overshirt",
+        description: "Spun from 100% textured organic cotton with durable dual-needle construction, reinforced button placket, and functional chest bellows pockets.",
+        category: "shirt",
+        gender: "mens",
+        price: { amount: 2490, currency: "INR" },
+        images: [{ url: "/editorial/overshirt_olive_piece.jpg", isCover: true }],
+        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
+        tag: "FIELD READY",
+        subtitle: "Muted Olive • 100% Textured Cotton",
+        sizes: ["S", "M", "L", "XL"],
+    },
+    {
+        _id: "snitch-supima-tee",
+        title: "Heavyweight Supima Tee",
+        description: "Cut from 280 GSM combed Supima jersey cotton with dense ribbed micro-collar that retains its clean structure wash after wash.",
+        category: "tshirt",
+        gender: "mens",
+        price: { amount: 1290, currency: "INR" },
+        images: [{ url: "/editorial/supima_tee_piece.jpg", isCover: true }],
+        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
+        tag: "CORE LAYER",
+        subtitle: "Chalk White • 280 GSM Supima Jersey",
+        sizes: ["S", "M", "L", "XL"],
+    },
+    {
+        _id: "snitch-pleated-trouser",
+        title: "Relaxed Pleated Trouser",
+        description: "Tailored from Italian Super 120s wool blend with classic double inward pleats, extended tab closure, and concealed side adjusters.",
+        category: "trouser",
+        gender: "mens",
+        price: { amount: 2890, currency: "INR" },
+        images: [
+            { url: "/editorial/pleated_trouser_piece.jpg", isCover: true },
+            { url: "/editorial/trouser_cuff_detail.jpg", isCover: false },
+        ],
+        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
+        tag: "TAILORED BASE",
+        subtitle: "Deep Charcoal • Italian Super 120s Wool",
+        sizes: ["30", "32", "34", "36"],
+    },
     {
         _id: "snitch-1",
         title: "Dark Purple Slim Fit Shirt",
@@ -274,7 +162,9 @@ const CURATED_SNITCH_PRODUCTS = [
         price: { amount: 1190, currency: "INR" },
         images: [{ url: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=600&q=80", isCover: true }],
         seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [1, 2, 3],
+        tag: "ATELIER CLASSIC",
+        subtitle: "Deep Plum • Premium Egyptian Cotton",
+        sizes: ["S", "M", "L", "XL"],
     },
     {
         _id: "snitch-2",
@@ -282,10 +172,12 @@ const CURATED_SNITCH_PRODUCTS = [
         description: "Classic five-pocket vintage blue denim with subtle fading and durable reinforced seams.",
         category: "jeans",
         gender: "mens",
-        price: { amount: 899, currency: "INR" },
+        price: { amount: 1899, currency: "INR" },
         images: [{ url: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=600&q=80", isCover: true }],
         seller: { username: "snitch_denim", name: "Snitch Denim Studio" },
-        variants: [1, 2, 3, 4],
+        tag: "DENIM ARCHIVE",
+        subtitle: "Vintage Blue • 13.5oz Ring-Spun Denim",
+        sizes: ["30", "32", "34", "36"],
     },
     {
         _id: "snitch-3",
@@ -293,43 +185,12 @@ const CURATED_SNITCH_PRODUCTS = [
         description: "Charcoal dark-wash relaxed denim cut loose through the thigh with gentle taper.",
         category: "jeans",
         gender: "mens",
-        price: { amount: 1090, currency: "INR" },
+        price: { amount: 1990, currency: "INR" },
         images: [{ url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80", isCover: true }],
         seller: { username: "urban_atelier", name: "Urban Atelier" },
-        variants: [1, 2],
-    },
-    {
-        _id: "snitch-4",
-        title: "Straight Fit Stretch Jeans",
-        description: "Versatile beige/ecru straight leg stretch denim engineered for all-day comfort.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 899, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_denim", name: "Snitch Denim Studio" },
-        variants: [1, 2, 3],
-    },
-    {
-        _id: "snitch-5",
-        title: "Straight Fit Washed Jeans",
-        description: "Medium vintage wash straight jeans with natural fading and soft hand feel.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 1090, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [1, 2, 3, 4],
-    },
-    {
-        _id: "snitch-6",
-        title: "Dark Purple Slim Fit Shirt",
-        description: "Tailored deep plum lightweight shirt, ideal for evening layers and casual styling.",
-        category: "shirt",
-        gender: "mens",
-        price: { amount: 1190, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [1, 2],
+        tag: "DENIM ARCHIVE",
+        subtitle: "Charcoal Fade • 14oz Heavyweight Denim",
+        sizes: ["30", "32", "34", "36"],
     },
     {
         _id: "snitch-7",
@@ -337,10 +198,12 @@ const CURATED_SNITCH_PRODUCTS = [
         description: "Tailored smart-casual olive trousers with double front pleats and side adjusters.",
         category: "trouser",
         gender: "mens",
-        price: { amount: 1299, currency: "INR" },
+        price: { amount: 2299, currency: "INR" },
         images: [{ url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=600&q=80", isCover: true }],
         seller: { username: "atelier_tailors", name: "Atelier Tailors" },
-        variants: [1, 2, 3],
+        tag: "STRUCTURED",
+        subtitle: "Forest Olive • Wool-Linen Tropical Weave",
+        sizes: ["30", "32", "34", "36"],
     },
     {
         _id: "snitch-8",
@@ -348,10 +211,12 @@ const CURATED_SNITCH_PRODUCTS = [
         description: "240 GSM combed cotton drop-shoulder streetwear tee with ribbed neckline.",
         category: "tshirt",
         gender: "mens",
-        price: { amount: 799, currency: "INR" },
+        price: { amount: 999, currency: "INR" },
         images: [{ url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80", isCover: true }],
         seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [1, 2, 3, 4],
+        tag: "CORE LAYER",
+        subtitle: "Warm Mocha • 240 GSM Jersey",
+        sizes: ["S", "M", "L", "XL"],
     },
     {
         _id: "snitch-9",
@@ -359,146 +224,42 @@ const CURATED_SNITCH_PRODUCTS = [
         description: "Multi-pocket durable cotton ripstop cargo pants with drawstring cuff toggles.",
         category: "cargo",
         gender: "mens",
-        price: { amount: 1499, currency: "INR" },
+        price: { amount: 2499, currency: "INR" },
         images: [{ url: "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=600&q=80", isCover: true }],
         seller: { username: "cargo_craft", name: "Cargo Craft" },
-        variants: [1, 2, 3],
-    },
-    {
-        _id: "snitch-10",
-        title: "Cropped Linen Resort Shirt",
-        description: "Airy relaxed cropped silhouette with breathable natural linen weave.",
-        category: "shirt",
-        gender: "girls",
-        price: { amount: 1090, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_her", name: "Snitch For Her" },
-        variants: [1, 2, 3],
-    },
-    {
-        _id: "snitch-11",
-        title: "Wide Leg Pleated Trousers",
-        description: "High-waist fluid tailored trousers with front darts and sleek side slant pockets.",
-        category: "trouser",
-        gender: "girls",
-        price: { amount: 1399, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_her", name: "Snitch For Her" },
-        variants: [1, 2],
-    },
-    {
-        _id: "snitch-12",
-        title: "Parachute Utility Cargos",
-        description: "Ultra-lightweight windbreaker fabric relaxed parachute pants with toggle hems.",
-        category: "cargo",
-        gender: "girls",
-        price: { amount: 1299, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_her", name: "Snitch For Her" },
-        variants: [1, 2, 3, 4],
+        tag: "TACTICAL",
+        subtitle: "Olive Drab • Military Cotton Ripstop",
+        sizes: ["30", "32", "34", "36"],
     },
 ];
 
-// ─── Snitch Product Card (Mockup Style: Clean, Tall, Heart + Plus) ────────────
-function ProductGridCard({ product, isWishlisted, onToggleWishlist, onClick }) {
-    const symbol = currencySymbol[product.price?.currency] ?? product.price?.currency ?? "₹";
-    const formattedPrice = Number(product.price?.amount || 0).toLocaleString("en-IN");
+// ─── Filter Pills Definition ──────────────────────────────────────────────────
+const CATEGORY_TABS = [
+    { id: "all", label: "All Pieces", filter: null },
+    { id: "shirt", label: "Outerwear & Shirts", filter: "shirt" },
+    { id: "trouser", label: "Tailored Trousers", filter: "trouser" },
+    { id: "tshirt", label: "Heavyweight Knitwear", filter: "tshirt" },
+    { id: "jeans", label: "Denim Archive", filter: "jeans" },
+    { id: "cargo", label: "Cargo Craft", filter: "cargo" },
+];
 
-    const coverImage =
-        product.images?.find((img) => img?.isCover)?.url ||
-        product.images?.[0]?.url ||
-        product.images?.[0] ||
-        "";
-
-    return (
-        <div
-            onClick={() => onClick(product)}
-            className="group cursor-pointer flex flex-col justify-between bg-white border border-zinc-200 hover:border-zinc-900 transition-all duration-300 relative select-none"
-        >
-            <div>
-                {/* Product Image Box */}
-                <div className="relative aspect-[3/4] overflow-hidden bg-[#f4f4f5]">
-                    {coverImage ? (
-                        <img
-                            src={coverImage}
-                            alt={product.title}
-                            loading="lazy"
-                            className="h-full w-full object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
-                        />
-                    ) : (
-                        <div className="h-full w-full flex items-center justify-center">
-                            <PackageIcon className="w-10 h-10 text-zinc-400" />
-                        </div>
-                    )}
-
-                    {/* Wishlist Heart Icon (Top Right, outline with clean circle or floating) */}
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.stopPropagation();
-                            onToggleWishlist(product._id);
-                        }}
-                        aria-label="Wishlist"
-                        className="absolute top-2.5 right-2.5 w-8 h-8 rounded-full bg-white/80 hover:bg-white backdrop-blur-sm shadow-sm flex items-center justify-center transition-transform hover:scale-110 active:scale-95 z-10 cursor-pointer"
-                    >
-                        <HeartIcon
-                            filled={isWishlisted}
-                            className={`w-4 h-4 transition-colors ${isWishlisted ? "text-rose-600 scale-110" : "text-zinc-700 hover:text-black"
-                                }`}
-                        />
-                    </button>
-
-                    {/* Variety Tag if exists */}
-                    {product.variants && product.variants.length > 0 && (
-                        <div className="absolute bottom-2 left-2 px-1.5 py-0.5 bg-black/75 backdrop-blur-sm text-[9px] font-mono uppercase tracking-wider text-white">
-                            {product.variants.length} Sizes/Colors
-                        </div>
-                    )}
-                </div>
-
-                {/* Card Info Footer */}
-                <div className="p-3">
-                    <h3 className="text-[12px] sm:text-[13px] font-medium text-zinc-900 truncate tracking-tight uppercase group-hover:text-black transition-colors">
-                        {product.title}
-                    </h3>
-
-                    <div className="flex items-center justify-between mt-1 pt-1">
-                        <div className="flex items-baseline gap-0.5">
-                            <span className="text-[11px] font-mono text-zinc-500">{symbol}</span>
-                            <span className="text-[13px] sm:text-[14px] font-bold text-zinc-900 font-mono tracking-tight">
-                                {formattedPrice}
-                            </span>
-                        </div>
-
-                        {/* Quick Action Plus Button (+) */}
-                        <button
-                            type="button"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                onClick(product);
-                            }}
-                            title="View product"
-                            className="w-6 h-6 rounded-full border border-zinc-300 hover:border-black hover:bg-black hover:text-white flex items-center justify-center text-zinc-700 transition-all cursor-pointer"
-                        >
-                            <PlusIcon className="w-3.5 h-3.5" />
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    );
-}
-
-// ─── Main Home Component ──────────────────────────────────────────────────────
 export default function Home() {
     const navigate = useNavigate();
-    const productsCatalogRef = useRef(null);
+    const [searchParams] = useSearchParams();
+    const catalogSectionRef = useRef(null);
+    const capsuleSectionRef = useRef(null);
 
-    const [mounted, setMounted] = useState(false);
-    const [fetchError, setFetchError] = useState(null);
-    const [searchTerm, setSearchTerm] = useState("");
-    const [sortBy, setSortBy] = useState("newest"); // "newest", "price-low", "price-high", "title"
-    const [activeFilter, setActiveFilter] = useState({ type: null, value: null, label: null }); // { type: 'category' | 'gender' | 'both', value, label }
+    const [currentLookIdx, setCurrentLookIdx] = useState(0);
+    const [activeHotspot, setActiveHotspot] = useState(null); // 'overshirt' | 'trouser' | null
+    const [selectedTab, setSelectedTab] = useState("all");
+    const [sortBy, setSortBy] = useState("newest");
+    const [tailoringModalOpen, setTailoringModalOpen] = useState(false);
+    const [selectedSizes, setSelectedSizes] = useState({
+        "snitch-overshirt": "M",
+        "snitch-supima-tee": "L",
+        "snitch-pleated-trouser": "32",
+    });
+
     const [wishlist, setWishlist] = useState(() => {
         try {
             return JSON.parse(localStorage.getItem("snitch_wishlist") || "[]");
@@ -507,617 +268,889 @@ export default function Home() {
         }
     });
 
-    // Hero Carousel Banner state
-    const [activeBanner, setActiveBanner] = useState(0);
-    const [isHoveringBanner, setIsHoveringBanner] = useState(false);
-
     const { handleGetAllProducts } = useProduct();
-
-    // Redux selectors
     const allDbProducts = useSelector((state) => state.product.allProducts || []);
     const loading = useSelector((state) => state.product.loading);
-    const user = useSelector((state) => state.auth.user);
-    const cartItems = useSelector((state) => state.cart?.items || []);
 
-    // Load DB products
-    const loadProducts = () => {
-        setFetchError(null);
-        handleGetAllProducts().catch((err) => {
-            setFetchError(err?.response?.data?.message || "Failed to load database products");
-        });
-    };
-
+    // Initial load of DB products
     useEffect(() => {
-        loadProducts();
+        handleGetAllProducts().catch(() => {});
     }, []);
 
-    useEffect(() => {
-        const t = setTimeout(() => setMounted(true), 50);
-        return () => clearTimeout(t);
-    }, []);
-
-    // Autoplay hero banner carousel
-    useEffect(() => {
-        if (isHoveringBanner) return;
-        const interval = setInterval(() => {
-            setActiveBanner((prev) => (prev + 1) % HERO_BANNERS.length);
-        }, 4500);
-        return () => clearInterval(interval);
-    }, [isHoveringBanner]);
-
-    // Save wishlist in localStorage
+    // Toggle wishlist
     const handleToggleWishlist = (id) => {
         setWishlist((prev) => {
-            let next;
-            if (prev.includes(id)) {
-                next = prev.filter((item) => item !== id);
-            } else {
-                next = [...prev, id];
-            }
+            const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
             try {
                 localStorage.setItem("snitch_wishlist", JSON.stringify(next));
             } catch (e) {
-                console.error("wishlist save error", e);
+                console.error("wishlist err", e);
             }
             return next;
         });
     };
 
-    // Combine user DB products with curated Snitch products
+    // Combine DB products with Curated Editorial pieces
     const combinedProducts = useMemo(() => {
         const dbItems = Array.isArray(allDbProducts) ? allDbProducts : [];
         const seenIds = new Set(dbItems.map((p) => String(p._id)));
         const uniqueCurated = CURATED_SNITCH_PRODUCTS.filter((p) => !seenIds.has(String(p._id)));
-        return [...dbItems, ...uniqueCurated];
+        return [...uniqueCurated, ...dbItems];
     }, [allDbProducts]);
 
-    // Filter and Sort Products
+    // Search query from URL or search box
+    const searchQuery = (searchParams.get("search") || "").toLowerCase().trim();
+
+    // Filter & Sort Products
     const filteredProducts = useMemo(() => {
         let result = [...combinedProducts];
 
-        // 1. Text Search query
-        if (searchTerm.trim()) {
-            const query = searchTerm.toLowerCase().trim();
+        // Search filtering
+        if (searchQuery) {
             result = result.filter((p) => {
-                const titleMatch = p.title?.toLowerCase().includes(query);
-                const descMatch = p.description?.toLowerCase().includes(query);
-                const categoryMatch = p.category?.toLowerCase().includes(query);
-                const sellerMatch =
-                    p.seller?.username?.toLowerCase().includes(query) ||
-                    p.seller?.name?.toLowerCase().includes(query) ||
-                    p.seller?.email?.toLowerCase().includes(query);
-                return titleMatch || descMatch || categoryMatch || sellerMatch;
+                const titleMatch = (p.title || "").toLowerCase().includes(searchQuery);
+                const descMatch = (p.description || "").toLowerCase().includes(searchQuery);
+                const catMatch = (p.category || "").toLowerCase().includes(searchQuery);
+                return titleMatch || descMatch || catMatch;
             });
         }
 
-        // 2. Active Category / Gender Filter
-        if (activeFilter.type) {
-            const val = String(activeFilter.value || "").toLowerCase();
-            if (activeFilter.type === "category") {
-                result = result.filter((p) => {
-                    const title = (p.title || "").toLowerCase();
-                    const desc = (p.description || "").toLowerCase();
-                    const cat = (p.category || "").toLowerCase();
-                    return cat.includes(val) || title.includes(val) || desc.includes(val);
-                });
-            } else if (activeFilter.type === "mens-cat") {
-                result = result.filter((p) => {
-                    const title = (p.title || "").toLowerCase();
-                    const desc = (p.description || "").toLowerCase();
-                    const cat = (p.category || "").toLowerCase();
-                    const isGenderMatch = p.gender === "mens" || !p.gender;
-                    const isCatMatch = cat.includes(val) || title.includes(val) || desc.includes(val);
-                    return isGenderMatch && isCatMatch;
-                });
-            } else if (activeFilter.type === "girls-cat") {
-                result = result.filter((p) => {
-                    const title = (p.title || "").toLowerCase();
-                    const desc = (p.description || "").toLowerCase();
-                    const cat = (p.category || "").toLowerCase();
-                    const isGenderMatch = p.gender === "girls" || !p.gender;
-                    const isCatMatch = cat.includes(val) || title.includes(val) || desc.includes(val);
-                    return isGenderMatch && isCatMatch;
-                });
-            } else if (activeFilter.type === "gender") {
-                result = result.filter((p) => p.gender === val || !p.gender);
-            }
+        // Category tab filter
+        if (selectedTab !== "all") {
+            result = result.filter((p) => {
+                const cat = (p.category || "").toLowerCase();
+                const title = (p.title || "").toLowerCase();
+                return cat.includes(selectedTab) || title.includes(selectedTab);
+            });
         }
 
-        // 3. Sorting
+        // Sorting
         if (sortBy === "price-low") {
             result.sort((a, b) => (a.price?.amount || 0) - (b.price?.amount || 0));
         } else if (sortBy === "price-high") {
             result.sort((a, b) => (b.price?.amount || 0) - (a.price?.amount || 0));
         } else if (sortBy === "title") {
             result.sort((a, b) => (a.title || "").localeCompare(b.title || ""));
-        } else {
-            // newest
-            result.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         }
 
         return result;
-    }, [combinedProducts, searchTerm, activeFilter, sortBy]);
+    }, [combinedProducts, searchQuery, selectedTab, sortBy]);
 
-    // Handle Category Filter Click
-    const handleCategoryClick = (type, value, label) => {
-        if (activeFilter.type === type && activeFilter.value === value) {
-            // toggle off
-            setActiveFilter({ type: null, value: null, label: null });
-        } else {
-            setActiveFilter({ type, value, label });
-            // Smooth scroll to catalog
-            if (productsCatalogRef.current) {
-                productsCatalogRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-            }
+    const activeLook = EDITORIAL_LOOKS[currentLookIdx];
+
+    const nextLook = () => {
+        setCurrentLookIdx((prev) => (prev + 1) % EDITORIAL_LOOKS.length);
+    };
+
+    const prevLook = () => {
+        setCurrentLookIdx((prev) => (prev - 1 + EDITORIAL_LOOKS.length) % EDITORIAL_LOOKS.length);
+    };
+
+    const scrollToCatalog = () => {
+        if (catalogSectionRef.current) {
+            catalogSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         }
     };
 
-    // Clear filter
-    const handleClearFilter = () => {
-        setActiveFilter({ type: null, value: null, label: null });
-        setSearchTerm("");
+    const scrollToCapsule = () => {
+        if (capsuleSectionRef.current) {
+            capsuleSectionRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
     };
 
     return (
-        <>
-            <FontLoader />
-
+        <div className="min-h-screen bg-[#FBF9F5] text-[#1A1917] selection:bg-[#1A1917] selection:text-[#FBF9F5] antialiased">
+            {/* Custom font definitions for pure editorial aesthetic */}
             <style>{`
-                *, *::before, *::after {
-                    font-family: 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+                .font-editorial-serif {
+                    font-family: 'Newsreader', 'Cormorant Garamond', 'Playfair Display', Georgia, serif;
                 }
-                .font-mono-code {
-                    font-family: 'JetBrains Mono', monospace;
-                }
-                @keyframes fadeIn {
-                    from { opacity: 0; transform: translateY(8px); }
-                    to   { opacity: 1; transform: translateY(0); }
-                }
-                .fade-in-entry {
-                    animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
-                }
-                /* Hide scrollbar for category row while keeping scrolling */
-                .no-scrollbar::-webkit-scrollbar {
-                    display: none;
-                }
-                .no-scrollbar {
-                    -ms-overflow-style: none;
-                    scrollbar-width: none;
+                .font-interface-sans {
+                    font-family: 'Plus Jakarta Sans', 'Hanken Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 }
             `}</style>
 
-            <main className="min-h-screen w-full bg-[#fcfcfd] text-zinc-900 selection:bg-black selection:text-white">
+            {/* ══════════════════════════════════════════════════════════════════
+                1. SPLIT HERO SECTION (Exact Reference Screenshot Layout)
+            ══════════════════════════════════════════════════════════════════ */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 sm:pt-14 pb-12 sm:pb-20">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 items-center">
 
-                {/* ══════════════════════════════════════════════════════════
-                    2. MAIN CONTAINER: Exact Mockup Layout Hierarchy
-                    - Ads with images (Carousel Banner with 5 dots)
-                    - Capsule Category Pills (Shirt, Pants, Girls clothes)
-                    - Mens Category Grid (SHIRTS, TROUSERS, T-SHIRTS, JEANS, CARGOS)
-                    - Girls Category Grid (SHIRTS, TROUSERS, T-SHIRTS, JEANS, CARGOS)
-                    - Product Catalog Grid (Tall cards, Heart, +, Title, Price)
-                ══════════════════════════════════════════════════════════ */}
-                <div className="max-w-screen mx-auto px-4 sm:px-8 py-6 space-y-10">
-
-                    {/* ──────────────────────────────────────────────────────────
-                        SECTION A: "Ads with images" (Hero Banner Carousel)
-                    ────────────────────────────────────────────────────────── */}
-                    <section
-                        className="relative rounded-2xl overflow-hidden border border-zinc-200 bg-zinc-100 shadow-sm"
-                        onMouseEnter={() => setIsHoveringBanner(true)}
-                        onMouseLeave={() => setIsHoveringBanner(false)}
-                    >
-                        {/* Slide Display Container */}
-                        <div className="relative aspect-[16/7] sm:aspect-[21/8] md:aspect-[24/8] min-h-[220px] sm:min-h-[280px] w-full overflow-hidden bg-zinc-900">
-                            {HERO_BANNERS.map((banner, index) => {
-                                const isActive = activeBanner === index;
-                                return (
-                                    <div
-                                        key={banner.id}
-                                        className={`absolute inset-0 transition-opacity duration-700 ease-in-out ${isActive ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
-                                            }`}
-                                    >
-                                        <img
-                                            src={banner.image}
-                                            alt={banner.title}
-                                            className="w-full h-full object-cover object-center brightness-[0.78]"
-                                        />
-
-                                        {/* Gradient Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/45 to-transparent" />
-
-                                        {/* Banner Content */}
-                                        <div className="absolute inset-0 flex flex-col justify-center px-6 sm:px-12 md:px-16 text-white max-w-2xl space-y-2 sm:space-y-3">
-
-                                            {/* Tag / Offer pill */}
-                                            <div className="flex items-center gap-2">
-                                                <span className="px-2.5 py-0.5 rounded-full bg-white text-black text-[10px] sm:text-[11px] font-black tracking-widest uppercase font-mono-code">
-                                                    {banner.tag}
-                                                </span>
-                                                <span className="text-[11px] sm:text-xs text-yellow-400 font-bold uppercase tracking-wider font-mono-code">
-                                                    {banner.offer}
-                                                </span>
-                                            </div>
-
-                                            {/* Title */}
-                                            <h2 className="text-2xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight leading-[1.05]">
-                                                {banner.title}
-                                            </h2>
-
-                                            {/* Subtitle */}
-                                            <p className="text-xs sm:text-sm text-zinc-300 font-light line-clamp-2 max-w-lg">
-                                                {banner.subtitle}
-                                            </p>
-
-                                            {/* CTA Button */}
-                                            <div className="pt-2">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => {
-                                                        if (banner.category !== "all") {
-                                                            handleCategoryClick("category", banner.category, banner.title);
-                                                        } else if (productsCatalogRef.current) {
-                                                            productsCatalogRef.current.scrollIntoView({ behavior: "smooth" });
-                                                        }
-                                                    }}
-                                                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-zinc-100 text-black font-extrabold text-[11px] sm:text-xs uppercase tracking-widest rounded-full transition-transform active:scale-95 shadow-md cursor-pointer font-mono-code"
-                                                >
-                                                    <span>{banner.cta}</span>
-                                                    <span className="text-base leading-none">→</span>
-                                                </button>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                                );
-                            })}
-
-                            {/* Left & Right Navigation Arrows */}
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setActiveBanner((prev) => (prev - 1 + HERO_BANNERS.length) % HERO_BANNERS.length)
-                                }
-                                aria-label="Previous Slide"
-                                className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 hover:bg-white text-black flex items-center justify-center transition-all z-20 shadow-md backdrop-blur-sm cursor-pointer"
-                            >
-                                <ChevronLeftIcon className="w-5 h-5" />
-                            </button>
-
-                            <button
-                                type="button"
-                                onClick={() => setActiveBanner((prev) => (prev + 1) % HERO_BANNERS.length)}
-                                aria-label="Next Slide"
-                                className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/70 hover:bg-white text-black flex items-center justify-center transition-all z-20 shadow-md backdrop-blur-sm cursor-pointer"
-                            >
-                                <ChevronRightIcon className="w-5 h-5" />
-                            </button>
-                        </div>
-
-                        {/* Pagination Dots (• • • • • as shown in wireframe mockup) */}
-                        <div className="py-3 bg-white border-t border-zinc-200 flex items-center justify-center gap-2">
-                            {HERO_BANNERS.map((_, i) => (
-                                <button
-                                    key={i}
-                                    type="button"
-                                    onClick={() => setActiveBanner(i)}
-                                    aria-label={`Slide ${i + 1}`}
-                                    className={`transition-all duration-300 rounded-full cursor-pointer ${activeBanner === i
-                                        ? "w-6 h-2 bg-black"
-                                        : "w-2 h-2 bg-zinc-300 hover:bg-zinc-500"
-                                        }`}
-                                />
-                            ))}
-                        </div>
-                    </section>
-
-
-                    {/* ──────────────────────────────────────────────────────────
-                        SECTION B: Category Capsules Row (Directly below Banner)
-                        [ Shirt with image ] [ pents with image ] [ girl any cloths name with image ] [ ... ]
-                    ────────────────────────────────────────────────────────── */}
-                    <section>
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
-                            {CATEGORY_CAPSULES.map((item) => {
-                                const isSelected =
-                                    activeFilter.type === "category" && activeFilter.value === item.category;
-
-                                return (
-                                    <button
-                                        key={item.id}
-                                        type="button"
-                                        onClick={() => handleCategoryClick("category", item.category, item.name)}
-                                        className={`group relative p-2.5 sm:p-3 rounded-full border transition-all duration-200 flex items-center gap-3 text-left cursor-pointer ${isSelected
-                                            ? "bg-black text-white border-black shadow-md scale-[1.02]"
-                                            : "bg-white text-zinc-800 border-zinc-300 hover:border-black hover:shadow-xs"
-                                            }`}
-                                    >
-                                        {/* Circular Image Thumbnail */}
-                                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full overflow-hidden bg-zinc-100 border border-zinc-200 flex-shrink-0 group-hover:scale-105 transition-transform">
-                                            <img
-                                                src={item.image}
-                                                alt={item.name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        </div>
-
-                                        {/* Label Text */}
-                                        <div className="flex-1 min-w-0 pr-2">
-                                            <span className="block text-[11px] sm:text-xs font-bold uppercase tracking-tight truncate">
-                                                {item.name}
-                                            </span>
-                                            <span
-                                                className={`block text-[9px] sm:text-[10px] tracking-tight truncate ${isSelected ? "text-zinc-300" : "text-zinc-500"
-                                                    }`}
-                                            >
-                                                {item.label}
-                                            </span>
-                                        </div>
-                                    </button>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-
-                    {/* ──────────────────────────────────────────────────────────
-                        SECTION C: "Mens" Category Row
-                        Heading: Mens
-                        5 columns: SHIRTS, TROUSERS, T-SHIRTS, JEANS, CARGOS
-                    ────────────────────────────────────────────────────────── */}
-                    <section className="space-y-4 pt-2">
-                        {/* Heading */}
-                        <div className="text-center">
-                            <h2 className="text-2xl sm:text-3xl font-extrabold text-black tracking-tight uppercase">
-                                Mens
-                            </h2>
-                            <div className="w-8 h-0.5 bg-black mx-auto mt-1" />
-                        </div>
-
-                        {/* 5 Cards Row */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-                            {MENS_CATEGORIES.map((cat) => {
-                                const isSelected =
-                                    activeFilter.type === "mens-cat" && activeFilter.value === cat.category;
-
-                                return (
-                                    <div
-                                        key={cat.id}
-                                        onClick={() => handleCategoryClick("mens-cat", cat.category, `Mens ${cat.label}`)}
-                                        className={`group cursor-pointer rounded-xl bg-white border transition-all duration-300 p-3 flex flex-col items-center justify-between text-center select-none ${isSelected
-                                            ? "border-black ring-2 ring-black shadow-md bg-zinc-50"
-                                            : "border-zinc-200 hover:border-black hover:shadow-sm"
-                                            }`}
-                                    >
-                                        {/* Category Label at Top */}
-                                        <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-zinc-900 group-hover:text-black mb-2 font-mono-code">
-                                            {cat.label}
-                                        </span>
-
-                                        {/* Isolated Garment Image */}
-                                        <div className="w-full aspect-[4/5] overflow-hidden flex items-center justify-center p-2 bg-transparent">
-                                            <img
-                                                src={cat.image}
-                                                alt={cat.label}
-                                                className="max-h-full max-w-full object-contain filter drop-shadow-sm "
-                                            />
-                                        </div>
-
-                                        {/* Subtle Filter Chip */}
-                                        <span
-                                            className={`text-[9px] uppercase tracking-widest font-mono-code mt-2 px-2 py-0.5 rounded-full transition-colors ${isSelected
-                                                ? "bg-black text-white"
-                                                : "bg-zinc-100 text-zinc-600 group-hover:bg-zinc-200"
-                                                }`}
-                                        >
-                                            {isSelected ? "Active" : "Shop"}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-
-                    {/* ──────────────────────────────────────────────────────────
-                        SECTION D: "Girls" Category Row
-                        Heading: Girls
-                        5 columns: SHIRTS, TROUSERS, T-SHIRTS, JEANS, CARGOS
-                    ────────────────────────────────────────────────────────── */}
-                    <section className="space-y-4 pt-2">
-                        {/* Heading */}
-                        <div className="text-center">
-                            <h2 className="text-2xl sm:text-3xl font-extrabold text-black tracking-tight uppercase">
-                                Girls
-                            </h2>
-                            <div className="w-8 h-0.5 bg-black mx-auto mt-1" />
-                        </div>
-
-                        {/* 5 Cards Row */}
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 sm:gap-4">
-                            {GIRLS_CATEGORIES.map((cat) => {
-                                const isSelected =
-                                    activeFilter.type === "girls-cat" && activeFilter.value === cat.category;
-
-                                return (
-                                    <div
-                                        key={cat.id}
-                                        onClick={() => handleCategoryClick("girls-cat", cat.category, `Girls ${cat.label}`)}
-                                        className={`group cursor-pointer rounded-xl bg-white border transition-all duration-300 p-3 flex flex-col items-center justify-between text-center select-none ${isSelected
-                                            ? "border-black ring-2 ring-black shadow-md bg-zinc-50"
-                                            : "border-zinc-200 hover:border-black hover:shadow-sm"
-                                            }`}
-                                    >
-                                        {/* Category Label at Top */}
-                                        <span className="text-[11px] sm:text-xs font-black uppercase tracking-wider text-zinc-900 group-hover:text-black mb-2 font-mono-code">
-                                            {cat.label}
-                                        </span>
-
-                                        {/* Isolated Garment Image */}
-                                        <div className="w-full aspect-[4/5] overflow-hidden flex items-center justify-center p-2 bg-transparent">
-                                            <img
-                                                src={cat.image}
-                                                alt={cat.label}
-                                                className="max-h-full max-w-full object-contain filter drop-shadow-sm "
-                                            />
-                                        </div>
-
-                                        {/* Subtle Filter Chip */}
-                                        <span
-                                            className={`text-[9px] uppercase tracking-widest font-mono-code mt-2 px-2 py-0.5 rounded-full transition-colors ${isSelected
-                                                ? "bg-black text-white"
-                                                : "bg-zinc-100 text-zinc-600 group-hover:bg-zinc-200"
-                                                }`}
-                                        >
-                                            {isSelected ? "Active" : "Shop"}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                        </div>
-                    </section>
-
-
-                    {/* ──────────────────────────────────────────────────────────
-                        SECTION E: Snitch Product Catalog Grid (Bottom of Wireframe)
-                        Multi-column responsive grid matching Snitch store
-                    ────────────────────────────────────────────────────────── */}
-                    <section ref={productsCatalogRef} className="pt-6 space-y-6">
-
-                        {/* Catalog Header & Filters Bar */}
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-4 border-b border-zinc-200">
-                            <div>
-                                <h3 className="text-xl sm:text-2xl font-black text-black uppercase tracking-tight">
-                                    Curated Product Drops
-                                </h3>
-                                <p className="text-xs text-zinc-500 font-normal">
-                                    Showing {filteredProducts.length} curated apparel pieces
-                                </p>
+                    {/* ─── LEFT COLUMN: Campaign Eyebrow, Serif Headline, Copy, CTA ─── */}
+                    <div className="lg:col-span-5 flex flex-col justify-between self-stretch space-y-8 sm:space-y-10">
+                        <div className="space-y-5 sm:space-y-7">
+                            {/* Campaign Eyebrow */}
+                            <div className="flex items-center gap-2">
+                                <span className="w-1.5 h-1.5 rounded-full bg-[#4A5340]" />
+                                <span className="font-interface-sans text-[11px] font-semibold tracking-[0.24em] text-[#5A564D] uppercase">
+                                    AUTUMN / WINTER 26
+                                </span>
                             </div>
 
-                            {/* Active Filter Pill & Sort Controls */}
-                            <div className="flex items-center gap-3 flex-wrap">
-                                {(activeFilter.type || searchTerm) && (
-                                    <div className="flex items-center gap-2 px-3 py-1 bg-zinc-900 text-white rounded-full text-xs font-mono-code">
-                                        <span>
-                                            Filtered:{" "}
-                                            <strong>{activeFilter.label || `"${searchTerm}"`}</strong>
-                                        </span>
+                            {/* Main Editorial Headline */}
+                            <h1 className="font-editorial-serif text-5xl sm:text-6xl md:text-7xl font-normal leading-[1.04] tracking-[-0.02em] text-[#1A1917]">
+                                Made for the everyday.
+                            </h1>
+
+                            {/* Supporting Copy */}
+                            <p className="font-interface-sans text-sm sm:text-[15px] font-normal leading-relaxed text-[#5A564D] max-w-md">
+                                Considered layers. Lasting materials. No extra noise. Tailored silhouettes built around unhurried craftsmanship and tactile slow cloth.
+                            </p>
+
+                            {/* Actions: Primary CTA + Secondary Link */}
+                            <div className="flex flex-wrap items-center gap-5 pt-2">
+                                <button
+                                    type="button"
+                                    onClick={scrollToCatalog}
+                                    className="px-7 py-3.5 bg-[#1A1917] hover:bg-[#32312D] text-[#FBF9F5] font-interface-sans text-[11px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
+                                >
+                                    SHOP THE COLLECTION
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={scrollToCapsule}
+                                    className="group inline-flex items-center gap-2 font-interface-sans text-[11px] font-semibold tracking-[0.18em] text-[#1A1917] hover:text-[#4A5340] uppercase transition-colors cursor-pointer"
+                                >
+                                    <span>EXPLORE THE LOOK</span>
+                                    <span className="transform group-hover:translate-x-1 transition-transform">→</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Look Details Box (Bottom Left Box matching screenshot) */}
+                        <div className="border border-[#E5DFD3] bg-[#F5F2EB]/70 p-4 sm:p-5 transition-all">
+                            <div className="flex items-center justify-between pb-2 border-b border-[#E8E2D6] text-[11px] tracking-[0.18em] text-[#1A1917] font-semibold uppercase font-interface-sans">
+                                <span>{activeLook.title}</span>
+                                <div className="flex items-center gap-3">
+                                    <span className="text-[#6C685F] font-normal">{activeLook.lookNumber} — {activeLook.totalLooks}</span>
+                                    <div className="flex items-center gap-1">
                                         <button
                                             type="button"
-                                            onClick={handleClearFilter}
-                                            className="text-zinc-400 hover:text-white p-0.5 cursor-pointer"
-                                            title="Clear filter"
+                                            onClick={prevLook}
+                                            aria-label="Previous Look"
+                                            className="w-5 h-5 flex items-center justify-center hover:text-[#4A5340] cursor-pointer text-[#5A564D]"
                                         >
-                                            <XIcon className="w-3.5 h-3.5" />
+                                            <ChevronLeftIcon className="w-3.5 h-3.5" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={nextLook}
+                                            aria-label="Next Look"
+                                            className="w-5 h-5 flex items-center justify-center hover:text-[#4A5340] cursor-pointer text-[#5A564D]"
+                                        >
+                                            <ChevronRightIcon className="w-3.5 h-3.5" />
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <p className="pt-2 text-[11px] sm:text-xs text-[#5A564D] font-interface-sans leading-normal">
+                                {activeLook.cloth}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* ─── RIGHT COLUMN: Strong Lifestyle Fashion Image with Hotspots ─── */}
+                    <div className="lg:col-span-7 relative">
+                        <div className="relative aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5] w-full overflow-hidden bg-[#ECE7DD] border border-[#E2DBD0] shadow-sm">
+                            <img
+                                src="/editorial/hero_bordeaux_menswear.jpg"
+                                alt="Autumn Atelier Menswear Lifestyle"
+                                className="w-full h-full object-cover object-top"
+                                loading="eager"
+                            />
+
+                            {/* Top Right Floating Badge */}
+                            <div className="absolute top-4 right-4 bg-[#FBF9F5]/85 backdrop-blur-md px-3 py-1.5 border border-white/60 text-[10px] font-semibold tracking-[0.2em] uppercase text-[#1A1917] font-interface-sans">
+                                {activeLook.atelier}
+                            </div>
+
+                            {/* ─── Hotspot 1: Field Overshirt ─── */}
+                            <div className="absolute top-[40%] left-[60%] -translate-x-1/2 -translate-y-1/2 z-20">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveHotspot(activeHotspot === "overshirt" ? null : "overshirt")}
+                                    className="relative w-7 h-7 rounded-full bg-[#FBF9F5]/90 hover:bg-[#FBF9F5] text-[#1A1917] border border-white/70 shadow-md flex items-center justify-center transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+                                    aria-label="View Field Overshirt details"
+                                >
+                                    <PlusIcon className="w-3.5 h-3.5" />
+                                    <span className="absolute inset-0 rounded-full animate-ping bg-white/40 pointer-events-none" />
+                                </button>
+
+                                {/* Tooltip Popover */}
+                                {activeHotspot === "overshirt" && (
+                                    <div className="absolute top-9 left-1/2 -translate-x-1/2 w-48 bg-[#FBF9F5] border border-[#E2DBD0] shadow-xl p-3 z-30 font-interface-sans text-left space-y-1">
+                                        <p className="text-[10px] tracking-[0.16em] uppercase text-[#4A5340] font-semibold">01 • OUTERWEAR</p>
+                                        <p className="font-editorial-serif text-sm font-semibold text-[#1A1917]">The Field Overshirt</p>
+                                        <p className="text-[11px] text-[#5A564D]">Muted Olive • ₹2,490</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate("/product/snitch-overshirt")}
+                                            className="pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#1A1917] hover:underline block"
+                                        >
+                                            INSPECT PIECE →
                                         </button>
                                     </div>
                                 )}
+                            </div>
 
-                                {/* Sort Dropdown */}
-                                <div className="relative flex items-center">
-                                    <SortIcon className="absolute left-3 text-zinc-500 w-3.5 h-3.5 pointer-events-none" />
-                                    <select
-                                        value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value)}
-                                        className="h-9 pl-8 pr-7 bg-white border border-zinc-300 rounded-full text-xs font-medium text-zinc-800 uppercase tracking-wider appearance-none focus:outline-none focus:border-black cursor-pointer font-mono-code"
-                                    >
-                                        <option value="newest">Sort: Newest</option>
-                                        <option value="price-low">Price: Low to High</option>
-                                        <option value="price-high">Price: High to Low</option>
-                                        <option value="title">Alphabetical (A-Z)</option>
-                                    </select>
-                                    <span className="absolute right-2.5 pointer-events-none text-[9px] text-zinc-500">
-                                        ▼
+                            {/* ─── Hotspot 2: Relaxed Pleated Trouser ─── */}
+                            <div className="absolute top-[68%] left-[48%] -translate-x-1/2 -translate-y-1/2 z-20">
+                                <button
+                                    type="button"
+                                    onClick={() => setActiveHotspot(activeHotspot === "trouser" ? null : "trouser")}
+                                    className="relative w-7 h-7 rounded-full bg-[#FBF9F5]/90 hover:bg-[#FBF9F5] text-[#1A1917] border border-white/70 shadow-md flex items-center justify-center transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+                                    aria-label="View Pleated Trouser details"
+                                >
+                                    <PlusIcon className="w-3.5 h-3.5" />
+                                    <span className="absolute inset-0 rounded-full animate-ping bg-white/40 pointer-events-none" />
+                                </button>
+
+                                {/* Tooltip Popover */}
+                                {activeHotspot === "trouser" && (
+                                    <div className="absolute bottom-9 left-1/2 -translate-x-1/2 w-48 bg-[#FBF9F5] border border-[#E2DBD0] shadow-xl p-3 z-30 font-interface-sans text-left space-y-1">
+                                        <p className="text-[10px] tracking-[0.16em] uppercase text-[#4A5340] font-semibold">03 • BASE</p>
+                                        <p className="font-editorial-serif text-sm font-semibold text-[#1A1917]">Relaxed Pleated Trouser</p>
+                                        <p className="text-[11px] text-[#5A564D]">Deep Charcoal • ₹2,890</p>
+                                        <button
+                                            type="button"
+                                            onClick={() => navigate("/product/snitch-pleated-trouser")}
+                                            className="pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#1A1917] hover:underline block"
+                                        >
+                                            INSPECT PIECE →
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* ─── Bottom Overlay Card on Image (Complete Ensemble) ─── */}
+                            <div className="absolute bottom-4 left-4 right-4 sm:left-6 sm:right-6 bg-[#FBF9F5]/90 backdrop-blur-md border border-white/80 p-3.5 sm:p-4 flex items-center justify-between gap-3 shadow-lg">
+                                <div className="space-y-0.5 min-w-0">
+                                    <span className="block font-interface-sans text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] text-[#6C685F] uppercase">
+                                        COMPLETE ENSEMBLE
+                                    </span>
+                                    <h4 className="font-editorial-serif text-sm sm:text-base font-normal text-[#1A1917] truncate">
+                                        Look {activeLook.lookNumber}: Three-Piece Set — ₹{activeLook.ensemblePrice.toLocaleString("en-IN")}
+                                    </h4>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => navigate(`/product/${activeLook.primaryTarget}`)}
+                                    className="px-4 sm:px-5 py-2 bg-[#1A1917] hover:bg-[#32312D] text-[#FBF9F5] font-interface-sans text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex-shrink-0 cursor-pointer"
+                                >
+                                    ACQUIRE
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════════
+                2. THREE FEATURE VALUE CARDS (Tactile Fabrication, Perpetual Fit, Quiet Luxury)
+            ══════════════════════════════════════════════════════════════════ */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-8 py-8 sm:py-12 border-t border-[#ECE7DD]">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+
+                    {/* Card 01: Fabric Origin */}
+                    <div className="bg-[#F5F2EB]/70 border border-[#E5DFD3] p-7 sm:p-8 flex flex-col justify-between space-y-6 hover:border-[#1A1917]/30 transition-colors">
+                        <div className="space-y-4">
+                            <div className="w-9 h-9 rounded-full bg-[#EAE5DB] text-[#4A5340] flex items-center justify-center">
+                                <WeaveIcon className="w-4 h-4" />
+                            </div>
+                            <span className="block font-interface-sans text-[10px] font-bold tracking-[0.22em] text-[#6C685F] uppercase">
+                                01 / FABRIC ORIGIN
+                            </span>
+                            <h3 className="font-editorial-serif text-2xl font-normal text-[#1A1917]">
+                                Tactile Fabrication
+                            </h3>
+                            <p className="font-interface-sans text-xs sm:text-[13px] leading-relaxed text-[#5A564D]">
+                                Spun and finished across heritage Portuguese and Biella Italian mills using certified organic cottons, low-impact botanical dyes, and resilient melton wools.
+                            </p>
+                        </div>
+                        <div className="pt-4 border-t border-[#E8E2D6] flex items-center justify-between text-[10px] font-semibold tracking-[0.2em] uppercase font-interface-sans text-[#1A1917]">
+                            <span>TRACEABILITY VERIFIED</span>
+                            <span>⊙</span>
+                        </div>
+                    </div>
+
+                    {/* Card 02: Engineering */}
+                    <div className="bg-[#F5F2EB]/70 border border-[#E5DFD3] p-7 sm:p-8 flex flex-col justify-between space-y-6 hover:border-[#1A1917]/30 transition-colors">
+                        <div className="space-y-4">
+                            <div className="w-9 h-9 rounded-full bg-[#EAE5DB] text-[#4A5340] flex items-center justify-center">
+                                <RulerIcon className="w-4 h-4" />
+                            </div>
+                            <span className="block font-interface-sans text-[10px] font-bold tracking-[0.22em] text-[#6C685F] uppercase">
+                                02 / ENGINEERING
+                            </span>
+                            <h3 className="font-editorial-serif text-2xl font-normal text-[#1A1917]">
+                                Perpetual Fit
+                            </h3>
+                            <p className="font-interface-sans text-xs sm:text-[13px] leading-relaxed text-[#5A564D]">
+                                Draped with architectural balance. Every seam, pleat, and drop is tuned for fluid movement without losing structural authority throughout daily transit.
+                            </p>
+                        </div>
+                        <div className="pt-4 border-t border-[#E8E2D6] flex items-center justify-between text-[10px] font-semibold tracking-[0.2em] uppercase font-interface-sans text-[#1A1917]">
+                            <span>PATTERN STUDIO GRADE</span>
+                            <span>⋀</span>
+                        </div>
+                    </div>
+
+                    {/* Card 03: Philosophy */}
+                    <div className="bg-[#F5F2EB]/70 border border-[#E5DFD3] p-7 sm:p-8 flex flex-col justify-between space-y-6 hover:border-[#1A1917]/30 transition-colors">
+                        <div className="space-y-4">
+                            <div className="w-9 h-9 rounded-full bg-[#EAE5DB] text-[#4A5340] flex items-center justify-center">
+                                <ShieldIcon className="w-4 h-4" />
+                            </div>
+                            <span className="block font-interface-sans text-[10px] font-bold tracking-[0.22em] text-[#6C685F] uppercase">
+                                03 / PHILOSOPHY
+                            </span>
+                            <h3 className="font-editorial-serif text-2xl font-normal text-[#1A1917]">
+                                Quiet Luxury
+                            </h3>
+                            <p className="font-interface-sans text-xs sm:text-[13px] leading-relaxed text-[#5A564D]">
+                                Zero external badges or superfluous insignias. Longevity guaranteed through dual-needle bar tacks, real horn buttons, and repairable seams.
+                            </p>
+                        </div>
+                        <div className="pt-4 border-t border-[#E8E2D6] flex items-center justify-between text-[10px] font-semibold tracking-[0.2em] uppercase font-interface-sans text-[#1A1917]">
+                            <span>LIFETIME REPAIR GUARANTEE</span>
+                            <span>⛨</span>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════════
+                3. THE CAPSULE DECONSTRUCTED / The Key Ensemble Pieces
+            ══════════════════════════════════════════════════════════════════ */}
+            <section ref={capsuleSectionRef} id="capsule-section" className="max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16 border-t border-[#ECE7DD]">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-8 sm:pb-12">
+                    <div className="space-y-2">
+                        <span className="block font-interface-sans text-[10px] sm:text-[11px] font-bold tracking-[0.22em] text-[#6C685F] uppercase">
+                            THE CAPSULE DECONSTRUCTED
+                        </span>
+                        <h2 className="font-editorial-serif text-3xl sm:text-4xl md:text-5xl font-normal text-[#1A1917]">
+                            The Key Ensemble Pieces
+                        </h2>
+                    </div>
+                    <p className="font-interface-sans text-xs sm:text-sm text-[#5A564D] max-w-sm">
+                        Individually articulated, designed to work as a unified tone-on-tone daily uniform.
+                    </p>
+                </div>
+
+                {/* 3 Pieces Grid Matching Screenshot Reference */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8">
+
+                    {/* ─── Piece 1: The Field Overshirt ─── */}
+                    <div className="group bg-[#F7F4EC] border border-[#E5DFD3] p-4 sm:p-5 flex flex-col justify-between space-y-4 hover:border-[#1A1917] transition-all">
+                        <div className="space-y-4">
+                            <div className="relative aspect-[4/5] overflow-hidden bg-[#ECE7DD]">
+                                <span className="absolute top-3 left-3 bg-[#FBF9F5]/90 backdrop-blur-xs px-2.5 py-1 text-[9px] font-bold tracking-[0.2em] uppercase text-[#1A1917] font-interface-sans z-10">
+                                    FIELD READY
+                                </span>
+                                <img
+                                    src="/editorial/overshirt_olive_piece.jpg"
+                                    alt="The Field Overshirt"
+                                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <div className="flex items-baseline justify-between">
+                                    <h3 className="font-editorial-serif text-xl sm:text-2xl font-normal text-[#1A1917]">
+                                        The Field Overshirt
+                                    </h3>
+                                    <span className="font-interface-sans text-sm font-semibold text-[#1A1917]">
+                                        ₹2,490
                                     </span>
                                 </div>
+                                <p className="font-interface-sans text-[11px] text-[#6C685F]">
+                                    Muted Olive • 100% Textured Cotton
+                                </p>
                             </div>
                         </div>
 
-                        {/* Error state */}
-                        {fetchError && (
-                            <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs flex items-center justify-between">
-                                <span>Note: {fetchError}. Showing catalog backup drops.</span>
-                                <button
-                                    onClick={loadProducts}
-                                    className="underline font-bold uppercase tracking-wider font-mono-code"
-                                >
-                                    Retry
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Loading indicator */}
-                        {loading && (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-                                {Array.from({ length: 6 }).map((_, i) => (
-                                    <div key={i} className="animate-pulse bg-white border border-zinc-200">
-                                        <div className="aspect-[3/4] bg-zinc-200" />
-                                        <div className="p-3 space-y-2">
-                                            <div className="h-3 bg-zinc-200 rounded w-3/4" />
-                                            <div className="h-3 bg-zinc-200 rounded w-1/3" />
-                                        </div>
-                                    </div>
+                        <div className="pt-3 border-t border-[#E8E2D6] flex items-center justify-between">
+                            {/* Size Chips */}
+                            <div className="flex items-center gap-1.5 font-interface-sans">
+                                {["S", "M", "L", "XL"].map((sz) => (
+                                    <button
+                                        key={sz}
+                                        type="button"
+                                        onClick={() => setSelectedSizes({ ...selectedSizes, "snitch-overshirt": sz })}
+                                        className={`w-6 h-6 text-[10px] font-semibold border flex items-center justify-center transition-colors cursor-pointer ${
+                                            selectedSizes["snitch-overshirt"] === sz
+                                                ? "bg-[#1A1917] text-[#FBF9F5] border-[#1A1917]"
+                                                : "border-[#D5CEBF] text-[#5A564D] hover:border-[#1A1917] hover:text-[#1A1917]"
+                                        }`}
+                                    >
+                                        {sz}
+                                    </button>
                                 ))}
                             </div>
-                        )}
+                            <button
+                                type="button"
+                                onClick={() => navigate("/product/snitch-overshirt")}
+                                className="font-interface-sans text-[10px] font-bold uppercase tracking-[0.2em] text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
+                            >
+                                INSPECT →
+                            </button>
+                        </div>
+                    </div>
 
-                        {/* Empty Products Filter State */}
-                        {!loading && filteredProducts.length === 0 && (
-                            <div className="py-20 text-center border border-dashed border-zinc-300 rounded-2xl bg-zinc-50 p-8 space-y-4">
-                                <PackageIcon className="w-12 h-12 text-zinc-400 mx-auto" />
-                                <h4 className="text-base font-bold uppercase text-zinc-800">
-                                    No products found matching criteria
-                                </h4>
-                                <p className="text-xs text-zinc-500 max-w-sm mx-auto">
-                                    Try clearing your current search keywords or selecting a different category.
+                    {/* ─── Piece 2: Heavyweight Supima Tee ─── */}
+                    <div className="group bg-[#F7F4EC] border border-[#E5DFD3] p-4 sm:p-5 flex flex-col justify-between space-y-4 hover:border-[#1A1917] transition-all">
+                        <div className="space-y-4">
+                            <div className="relative aspect-[4/5] overflow-hidden bg-[#ECE7DD]">
+                                <span className="absolute top-3 left-3 bg-[#FBF9F5]/90 backdrop-blur-xs px-2.5 py-1 text-[9px] font-bold tracking-[0.2em] uppercase text-[#1A1917] font-interface-sans z-10">
+                                    CORE LAYER
+                                </span>
+                                <img
+                                    src="/editorial/supima_tee_piece.jpg"
+                                    alt="Heavyweight Supima Tee"
+                                    className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700 ease-out"
+                                />
+                            </div>
+
+                            <div className="space-y-1">
+                                <div className="flex items-baseline justify-between">
+                                    <h3 className="font-editorial-serif text-xl sm:text-2xl font-normal text-[#1A1917]">
+                                        Heavyweight Supima Tee
+                                    </h3>
+                                    <span className="font-interface-sans text-sm font-semibold text-[#1A1917]">
+                                        ₹1,290
+                                    </span>
+                                </div>
+                                <p className="font-interface-sans text-[11px] text-[#6C685F]">
+                                    Chalk White • 280 GSM Supima Jersey
                                 </p>
-                                <button
-                                    type="button"
-                                    onClick={handleClearFilter}
-                                    className="px-5 py-2 bg-black text-white text-xs font-bold uppercase tracking-wider rounded-full font-mono-code cursor-pointer"
-                                >
-                                    Reset Filters
-                                </button>
                             </div>
-                        )}
+                        </div>
 
-                        {/* The Actual Product Grid: Matching Mockup Layout */}
-                        {!loading && filteredProducts.length > 0 && (
-                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 sm:gap-4">
-                                {filteredProducts.map((prod) => (
-                                    <ProductGridCard
-                                        key={prod._id}
-                                        product={prod}
-                                        isWishlisted={wishlist.includes(prod._id)}
-                                        onToggleWishlist={handleToggleWishlist}
-                                        onClick={(item) => navigate(`/product/${item._id}`)}
-                                    />
+                        <div className="pt-3 border-t border-[#E8E2D6] flex items-center justify-between">
+                            {/* Size Chips */}
+                            <div className="flex items-center gap-1.5 font-interface-sans">
+                                {["S", "M", "L", "XL"].map((sz) => (
+                                    <button
+                                        key={sz}
+                                        type="button"
+                                        onClick={() => setSelectedSizes({ ...selectedSizes, "snitch-supima-tee": sz })}
+                                        className={`w-6 h-6 text-[10px] font-semibold border flex items-center justify-center transition-colors cursor-pointer ${
+                                            selectedSizes["snitch-supima-tee"] === sz
+                                                ? "bg-[#1A1917] text-[#FBF9F5] border-[#1A1917]"
+                                                : "border-[#D5CEBF] text-[#5A564D] hover:border-[#1A1917] hover:text-[#1A1917]"
+                                        }`}
+                                    >
+                                        {sz}
+                                    </button>
                                 ))}
                             </div>
-                        )}
+                            <button
+                                type="button"
+                                onClick={() => navigate("/product/snitch-supima-tee")}
+                                className="font-interface-sans text-[10px] font-bold uppercase tracking-[0.2em] text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
+                            >
+                                INSPECT →
+                            </button>
+                        </div>
+                    </div>
 
-                    </section>
+                    {/* ─── Piece 3: Relaxed Pleated Trouser (Split Detail Images) ─── */}
+                    <div className="group bg-[#F7F4EC] border border-[#E5DFD3] p-4 sm:p-5 flex flex-col justify-between space-y-4 hover:border-[#1A1917] transition-all">
+                        <div className="space-y-4">
+                            {/* Split stacked photos matching the screenshot reference */}
+                            <div className="relative aspect-[4/5] flex flex-col gap-1.5 overflow-hidden">
+                                <span className="absolute top-3 left-3 bg-[#FBF9F5]/90 backdrop-blur-xs px-2.5 py-1 text-[9px] font-bold tracking-[0.2em] uppercase text-[#1A1917] font-interface-sans z-10">
+                                    TAILORED BASE
+                                </span>
+                                <div className="h-1/2 overflow-hidden bg-[#ECE7DD]">
+                                    <img
+                                        src="/editorial/pleated_trouser_piece.jpg"
+                                        alt="Pleated Trouser Waistband"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                    />
+                                </div>
+                                <div className="h-1/2 overflow-hidden bg-[#ECE7DD]">
+                                    <img
+                                        src="/editorial/trouser_cuff_detail.jpg"
+                                        alt="Pleated Trouser Hem and Cuff Detail"
+                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="space-y-1">
+                                <div className="flex items-baseline justify-between">
+                                    <h3 className="font-editorial-serif text-xl sm:text-2xl font-normal text-[#1A1917]">
+                                        Relaxed Pleated Trouser
+                                    </h3>
+                                    <span className="font-interface-sans text-sm font-semibold text-[#1A1917]">
+                                        ₹2,890
+                                    </span>
+                                </div>
+                                <p className="font-interface-sans text-[11px] text-[#6C685F]">
+                                    Deep Charcoal • Italian Super 120s Wool
+                                </p>
+                            </div>
+                        </div>
+
+                        <div className="pt-3 border-t border-[#E8E2D6] flex items-center justify-between">
+                            {/* Size Chips */}
+                            <div className="flex items-center gap-1.5 font-interface-sans">
+                                {["30", "32", "34", "36"].map((sz) => (
+                                    <button
+                                        key={sz}
+                                        type="button"
+                                        onClick={() => setSelectedSizes({ ...selectedSizes, "snitch-pleated-trouser": sz })}
+                                        className={`w-6 h-6 text-[10px] font-semibold border flex items-center justify-center transition-colors cursor-pointer ${
+                                            selectedSizes["snitch-pleated-trouser"] === sz
+                                                ? "bg-[#1A1917] text-[#FBF9F5] border-[#1A1917]"
+                                                : "border-[#D5CEBF] text-[#5A564D] hover:border-[#1A1917] hover:text-[#1A1917]"
+                                        }`}
+                                    >
+                                        {sz}
+                                    </button>
+                                ))}
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => navigate("/product/snitch-pleated-trouser")}
+                                className="font-interface-sans text-[10px] font-bold uppercase tracking-[0.2em] text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
+                            >
+                                INSPECT →
+                            </button>
+                        </div>
+                    </div>
 
                 </div>
+            </section>
 
-                {/* ══════════════════════════════════════════════════════════
-                    FOOTER
-                ══════════════════════════════════════════════════════════ */}
-                <footer className="mt-20 border-t border-zinc-200 bg-white py-10 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-2 font-mono-code">
-                    <div className="flex items-center justify-center gap-2">
-                        <span className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold text-black">
-                            S
+            {/* ══════════════════════════════════════════════════════════════════
+                4. COMPLIMENTARY TAILORING CONCIERGE BANNER
+            ══════════════════════════════════════════════════════════════════ */}
+            <section className="max-w-7xl mx-auto px-4 sm:px-8 py-6">
+                <div className="bg-[#EFECE5] border border-[#DFD9CD] p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-5">
+                    <div className="space-y-1.5">
+                        <span className="block font-interface-sans text-[10px] font-bold tracking-[0.24em] text-[#6C685F] uppercase">
+                            COMPLIMENTARY TAILORING CONCIERGE
                         </span>
-                        <span className="font-bold text-zinc-900 tracking-widest uppercase">
-                            SNITCH STORE
-                        </span>
+                        <h3 className="font-editorial-serif text-xl sm:text-2xl md:text-3xl font-normal text-[#1A1917]">
+                            Trouser hemming and cuffing included with every pair.
+                        </h3>
                     </div>
-                    <p className="text-[11px] text-zinc-400">
-                        Designed for next-generation streetwear and curated lifestyle apparel.
-                    </p>
-                </footer>
+                    <button
+                        type="button"
+                        onClick={() => setTailoringModalOpen(true)}
+                        className="px-6 py-3 bg-[#1A1917] hover:bg-[#32312D] text-[#FBF9F5] font-interface-sans text-[11px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex-shrink-0 cursor-pointer text-center"
+                    >
+                        EXPLORE TAILORING CARE
+                    </button>
+                </div>
+            </section>
 
-            </main>
-        </>
+            {/* ══════════════════════════════════════════════════════════════════
+                5. COMPLETE STOREFRONT CATALOG INTEGRATION (All Apparel Pieces)
+            ══════════════════════════════════════════════════════════════════ */}
+            <section ref={catalogSectionRef} id="catalog-section" className="max-w-7xl mx-auto px-4 sm:px-8 py-12 sm:py-16 border-t border-[#ECE7DD] space-y-8">
+                {/* Catalog Controls Header */}
+                <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 pb-4 border-b border-[#ECE7DD]">
+                    <div className="space-y-1">
+                        <span className="block font-interface-sans text-[10px] font-bold tracking-[0.24em] text-[#6C685F] uppercase">
+                            ATELIER ARCHIVE
+                        </span>
+                        <h2 className="font-editorial-serif text-3xl sm:text-4xl font-normal text-[#1A1917]">
+                            The Menswear Collection
+                        </h2>
+                        <p className="font-interface-sans text-xs text-[#6C685F]">
+                            Displaying {filteredProducts.length} curated pieces {searchQuery && `matching "${searchQuery}"`}
+                        </p>
+                    </div>
+
+                    {/* Filter Pills & Sorting */}
+                    <div className="flex flex-wrap items-center gap-3">
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                            {CATEGORY_TABS.map((tab) => (
+                                <button
+                                    key={tab.id}
+                                    type="button"
+                                    onClick={() => setSelectedTab(tab.id)}
+                                    className={`px-3.5 py-1.5 text-[10px] font-semibold tracking-[0.16em] uppercase transition-all cursor-pointer whitespace-nowrap font-interface-sans ${
+                                        selectedTab === tab.id
+                                            ? "bg-[#1A1917] text-[#FBF9F5]"
+                                            : "bg-[#F5F2EB] text-[#5A564D] hover:text-[#1A1917] border border-[#E5DFD3]"
+                                    }`}
+                                >
+                                    {tab.label}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Sort Selector */}
+                        <select
+                            value={sortBy}
+                            onChange={(e) => setSortBy(e.target.value)}
+                            className="bg-[#F5F2EB] border border-[#E5DFD3] text-[#1A1917] text-[10px] font-semibold tracking-[0.16em] uppercase px-3 py-1.5 focus:outline-none cursor-pointer font-interface-sans"
+                        >
+                            <option value="newest">Sort: Newest</option>
+                            <option value="price-low">Price: Low to High</option>
+                            <option value="price-high">Price: High to Low</option>
+                            <option value="title">Alphabetical (A-Z)</option>
+                        </select>
+                    </div>
+                </div>
+
+                {/* Loading State */}
+                {loading && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                        {Array.from({ length: 4 }).map((_, i) => (
+                            <div key={i} className="animate-pulse bg-[#F5F2EB] aspect-[3/4]" />
+                        ))}
+                    </div>
+                )}
+
+                {/* Empty State */}
+                {!loading && filteredProducts.length === 0 && (
+                    <div className="py-20 text-center bg-[#F5F2EB] border border-[#E5DFD3] p-8 space-y-3 font-interface-sans">
+                        <h4 className="font-editorial-serif text-2xl text-[#1A1917]">No pieces found</h4>
+                        <p className="text-xs text-[#6C685F]">Try clearing filters or search terms.</p>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setSelectedTab("all");
+                                navigate("/");
+                            }}
+                            className="px-5 py-2 bg-[#1A1917] text-[#FBF9F5] text-[11px] font-semibold tracking-[0.2em] uppercase"
+                        >
+                            VIEW ALL PIECES
+                        </button>
+                    </div>
+                )}
+
+                {/* Product Grid */}
+                {!loading && filteredProducts.length > 0 && (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
+                        {filteredProducts.map((prod) => {
+                            const isWish = wishlist.includes(prod._id);
+                            const coverImg =
+                                prod.images?.find((img) => img?.isCover)?.url ||
+                                prod.images?.[0]?.url ||
+                                prod.images?.[0] ||
+                                "";
+                            const symbol = currencySymbol[prod.price?.currency] ?? "₹";
+                            const formattedPrice = Number(prod.price?.amount || 0).toLocaleString("en-IN");
+
+                            return (
+                                <div
+                                    key={prod._id}
+                                    onClick={() => navigate(`/product/${prod._id}`)}
+                                    className="group cursor-pointer bg-[#F7F4EC] border border-[#E5DFD3] hover:border-[#1A1917] p-3 sm:p-4 flex flex-col justify-between space-y-3 transition-all duration-300"
+                                >
+                                    <div>
+                                        {/* Image */}
+                                        <div className="relative aspect-[3/4] overflow-hidden bg-[#ECE7DD]">
+                                            {coverImg && (
+                                                <img
+                                                    src={coverImg}
+                                                    alt={prod.title}
+                                                    loading="lazy"
+                                                    className="w-full h-full object-cover object-top group-hover:scale-105 transition-transform duration-500 ease-out"
+                                                />
+                                            )}
+
+                                            {/* Tag */}
+                                            {prod.tag && (
+                                                <span className="absolute top-2.5 left-2.5 bg-[#FBF9F5]/90 backdrop-blur-xs px-2 py-0.5 text-[8px] font-bold tracking-[0.18em] uppercase text-[#1A1917] font-interface-sans">
+                                                    {prod.tag}
+                                                </span>
+                                            )}
+
+                                            {/* Wishlist Heart */}
+                                            <button
+                                                type="button"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleToggleWishlist(prod._id);
+                                                }}
+                                                className="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-[#FBF9F5]/85 hover:bg-[#FBF9F5] shadow-xs flex items-center justify-center transition-transform hover:scale-110 active:scale-95 cursor-pointer"
+                                                aria-label="Wishlist"
+                                            >
+                                                <HeartIcon filled={isWish} className="w-3.5 h-3.5 text-[#1A1917]" />
+                                            </button>
+                                        </div>
+
+                                        {/* Info */}
+                                        <div className="pt-3 space-y-1">
+                                            <h3 className="font-editorial-serif text-lg font-normal text-[#1A1917] truncate group-hover:text-[#4A5340] transition-colors">
+                                                {prod.title}
+                                            </h3>
+                                            <p className="font-interface-sans text-[11px] text-[#6C685F] truncate">
+                                                {prod.subtitle || prod.category}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="pt-2 border-t border-[#E8E2D6] flex items-center justify-between font-interface-sans">
+                                        <span className="text-xs font-semibold text-[#1A1917]">
+                                            {symbol}{formattedPrice}
+                                        </span>
+                                        <span className="text-[10px] font-bold tracking-[0.18em] uppercase text-[#1A1917] group-hover:text-[#4A5340]">
+                                            VIEW →
+                                        </span>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                )}
+            </section>
+
+            {/* ══════════════════════════════════════════════════════════════════
+                6. EDITORIAL FOOTER (Exact 4 Column Luxury Layout)
+            ══════════════════════════════════════════════════════════════════ */}
+            <footer className="border-t border-[#ECE7DD] bg-[#F5F2EB] pt-14 pb-12 mt-12 text-[#1A1917] font-interface-sans">
+                <div className="max-w-7xl mx-auto px-4 sm:px-8 space-y-12">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
+
+                        {/* Column 1: Brand Manifesto */}
+                        <div className="space-y-3">
+                            <span
+                                className="font-editorial-serif text-xl sm:text-2xl font-normal tracking-[0.18em] uppercase block text-[#1A1917]"
+                            >
+                                SNITCH
+                            </span>
+                            <p className="text-xs text-[#5A564D] leading-relaxed max-w-xs">
+                                Architectural menswear crafted with unhurried precision, quiet tactile luxury, and sustainable European cloth.
+                            </p>
+                        </div>
+
+                        {/* Column 2: Collections */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#6C685F]">
+                                COLLECTIONS
+                            </h4>
+                            <ul className="space-y-2 text-xs text-[#1A1917]">
+                                <li>
+                                    <button onClick={scrollToCapsule} className="hover:text-[#4A5340] cursor-pointer">
+                                        Tailored Outerwear
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onClick={scrollToCapsule} className="hover:text-[#4A5340] cursor-pointer">
+                                        Structured Trousers
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onClick={scrollToCatalog} className="hover:text-[#4A5340] cursor-pointer">
+                                        Supima Knitwear
+                                    </button>
+                                </li>
+                                <li>
+                                    <button onClick={scrollToCatalog} className="hover:text-[#4A5340] cursor-pointer">
+                                        Atelier Footwear
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Column 3: Editorial & Atelier */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#6C685F]">
+                                EDITORIAL &amp; ATELIER
+                            </h4>
+                            <ul className="space-y-2 text-xs text-[#1A1917]">
+                                <li>
+                                    <span className="hover:text-[#4A5340] cursor-pointer">The Journal</span>
+                                </li>
+                                <li>
+                                    <span className="hover:text-[#4A5340] cursor-pointer">Material Transparency</span>
+                                </li>
+                                <li>
+                                    <span className="hover:text-[#4A5340] cursor-pointer">Circular Repair Care</span>
+                                </li>
+                                <li>
+                                    <button onClick={() => setTailoringModalOpen(true)} className="hover:text-[#4A5340] cursor-pointer">
+                                        Bespoke Fitting
+                                    </button>
+                                </li>
+                            </ul>
+                        </div>
+
+                        {/* Column 4: Region & Currency */}
+                        <div className="space-y-3">
+                            <h4 className="text-[10px] font-bold tracking-[0.22em] uppercase text-[#6C685F]">
+                                REGION &amp; CURRENCY
+                            </h4>
+                            <p className="text-xs font-semibold text-[#1A1917]">
+                                INDIA (INR ₹) / UNITED STATES (USD $)
+                            </p>
+                            <p className="text-[11px] text-[#6C685F] leading-normal">
+                                Duties &amp; local sales taxes calculated at checkout.
+                            </p>
+                        </div>
+
+                    </div>
+
+                    {/* Bottom Legal Line */}
+                    <div className="pt-8 border-t border-[#E8E2D6] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#6C685F]">
+                        <p>© 2026 SNITCH Menswear Studio. All rights reserved.</p>
+                        <div className="flex items-center gap-6">
+                            <span className="hover:text-[#1A1917] cursor-pointer">Sustainability Pledge</span>
+                            <span className="hover:text-[#1A1917] cursor-pointer">Privacy</span>
+                            <span className="hover:text-[#1A1917] cursor-pointer">Terms</span>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+            {/* ══════════════════════════════════════════════════════════════════
+                7. MODAL: TAILORING CONCIERGE CARE
+            ══════════════════════════════════════════════════════════════════ */}
+            {tailoringModalOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs font-interface-sans">
+                    <div className="bg-[#FBF9F5] border border-[#E5DFD3] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative">
+                        <button
+                            type="button"
+                            onClick={() => setTailoringModalOpen(false)}
+                            className="absolute top-5 right-5 text-[#5A564D] hover:text-[#1A1917] p-1 cursor-pointer"
+                        >
+                            <XIcon className="w-4 h-4" />
+                        </button>
+                        <span className="block text-[10px] font-bold tracking-[0.24em] text-[#4A5340] uppercase">
+                            ATELIER BESPOKE SERVICE
+                        </span>
+                        <h3 className="font-editorial-serif text-2xl sm:text-3xl font-normal text-[#1A1917]">
+                            Complimentary Tailoring Concierge
+                        </h3>
+                        <p className="text-xs sm:text-sm text-[#5A564D] leading-relaxed">
+                            Every pair of Snitch trousers includes precision inseam hemming or 1.5” classic turn-up cuffs at zero additional charge.
+                        </p>
+                        <div className="p-4 bg-[#F5F2EB] border border-[#E5DFD3] space-y-2 text-xs">
+                            <div className="flex justify-between font-semibold text-[#1A1917]">
+                                <span>1. Select Custom Inseam</span>
+                                <span>Any measurement</span>
+                            </div>
+                            <div className="flex justify-between font-semibold text-[#1A1917]">
+                                <span>2. Turnaround Time</span>
+                                <span>48 Hours at Atelier</span>
+                            </div>
+                            <div className="flex justify-between font-semibold text-[#1A1917]">
+                                <span>3. Guaranteed Fit</span>
+                                <span>Free re-alterations</span>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => setTailoringModalOpen(false)}
+                            className="w-full py-3 bg-[#1A1917] text-[#FBF9F5] text-xs font-semibold tracking-[0.2em] uppercase cursor-pointer"
+                        >
+                            UNDERSTOOD &amp; CLOSE
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }

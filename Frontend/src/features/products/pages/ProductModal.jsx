@@ -104,6 +104,57 @@ function TagIcon({ className = "w-4 h-4" }) {
 // ─── Curated Snitch Fallback Database (matching Home.jsx) ─────────────────────
 const CURATED_FALLBACK_PRODUCTS = [
     {
+        _id: "snitch-overshirt",
+        title: "The Field Overshirt",
+        description: "Spun from 100% textured organic cotton with durable dual-needle construction, reinforced button placket, and functional chest bellows pockets. Built for versatile transitional layering across brisk climates.",
+        category: "shirt",
+        gender: "mens",
+        price: { amount: 2490, currency: "INR" },
+        images: [{ url: "/editorial/overshirt_olive_piece.jpg", isCover: true }],
+        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
+        variants: [
+            { _id: "v-fo-s", stock: 8, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "S" } },
+            { _id: "v-fo-m", stock: 15, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "M" } },
+            { _id: "v-fo-l", stock: 12, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "L" } },
+            { _id: "v-fo-xl", stock: 6, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "XL" } },
+        ],
+    },
+    {
+        _id: "snitch-supima-tee",
+        title: "Heavyweight Supima Tee",
+        description: "Cut from 280 GSM combed Supima jersey cotton. Features a dense ribbed micro-collar that retains its clean structure wash after wash, with dropped shoulder tailoring and tactile drape.",
+        category: "tshirt",
+        gender: "mens",
+        price: { amount: 1290, currency: "INR" },
+        images: [{ url: "/editorial/supima_tee_piece.jpg", isCover: true }],
+        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
+        variants: [
+            { _id: "v-st-s", stock: 10, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "S" } },
+            { _id: "v-st-m", stock: 20, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "M" } },
+            { _id: "v-st-l", stock: 18, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "L" } },
+            { _id: "v-st-xl", stock: 8, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "XL" } },
+        ],
+    },
+    {
+        _id: "snitch-pleated-trouser",
+        title: "Relaxed Pleated Trouser",
+        description: "Tailored from Italian Super 120s wool blend with classic double inward pleats, extended tab closure, and concealed side adjusters. Includes complimentary bespoke hemming and cuffing.",
+        category: "trouser",
+        gender: "mens",
+        price: { amount: 2890, currency: "INR" },
+        images: [
+            { url: "/editorial/pleated_trouser_piece.jpg", isCover: true },
+            { url: "/editorial/trouser_cuff_detail.jpg", isCover: false },
+        ],
+        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
+        variants: [
+            { _id: "v-pt-30", stock: 6, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "30" } },
+            { _id: "v-pt-32", stock: 14, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "32" } },
+            { _id: "v-pt-34", stock: 10, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "34" } },
+            { _id: "v-pt-36", stock: 5, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "36" } },
+        ],
+    },
+    {
         _id: "snitch-1",
         title: "Dark Purple Slim Fit Shirt",
         description: "Premium washed cotton slim fit shirt with structured spread collar and rounded cuffs. Engineered for evening gatherings and sharp streetwear aesthetics.",

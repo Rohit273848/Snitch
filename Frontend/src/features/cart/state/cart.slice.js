@@ -1,11 +1,77 @@
 import {createSlice} from "@reduxjs/toolkit";
 
+export const DEFAULT_ENSEMBLE_ITEMS = [
+    {
+        _id: "cart-item-overshirt",
+        productId: "snitch-overshirt",
+        product: {
+            _id: "snitch-overshirt",
+            title: "The Field Overshirt",
+            category: "Outerwear",
+            price: { amount: 240, currency: "USD" },
+            images: [{ url: "/editorial/overshirt_olive_piece.jpg", isCover: true }],
+        },
+        title: "The Field Overshirt",
+        color: "Muted Olive",
+        size: "M",
+        fabric: "100% Textured Cotton • Portuguese Mill",
+        unitPrice: 240,
+        price: { amount: 240, currency: "USD" },
+        quantity: 1,
+        itemTotal: 240,
+        inStock: true,
+        image: "/editorial/overshirt_olive_piece.jpg",
+    },
+    {
+        _id: "cart-item-supima-tee",
+        productId: "snitch-supima-tee",
+        product: {
+            _id: "snitch-supima-tee",
+            title: "Heavyweight Supima Tee",
+            category: "Knitwear",
+            price: { amount: 90, currency: "USD" },
+            images: [{ url: "/editorial/supima_tee_piece.jpg", isCover: true }],
+        },
+        title: "Heavyweight Supima Tee",
+        color: "Chalk White",
+        size: "M",
+        fabric: "280 GSM Supima Jersey • Organic",
+        unitPrice: 90,
+        price: { amount: 90, currency: "USD" },
+        quantity: 1,
+        itemTotal: 90,
+        inStock: true,
+        image: "/editorial/supima_tee_piece.jpg",
+    },
+    {
+        _id: "cart-item-pleated-trouser",
+        productId: "snitch-pleated-trouser",
+        product: {
+            _id: "snitch-pleated-trouser",
+            title: "Relaxed Pleated Trouser",
+            category: "Trousers",
+            price: { amount: 210, currency: "USD" },
+            images: [{ url: "/editorial/pleated_trouser_piece.jpg", isCover: true }],
+        },
+        title: "Relaxed Pleated Trouser",
+        color: "Deep Charcoal",
+        size: "32",
+        fabric: "Italian Super 120s Wool • Tailored Cuff",
+        unitPrice: 210,
+        price: { amount: 210, currency: "USD" },
+        quantity: 1,
+        itemTotal: 210,
+        inStock: true,
+        image: "/editorial/pleated_trouser_piece.jpg",
+    },
+];
+
 const cartSlice = createSlice({
     name:"cart",
     initialState:{
-        items:[],
-        totalPrice: 0,
-        currency: "INR",
+        items: DEFAULT_ENSEMBLE_ITEMS,
+        totalPrice: 540,
+        currency: "USD",
         shippingAddress: null,
         addresses: [],
         currentStep: 1, // 1: Bag, 2: Address, 3: Payment
@@ -33,7 +99,7 @@ const cartSlice = createSlice({
             } else if (payload && Array.isArray(payload.items)) {
                 state.items = filterValidItems(payload.items);
                 state.totalPrice = state.items.length === 0 ? 0 : Number(payload.totalPrice || 0);
-                state.currency = payload.currency || "INR";
+                state.currency = payload.currency || "USD";
                 if (payload.shippingAddress !== undefined) {
                     state.shippingAddress = payload.shippingAddress;
                 }
@@ -43,17 +109,20 @@ const cartSlice = createSlice({
             }
         },
         addItem:(state,action)=>{
-            state.items.push(action.payload)
+            state.items.push(action.payload);
+            state.totalPrice = state.items.reduce((sum, item) => sum + (Number(item.itemTotal) || (Number(item.unitPrice || 0) * (Number(item.quantity) || 1))), 0);
         },
         setLoading:(state,action)=>{
             state.loading = action.payload;
         },
         incrementCartItem: (state, action) => {
-            const { productId, variantId } = action.payload || {};
-            const targetPId = String(productId || "");
+            const { productId, variantId, itemId } = action.payload || {};
+            const targetItemId = itemId ? String(itemId) : null;
+            const targetPId = productId ? String(productId) : null;
             const targetVId = variantId ? String(variantId) : null;
 
             state.items = state.items.map((item) => {
+                const itemDbId = item._id ? String(item._id) : null;
                 const itemPId = String(item.product?._id || item.product || item.productId || "");
                 const itemVId = item.variant?._id
                     ? String(item.variant._id)
@@ -63,10 +132,11 @@ const cartSlice = createSlice({
                     ? String(item.variantId)
                     : null;
 
-                const isProductMatch = itemPId === targetPId;
+                const isItemMatch = targetItemId && itemDbId === targetItemId;
+                const isProductMatch = targetPId && itemPId === targetPId;
                 const isVariantMatch = targetVId ? itemVId === targetVId : true;
 
-                if (isProductMatch && isVariantMatch) {
+                if (isItemMatch || (isProductMatch && isVariantMatch)) {
                     const newQty = (Number(item.quantity) || 1) + 1;
                     const unitPrice = Number(item.unitPrice ?? item.price?.amount ?? 0);
                     return {
@@ -77,14 +147,17 @@ const cartSlice = createSlice({
                 }
                 return item;
             });
+            state.totalPrice = state.items.reduce((sum, item) => sum + (Number(item.itemTotal) || (Number(item.unitPrice || 0) * (Number(item.quantity) || 1))), 0);
         },
         decrementCartItem: (state, action) => {
-            const { productId, variantId } = action.payload || {};
-            const targetPId = String(productId || "");
+            const { productId, variantId, itemId } = action.payload || {};
+            const targetItemId = itemId ? String(itemId) : null;
+            const targetPId = productId ? String(productId) : null;
             const targetVId = variantId ? String(variantId) : null;
 
             state.items = state.items
                 .map((item) => {
+                    const itemDbId = item._id ? String(item._id) : null;
                     const itemPId = String(item.product?._id || item.product || item.productId || "");
                     const itemVId = item.variant?._id
                         ? String(item.variant._id)
@@ -94,10 +167,11 @@ const cartSlice = createSlice({
                         ? String(item.variantId)
                         : null;
 
-                    const isProductMatch = itemPId === targetPId;
+                    const isItemMatch = targetItemId && itemDbId === targetItemId;
+                    const isProductMatch = targetPId && itemPId === targetPId;
                     const isVariantMatch = targetVId ? itemVId === targetVId : true;
 
-                    if (isProductMatch && isVariantMatch) {
+                    if (isItemMatch || (isProductMatch && isVariantMatch)) {
                         const newQty = (Number(item.quantity) || 1) - 1;
                         const unitPrice = Number(item.unitPrice ?? item.price?.amount ?? 0);
                         return {
@@ -109,11 +183,13 @@ const cartSlice = createSlice({
                     return item;
                 })
                 .filter((item) => Number(item.quantity) > 0);
+            state.totalPrice = state.items.reduce((sum, item) => sum + (Number(item.itemTotal) || (Number(item.unitPrice || 0) * (Number(item.quantity) || 1))), 0);
         },
         removeCartItem: (state, action) => {
             const payload = action.payload;
             if (typeof payload === "number") {
                 state.items = state.items.filter((_, idx) => idx !== payload);
+                state.totalPrice = state.items.reduce((sum, item) => sum + (Number(item.itemTotal) || (Number(item.unitPrice || 0) * (Number(item.quantity) || 1))), 0);
                 return;
             }
 
@@ -122,7 +198,7 @@ const cartSlice = createSlice({
             const targetPId = productId ? String(productId) : null;
             const targetVId = variantId ? String(variantId) : null;
 
-            state.items = state.items.filter((item, index) => {
+            state.items = state.items.filter((item) => {
                 const itemDbId = item._id ? String(item._id) : null;
                 if (targetItemId && itemDbId === targetItemId) {
                     return false;
@@ -146,6 +222,12 @@ const cartSlice = createSlice({
 
                 return true;
             });
+            state.totalPrice = state.items.reduce((sum, item) => sum + (Number(item.itemTotal) || (Number(item.unitPrice || 0) * (Number(item.quantity) || 1))), 0);
+        },
+        resetToDefaultEnsemble: (state) => {
+            state.items = DEFAULT_ENSEMBLE_ITEMS;
+            state.totalPrice = 540;
+            state.currentStep = 1;
         },
         setShippingAddress: (state, action) => {
             state.shippingAddress = action.payload;
@@ -199,6 +281,7 @@ export const {
     incrementCartItem,
     decrementCartItem,
     removeCartItem,
+    resetToDefaultEnsemble,
     setShippingAddress,
     setAddresses,
     addAddressState,
