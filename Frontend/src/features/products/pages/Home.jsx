@@ -109,130 +109,6 @@ const EDITORIAL_LOOKS = [
     },
 ];
 
-// ─── Curated Snitch Fallback Catalog ──────────────────────────────────────────
-const CURATED_SNITCH_PRODUCTS = [
-    {
-        _id: "snitch-overshirt",
-        title: "The Field Overshirt",
-        description: "Spun from 100% textured organic cotton with durable dual-needle construction, reinforced button placket, and functional chest bellows pockets.",
-        category: "shirt",
-        gender: "mens",
-        price: { amount: 2490, currency: "INR" },
-        images: [{ url: "/editorial/overshirt_olive_piece.jpg", isCover: true }],
-        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
-        tag: "FIELD READY",
-        subtitle: "Muted Olive • 100% Textured Cotton",
-        sizes: ["S", "M", "L", "XL"],
-    },
-    {
-        _id: "snitch-supima-tee",
-        title: "Heavyweight Supima Tee",
-        description: "Cut from 280 GSM combed Supima jersey cotton with dense ribbed micro-collar that retains its clean structure wash after wash.",
-        category: "tshirt",
-        gender: "mens",
-        price: { amount: 1290, currency: "INR" },
-        images: [{ url: "/editorial/supima_tee_piece.jpg", isCover: true }],
-        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
-        tag: "CORE LAYER",
-        subtitle: "Chalk White • 280 GSM Supima Jersey",
-        sizes: ["S", "M", "L", "XL"],
-    },
-    {
-        _id: "snitch-pleated-trouser",
-        title: "Relaxed Pleated Trouser",
-        description: "Tailored from Italian Super 120s wool blend with classic double inward pleats, extended tab closure, and concealed side adjusters.",
-        category: "trouser",
-        gender: "mens",
-        price: { amount: 2890, currency: "INR" },
-        images: [
-            { url: "/editorial/pleated_trouser_piece.jpg", isCover: true },
-            { url: "/editorial/trouser_cuff_detail.jpg", isCover: false },
-        ],
-        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
-        tag: "TAILORED BASE",
-        subtitle: "Deep Charcoal • Italian Super 120s Wool",
-        sizes: ["30", "32", "34", "36"],
-    },
-    {
-        _id: "snitch-1",
-        title: "Dark Purple Slim Fit Shirt",
-        description: "Premium washed cotton slim fit shirt with structured spread collar and rounded cuffs.",
-        category: "shirt",
-        gender: "mens",
-        price: { amount: 1190, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        tag: "ATELIER CLASSIC",
-        subtitle: "Deep Plum • Premium Egyptian Cotton",
-        sizes: ["S", "M", "L", "XL"],
-    },
-    {
-        _id: "snitch-2",
-        title: "Regular Fit Washed Jeans",
-        description: "Classic five-pocket vintage blue denim with subtle fading and durable reinforced seams.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 1899, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_denim", name: "Snitch Denim Studio" },
-        tag: "DENIM ARCHIVE",
-        subtitle: "Vintage Blue • 13.5oz Ring-Spun Denim",
-        sizes: ["30", "32", "34", "36"],
-    },
-    {
-        _id: "snitch-3",
-        title: "Relaxed Fit Washed Jeans",
-        description: "Charcoal dark-wash relaxed denim cut loose through the thigh with gentle taper.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 1990, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "urban_atelier", name: "Urban Atelier" },
-        tag: "DENIM ARCHIVE",
-        subtitle: "Charcoal Fade • 14oz Heavyweight Denim",
-        sizes: ["30", "32", "34", "36"],
-    },
-    {
-        _id: "snitch-7",
-        title: "Pleated Olive Dress Trousers",
-        description: "Tailored smart-casual olive trousers with double front pleats and side adjusters.",
-        category: "trouser",
-        gender: "mens",
-        price: { amount: 2299, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "atelier_tailors", name: "Atelier Tailors" },
-        tag: "STRUCTURED",
-        subtitle: "Forest Olive • Wool-Linen Tropical Weave",
-        sizes: ["30", "32", "34", "36"],
-    },
-    {
-        _id: "snitch-8",
-        title: "Vintage Mocha Heavyweight T-Shirt",
-        description: "240 GSM combed cotton drop-shoulder streetwear tee with ribbed neckline.",
-        category: "tshirt",
-        gender: "mens",
-        price: { amount: 999, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        tag: "CORE LAYER",
-        subtitle: "Warm Mocha • 240 GSM Jersey",
-        sizes: ["S", "M", "L", "XL"],
-    },
-    {
-        _id: "snitch-9",
-        title: "Tactical Relaxed Cargo Pants",
-        description: "Multi-pocket durable cotton ripstop cargo pants with drawstring cuff toggles.",
-        category: "cargo",
-        gender: "mens",
-        price: { amount: 2499, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=600&q=80", isCover: true }],
-        seller: { username: "cargo_craft", name: "Cargo Craft" },
-        tag: "TACTICAL",
-        subtitle: "Olive Drab • Military Cotton Ripstop",
-        sizes: ["30", "32", "34", "36"],
-    },
-];
-
 // ─── Filter Pills Definition ──────────────────────────────────────────────────
 const CATEGORY_TABS = [
     { id: "all", label: "All Pieces", filter: null },
@@ -272,7 +148,7 @@ export default function Home() {
     const allDbProducts = useSelector((state) => state.product.allProducts || []);
     const loading = useSelector((state) => state.product.loading);
 
-    // Initial load of DB products
+    // Initial load of DB products from MongoDB
     useEffect(() => {
         handleGetAllProducts().catch(() => {});
     }, []);
@@ -290,12 +166,22 @@ export default function Home() {
         });
     };
 
-    // Combine DB products with Curated Editorial pieces
-    const combinedProducts = useMemo(() => {
+    // Dynamically resolve flagship atelier piece IDs from MongoDB products
+    const flagshipPieces = useMemo(() => {
         const dbItems = Array.isArray(allDbProducts) ? allDbProducts : [];
-        const seenIds = new Set(dbItems.map((p) => String(p._id)));
-        const uniqueCurated = CURATED_SNITCH_PRODUCTS.filter((p) => !seenIds.has(String(p._id)));
-        return [...uniqueCurated, ...dbItems];
+        const overshirt = dbItems.find((p) => (p.title || "").toLowerCase().includes("overshirt"));
+        const supima = dbItems.find((p) => (p.title || "").toLowerCase().includes("supima"));
+        const trouser = dbItems.find((p) => (p.title || "").toLowerCase().includes("trouser"));
+        return {
+            overshirtId: overshirt?._id || "snitch-overshirt",
+            supimaId: supima?._id || "snitch-supima-tee",
+            trouserId: trouser?._id || "snitch-pleated-trouser",
+        };
+    }, [allDbProducts]);
+
+    // Products directly loaded from MongoDB
+    const combinedProducts = useMemo(() => {
+        return Array.isArray(allDbProducts) ? allDbProducts : [];
     }, [allDbProducts]);
 
     // Search query from URL or search box
@@ -337,6 +223,11 @@ export default function Home() {
     }, [combinedProducts, searchQuery, selectedTab, sortBy]);
 
     const activeLook = EDITORIAL_LOOKS[currentLookIdx];
+    const activeTargetId = useMemo(() => {
+        if (currentLookIdx === 0) return flagshipPieces.overshirtId;
+        if (currentLookIdx === 1) return flagshipPieces.supimaId;
+        return flagshipPieces.trouserId;
+    }, [currentLookIdx, flagshipPieces]);
 
     const nextLook = () => {
         setCurrentLookIdx((prev) => (prev + 1) % EDITORIAL_LOOKS.length);
@@ -484,7 +375,7 @@ export default function Home() {
                                         <p className="text-[11px] text-[#5A564D]">Muted Olive • ₹2,490</p>
                                         <button
                                             type="button"
-                                            onClick={() => navigate("/product/snitch-overshirt")}
+                                            onClick={() => navigate(`/product/${flagshipPieces.overshirtId}`)}
                                             className="pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#1A1917] hover:underline block"
                                         >
                                             INSPECT PIECE →
@@ -513,7 +404,7 @@ export default function Home() {
                                         <p className="text-[11px] text-[#5A564D]">Deep Charcoal • ₹2,890</p>
                                         <button
                                             type="button"
-                                            onClick={() => navigate("/product/snitch-pleated-trouser")}
+                                            onClick={() => navigate(`/product/${flagshipPieces.trouserId}`)}
                                             className="pt-1 text-[10px] font-bold uppercase tracking-[0.18em] text-[#1A1917] hover:underline block"
                                         >
                                             INSPECT PIECE →
@@ -534,7 +425,7 @@ export default function Home() {
                                 </div>
                                 <button
                                     type="button"
-                                    onClick={() => navigate(`/product/${activeLook.primaryTarget}`)}
+                                    onClick={() => navigate(`/product/${activeTargetId}`)}
                                     className="px-4 sm:px-5 py-2 bg-[#1A1917] hover:bg-[#32312D] text-[#FBF9F5] font-interface-sans text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 flex-shrink-0 cursor-pointer"
                                 >
                                     ACQUIRE
@@ -693,7 +584,7 @@ export default function Home() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => navigate("/product/snitch-overshirt")}
+                                onClick={() => navigate(`/product/${flagshipPieces.overshirtId}`)}
                                 className="font-interface-sans text-[10px] font-bold uppercase tracking-[0.2em] text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
                             >
                                 INSPECT →
@@ -750,7 +641,7 @@ export default function Home() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => navigate("/product/snitch-supima-tee")}
+                                onClick={() => navigate(`/product/${flagshipPieces.supimaId}`)}
                                 className="font-interface-sans text-[10px] font-bold uppercase tracking-[0.2em] text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
                             >
                                 INSPECT →
@@ -817,7 +708,7 @@ export default function Home() {
                             </div>
                             <button
                                 type="button"
-                                onClick={() => navigate("/product/snitch-pleated-trouser")}
+                                onClick={() => navigate(`/product/${flagshipPieces.trouserId}`)}
                                 className="font-interface-sans text-[10px] font-bold uppercase tracking-[0.2em] text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
                             >
                                 INSPECT →

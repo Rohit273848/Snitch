@@ -335,6 +335,8 @@ export default function CreateProduct() {
   const [formData, setFormData] = useState({
     title: "",
     description: "",
+    category: "shirt",
+    gender: "mens",
     priceAmount: "",
     priceCurrency: "INR",
   });
@@ -568,6 +570,8 @@ export default function CreateProduct() {
     const data = new FormData();
     data.append("title", formData.title.trim());
     data.append("description", formData.description.trim());
+    data.append("category", formData.category);
+    data.append("gender", formData.gender);
     data.append("priceAmount", formData.priceAmount);
     data.append("priceCurrency", formData.priceCurrency);
     data.append("attributeKeys", JSON.stringify(validKeys));
@@ -728,6 +732,42 @@ export default function CreateProduct() {
                 {validationErrors.description && (
                   <p className="mt-1 text-[11px] text-rose-600 font-mono-code">{validationErrors.description}</p>
                 )}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-1">
+                <div>
+                  <label className="block text-xs uppercase font-mono-code text-zinc-600 mb-1.5 font-semibold">
+                    Category *
+                  </label>
+                  <select
+                    name="category"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-900 font-mono-code focus:bg-white focus:border-black focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value="shirt">Outerwear & Shirts</option>
+                    <option value="trouser">Tailored Trousers</option>
+                    <option value="tshirt">Heavyweight Knitwear</option>
+                    <option value="jeans">Denim Archive</option>
+                    <option value="cargo">Cargo Craft</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs uppercase font-mono-code text-zinc-600 mb-1.5 font-semibold">
+                    Department / Gender
+                  </label>
+                  <select
+                    name="gender"
+                    value={formData.gender}
+                    onChange={handleChange}
+                    className="w-full bg-zinc-50 border border-zinc-200 rounded-xl px-4 py-3 text-sm text-zinc-900 font-mono-code focus:bg-white focus:border-black focus:outline-none transition-all cursor-pointer"
+                  >
+                    <option value="mens">Men's Collection</option>
+                    <option value="girls">Women's Collection</option>
+                    <option value="unisex">Unisex Atelier</option>
+                  </select>
+                </div>
               </div>
             </div>
 

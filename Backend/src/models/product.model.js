@@ -12,6 +12,17 @@ const productSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    category: {
+        type: String,
+        trim: true,
+        default: "shirt",
+        index: true,
+    },
+    gender: {
+        type: String,
+        trim: true,
+        default: "mens",
+    },
     seller: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'user',

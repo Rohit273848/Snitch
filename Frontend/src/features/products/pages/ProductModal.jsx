@@ -101,236 +101,6 @@ function TagIcon({ className = "w-4 h-4" }) {
     );
 }
 
-// ─── Curated Snitch Fallback Database (matching Home.jsx) ─────────────────────
-const CURATED_FALLBACK_PRODUCTS = [
-    {
-        _id: "snitch-overshirt",
-        title: "The Field Overshirt",
-        description: "Spun from 100% textured organic cotton with durable dual-needle construction, reinforced button placket, and functional chest bellows pockets. Built for versatile transitional layering across brisk climates.",
-        category: "shirt",
-        gender: "mens",
-        price: { amount: 2490, currency: "INR" },
-        images: [{ url: "/editorial/overshirt_olive_piece.jpg", isCover: true }],
-        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
-        variants: [
-            { _id: "v-fo-s", stock: 8, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "S" } },
-            { _id: "v-fo-m", stock: 15, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "M" } },
-            { _id: "v-fo-l", stock: 12, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "L" } },
-            { _id: "v-fo-xl", stock: 6, price: { amount: 2490, currency: "INR" }, attributes: { Color: "Muted Olive", Size: "XL" } },
-        ],
-    },
-    {
-        _id: "snitch-supima-tee",
-        title: "Heavyweight Supima Tee",
-        description: "Cut from 280 GSM combed Supima jersey cotton. Features a dense ribbed micro-collar that retains its clean structure wash after wash, with dropped shoulder tailoring and tactile drape.",
-        category: "tshirt",
-        gender: "mens",
-        price: { amount: 1290, currency: "INR" },
-        images: [{ url: "/editorial/supima_tee_piece.jpg", isCover: true }],
-        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
-        variants: [
-            { _id: "v-st-s", stock: 10, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "S" } },
-            { _id: "v-st-m", stock: 20, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "M" } },
-            { _id: "v-st-l", stock: 18, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "L" } },
-            { _id: "v-st-xl", stock: 8, price: { amount: 1290, currency: "INR" }, attributes: { Color: "Chalk White", Size: "XL" } },
-        ],
-    },
-    {
-        _id: "snitch-pleated-trouser",
-        title: "Relaxed Pleated Trouser",
-        description: "Tailored from Italian Super 120s wool blend with classic double inward pleats, extended tab closure, and concealed side adjusters. Includes complimentary bespoke hemming and cuffing.",
-        category: "trouser",
-        gender: "mens",
-        price: { amount: 2890, currency: "INR" },
-        images: [
-            { url: "/editorial/pleated_trouser_piece.jpg", isCover: true },
-            { url: "/editorial/trouser_cuff_detail.jpg", isCover: false },
-        ],
-        seller: { username: "snitch_atelier", name: "Snitch Atelier" },
-        variants: [
-            { _id: "v-pt-30", stock: 6, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "30" } },
-            { _id: "v-pt-32", stock: 14, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "32" } },
-            { _id: "v-pt-34", stock: 10, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "34" } },
-            { _id: "v-pt-36", stock: 5, price: { amount: 2890, currency: "INR" }, attributes: { Color: "Deep Charcoal", Size: "36" } },
-        ],
-    },
-    {
-        _id: "snitch-1",
-        title: "Dark Purple Slim Fit Shirt",
-        description: "Premium washed cotton slim fit shirt with structured spread collar and rounded cuffs. Engineered for evening gatherings and sharp streetwear aesthetics.",
-        category: "shirt",
-        gender: "mens",
-        price: { amount: 1190, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1617137984095-74e4e5e3613f?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [
-            { _id: "v-p-s", stock: 10, price: { amount: 1190, currency: "INR" }, attributes: { Color: "Purple", Size: "S" } },
-            { _id: "v-p-m", stock: 15, price: { amount: 1190, currency: "INR" }, attributes: { Color: "Purple", Size: "M" } },
-            { _id: "v-p-l", stock: 8, price: { amount: 1190, currency: "INR" }, attributes: { Color: "Purple", Size: "L" } },
-            { _id: "v-p-xl", stock: 0, price: { amount: 1190, currency: "INR" }, attributes: { Color: "Purple", Size: "XL" } },
-            { _id: "v-b-m", stock: 6, price: { amount: 1190, currency: "INR" }, attributes: { Color: "Black", Size: "M" } },
-        ],
-    },
-    {
-        _id: "snitch-2",
-        title: "Regular Fit Washed Jeans",
-        description: "Classic five-pocket vintage blue denim with subtle fading, reinforced copper rivets, and a durable heavyweight weave.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 899, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_denim", name: "Snitch Denim Studio" },
-        variants: [
-            { _id: "v-j-28", stock: 5, price: { amount: 899, currency: "INR" }, attributes: { Color: "Blue", Size: "28" } },
-            { _id: "v-j-30", stock: 12, price: { amount: 899, currency: "INR" }, attributes: { Color: "Blue", Size: "30" } },
-            { _id: "v-j-32", stock: 18, price: { amount: 899, currency: "INR" }, attributes: { Color: "Blue", Size: "32" } },
-            { _id: "v-j-34", stock: 10, price: { amount: 899, currency: "INR" }, attributes: { Color: "Blue", Size: "34" } },
-        ],
-    },
-    {
-        _id: "snitch-3",
-        title: "Relaxed Fit Washed Jeans",
-        description: "Charcoal dark-wash relaxed denim cut loose through the thigh with gentle taper. Finished with vintage whiskering.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 1090, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "urban_atelier", name: "Urban Atelier" },
-        variants: [
-            { _id: "v-c-30", stock: 8, price: { amount: 1090, currency: "INR" }, attributes: { Color: "Charcoal", Size: "30" } },
-            { _id: "v-c-32", stock: 14, price: { amount: 1090, currency: "INR" }, attributes: { Color: "Charcoal", Size: "32" } },
-            { _id: "v-c-34", stock: 4, price: { amount: 1090, currency: "INR" }, attributes: { Color: "Charcoal", Size: "34" } },
-        ],
-    },
-    {
-        _id: "snitch-4",
-        title: "Straight Fit Stretch Jeans",
-        description: "Versatile beige/ecru straight leg stretch denim engineered for all-day comfort with natural mineral wash.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 899, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1516826957135-700dedea698c?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_denim", name: "Snitch Denim Studio" },
-        variants: [
-            { _id: "v-b-30", stock: 9, price: { amount: 899, currency: "INR" }, attributes: { Color: "Beige", Size: "30" } },
-            { _id: "v-b-32", stock: 15, price: { amount: 899, currency: "INR" }, attributes: { Color: "Beige", Size: "32" } },
-        ],
-    },
-    {
-        _id: "snitch-5",
-        title: "Straight Fit Washed Jeans",
-        description: "Medium vintage wash straight jeans with natural fading and soft hand feel.",
-        category: "jeans",
-        gender: "mens",
-        price: { amount: 1090, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [
-            { _id: "v-m-30", stock: 10, price: { amount: 1090, currency: "INR" }, attributes: { Color: "Blue", Size: "30" } },
-            { _id: "v-m-32", stock: 12, price: { amount: 1090, currency: "INR" }, attributes: { Color: "Blue", Size: "32" } },
-        ],
-    },
-    {
-        _id: "snitch-6",
-        title: "Dark Purple Slim Fit Shirt",
-        description: "Tailored deep plum lightweight shirt, ideal for evening layers and casual styling.",
-        category: "shirt",
-        gender: "mens",
-        price: { amount: 1190, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [
-            { _id: "v-dp-m", stock: 7, price: { amount: 1190, currency: "INR" }, attributes: { Color: "Purple", Size: "M" } },
-            { _id: "v-dp-l", stock: 11, price: { amount: 1190, currency: "INR" }, attributes: { Color: "Purple", Size: "L" } },
-        ],
-    },
-    {
-        _id: "snitch-7",
-        title: "Pleated Olive Dress Trousers",
-        description: "Tailored smart-casual olive trousers with double front pleats and side adjusters.",
-        category: "trouser",
-        gender: "mens",
-        price: { amount: 1299, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "atelier_tailors", name: "Atelier Tailors" },
-        variants: [
-            { _id: "v-o-30", stock: 6, price: { amount: 1299, currency: "INR" }, attributes: { Color: "Olive", Size: "30" } },
-            { _id: "v-o-32", stock: 14, price: { amount: 1299, currency: "INR" }, attributes: { Color: "Olive", Size: "32" } },
-        ],
-    },
-    {
-        _id: "snitch-8",
-        title: "Vintage Mocha Heavyweight T-Shirt",
-        description: "240 GSM combed cotton drop-shoulder streetwear tee with ribbed neckline.",
-        category: "tshirt",
-        gender: "mens",
-        price: { amount: 799, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_official", name: "Snitch Official" },
-        variants: [
-            { _id: "v-mo-s", stock: 12, price: { amount: 799, currency: "INR" }, attributes: { Color: "Brown", Size: "S" } },
-            { _id: "v-mo-m", stock: 20, price: { amount: 799, currency: "INR" }, attributes: { Color: "Brown", Size: "M" } },
-            { _id: "v-mo-l", stock: 15, price: { amount: 799, currency: "INR" }, attributes: { Color: "Brown", Size: "L" } },
-        ],
-    },
-    {
-        _id: "snitch-9",
-        title: "Tactical Relaxed Cargo Pants",
-        description: "Multi-pocket durable cotton ripstop cargo pants with drawstring cuff toggles.",
-        category: "cargo",
-        gender: "mens",
-        price: { amount: 1499, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "cargo_craft", name: "Cargo Craft" },
-        variants: [
-            { _id: "v-tg-30", stock: 8, price: { amount: 1499, currency: "INR" }, attributes: { Color: "Olive", Size: "30" } },
-            { _id: "v-tg-32", stock: 12, price: { amount: 1499, currency: "INR" }, attributes: { Color: "Olive", Size: "32" } },
-        ],
-    },
-    {
-        _id: "snitch-10",
-        title: "Cropped Linen Resort Shirt",
-        description: "Airy relaxed cropped silhouette with breathable natural linen weave.",
-        category: "shirt",
-        gender: "girls",
-        price: { amount: 1090, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1583743814966-8936f5b7be1a?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_her", name: "Snitch For Her" },
-        variants: [
-            { _id: "v-lr-s", stock: 10, price: { amount: 1090, currency: "INR" }, attributes: { Color: "White", Size: "S" } },
-            { _id: "v-lr-m", stock: 14, price: { amount: 1090, currency: "INR" }, attributes: { Color: "White", Size: "M" } },
-        ],
-    },
-    {
-        _id: "snitch-11",
-        title: "Wide Leg Pleated Trousers",
-        description: "High-waist fluid tailored trousers with front darts and sleek side slant pockets.",
-        category: "trouser",
-        gender: "girls",
-        price: { amount: 1399, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_her", name: "Snitch For Her" },
-        variants: [
-            { _id: "v-wp-28", stock: 7, price: { amount: 1399, currency: "INR" }, attributes: { Color: "Beige", Size: "28" } },
-            { _id: "v-wp-30", stock: 11, price: { amount: 1399, currency: "INR" }, attributes: { Color: "Beige", Size: "30" } },
-        ],
-    },
-    {
-        _id: "snitch-12",
-        title: "Parachute Utility Cargos",
-        description: "Ultra-lightweight windbreaker fabric relaxed parachute pants with toggle hems.",
-        category: "cargo",
-        gender: "girls",
-        price: { amount: 1299, currency: "INR" },
-        images: [{ url: "https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?auto=format&fit=crop&w=800&q=80", isCover: true }],
-        seller: { username: "snitch_her", name: "Snitch For Her" },
-        variants: [
-            { _id: "v-pu-s", stock: 12, price: { amount: 1299, currency: "INR" }, attributes: { Color: "Black", Size: "S" } },
-            { _id: "v-pu-m", stock: 16, price: { amount: 1299, currency: "INR" }, attributes: { Color: "Black", Size: "M" } },
-        ],
-    },
-];
-
 // ─── Main Product Details Component ───────────────────────────────────────────
 export default function ProductModal() {
     const { id } = useParams();
@@ -374,38 +144,23 @@ export default function ProductModal() {
         });
     };
 
-    // Load product by ID or curated fallback
+    // Load product directly from MongoDB database via API
     useEffect(() => {
         if (!id) return;
         setLoadingProduct(true);
         setError(null);
 
-        // Check if ID matches curated mockup drops first
-        const curatedMatch = CURATED_FALLBACK_PRODUCTS.find((p) => p._id === id);
-        if (curatedMatch) {
-            setProduct(curatedMatch);
-            setLoadingProduct(false);
-            return;
-        }
-
-        // Otherwise fetch from database API
         handleGetProductById(id)
             .then((data) => {
                 if (data) {
                     setProduct(data);
                 } else {
-                    const fallback = CURATED_FALLBACK_PRODUCTS[0];
-                    setProduct(fallback);
+                    setError("Piece not found in collection.");
                 }
             })
             .catch((err) => {
-                console.warn("Product API fetch error, checking fallbacks:", err);
-                const fallback = CURATED_FALLBACK_PRODUCTS.find((p) => p._id === id) || CURATED_FALLBACK_PRODUCTS[0];
-                if (fallback) {
-                    setProduct(fallback);
-                } else {
-                    setError(err?.response?.data?.message || "Failed to load product details.");
-                }
+                console.error("Product API fetch error:", err);
+                setError(err?.response?.data?.message || "Failed to load product details.");
             })
             .finally(() => {
                 setLoadingProduct(false);

@@ -162,6 +162,7 @@ const WEEKLY_PERFORMANCE = [
 
 export default function SellerDashboard() {
     const user = useSelector((state) => state.auth?.user);
+    const sellerProducts = useSelector((state) => state.product.sellerProduct || []);
     const navigate = useNavigate();
 
     const [mobileNavOpen, setMobileNavOpen] = useState(false);
@@ -234,15 +235,40 @@ export default function SellerDashboard() {
             revenueChange: "+24.8% vs last month",
             totalOrders: totalOrdersCount,
             ordersBreakdown: `${inProgressCount || 5} In Transit / Packing • ${deliveredCount || 1} Delivered`,
-            activeListings: 3,
-            listingsSubtitle: "3 Flagship Atelier Master Items",
+            activeListings: sellerProducts.length > 0 ? sellerProducts.length : 3,
+            listingsSubtitle: `${sellerProducts.length || 3} Atelier Master Items`,
             dispatchSla: "99.4%",
             slaSubtitle: "Avg Dispatch: 4.2 hrs • 0 breaches",
             avgOrderValue: `₹${avgOrderVal.toLocaleString("en-IN")}`,
             repeatPatrons: "42.8%",
             conversionRate: "5.1%",
         };
-    }, [orders]);
+    }, [orders, sellerProducts]);
+
+    // Derive catalog pieces dynamically from real MongoDB seller products
+    const displayCatalogPieces = useMemo(() => {
+        if (Array.isArray(sellerProducts) && sellerProducts.length > 0) {
+            return sellerProducts.slice(0, 3).map((p, idx) => {
+                const totalStock = Array.isArray(p.variants)
+                    ? p.variants.reduce((acc, v) => acc + (Number(v.stock) || 0), 0)
+                    : 15;
+                const status = totalStock < 10 ? "LOW STOCK ALERT" : "HEALTHY BATCH";
+                return {
+                    id: String(p._id),
+                    sku: `#NTL-${String(idx + 1).padStart(2, "0")}`,
+                    title: p.title,
+                    category: (p.category || "GARMENT").toUpperCase(),
+                    fabric: p.description || "Fine European Weave",
+                    price: Number(p.price?.amount || 190),
+                    currency: p.price?.currency || "INR",
+                    stock: totalStock,
+                    status: status,
+                    image: p.images?.[0]?.url || "/editorial/overshirt_olive_piece.jpg",
+                };
+            });
+        }
+        return FLAGSHIP_CATALOG_PIECES;
+    }, [sellerProducts]);
 
     // ─── Export Report Handler ────────────────────────────────────────────────
     const handleExportReport = () => {
@@ -807,7 +833,7 @@ export default function SellerDashboard() {
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                {FLAGSHIP_CATALOG_PIECES.map((piece) => (
+                                {displayCatalogPieces.map((piece) => (
                                     <div
                                         key={piece.id}
                                         className="bg-[#FBF9F5] border border-[#ECE7DD] p-5 space-y-4 shadow-xs hover:border-[#D5CEBF] transition-all flex flex-col justify-between"
@@ -843,7 +869,7 @@ export default function SellerDashboard() {
                                                     ACQUISITION PRICE
                                                 </span>
                                                 <span className="font-editorial-serif text-lg font-medium text-[#171717]">
-                                                    ${piece.price}
+                                                    {piece.currency === "INR" ? "₹" : "$"}{piece.price.toLocaleString("en-IN")}
                                                 </span>
                                             </div>
                                             <div className="text-right">

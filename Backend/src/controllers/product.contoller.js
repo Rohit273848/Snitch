@@ -1,9 +1,10 @@
+import mongoose from "mongoose";
 import productModel from "../models/product.model.js";
 import { uploadFile, deleteFileByUrl, deleteFileById } from "../services/storage.service.js";
 
 export async function createProduct(req, res) {
     try {
-        let { title, description, priceAmount, priceCurrency, attributeKeys, variants, imageMetadata } = req.body;
+        let { title, description, priceAmount, priceCurrency, attributeKeys, variants, imageMetadata, category, gender } = req.body;
         const seller = req.user;
 
         if (!req.files || req.files.length === 0) {
@@ -130,6 +131,8 @@ export async function createProduct(req, res) {
         const product = await productModel.create({
             title: title.trim(),
             description: description.trim(),
+            category: category ? String(category).trim().toLowerCase() : "shirt",
+            gender: gender ? String(gender).trim().toLowerCase() : "mens",
             seller: seller._id,
             price: {
                 amount: Number(priceAmount),
@@ -194,7 +197,21 @@ export async function getAllProducts(req, res) {
 export async function getProductById(req, res) {
     try {
         const { id } = req.params;
-        const product = await productModel.findById(id).populate("seller", "username email name");
+        let product = null;
+
+        if (mongoose.Types.ObjectId.isValid(id)) {
+            product = await productModel.findById(id).populate("seller", "username email fullname name");
+        }
+
+        if (!product) {
+            const cleanKey = String(id).replace(/^snitch-/, "").replace(/[-_]/g, " ").trim();
+            if (cleanKey) {
+                product = await productModel.findOne({
+                    title: { $regex: cleanKey, $options: "i" }
+                }).populate("seller", "username email fullname name");
+            }
+        }
+
         if (!product) {
             return res.status(404).json({
                 success: false,
@@ -235,9 +252,11 @@ export async function updateSellerProduct(req, res) {
             });
         }
 
-        const { title, description, priceAmount, priceCurrency } = req.body;
+        const { title, description, priceAmount, priceCurrency, category, gender } = req.body;
         if (title) product.title = title;
         if (description) product.description = description;
+        if (category) product.category = String(category).trim().toLowerCase();
+        if (gender) product.gender = String(gender).trim().toLowerCase();
         if (priceAmount !== undefined && priceAmount !== null && priceAmount !== "") {
             product.price.amount = Number(priceAmount);
         }

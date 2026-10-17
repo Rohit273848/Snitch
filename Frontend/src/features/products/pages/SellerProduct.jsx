@@ -163,15 +163,13 @@ export default function SellerProduct() {
         handleGetSellerProduct().catch(() => {});
     }, []);
 
-    // Merge NORTHLINE archival products with any user-created DB products
+    // Load seller DB products from MongoDB
     const allProducts = useMemo(() => {
         const dbItems = Array.isArray(dbProducts) ? dbProducts : [];
-        const seenIds = new Set(DEFAULT_NORTHLINE_CATALOG.map((p) => p._id));
-        const formattedDb = dbItems
-            .filter((p) => !seenIds.has(String(p._id)))
-            .map((p, idx) => ({
+        if (dbItems.length > 0) {
+            return dbItems.map((p, idx) => ({
                 _id: String(p._id),
-                sku: `#NTL-${String(idx + 4).padStart(2, "0")}`,
+                sku: `#NTL-${String(idx + 1).padStart(2, "0")}`,
                 title: p.title || "Custom Tailored Piece",
                 category: (p.category || "GARMENT").toUpperCase(),
                 categoryPill: (p.category || "GARMENT").toUpperCase(),
@@ -180,7 +178,7 @@ export default function SellerProduct() {
                     ? `${p.variants[0].attributes.Color.toUpperCase()} • ${p.variants[0].attributes.Size || "M"}`
                     : "TAILORED CUT",
                 price: Number(p.price?.amount || 190),
-                currency: p.price?.currency || "USD",
+                currency: p.price?.currency || "INR",
                 status: "ACTIVE",
                 provenance: {
                     mill: "Atelier Studio Mill",
@@ -188,8 +186,8 @@ export default function SellerProduct() {
                 },
                 image: p.images?.[0]?.url || p.images?.[0] || "/editorial/hero_bordeaux_menswear.jpg",
             }));
-
-        return [...DEFAULT_NORTHLINE_CATALOG, ...formattedDb];
+        }
+        return DEFAULT_NORTHLINE_CATALOG;
     }, [dbProducts]);
 
     // Filter & Search processing
