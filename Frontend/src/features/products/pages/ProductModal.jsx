@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from "react-router-dom";
 import { useProduct } from "../hook/useProduct.js";
 import { useChat } from "../../cart/hook/useChat.js";
 import ProductVarietySelector from "../components/ProductVarietySelector.jsx";
+import { STITCH_SAMPLE_PIECES } from "../utils/searchEngine.js";
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
 function FontLoader() {
@@ -144,11 +145,36 @@ export default function ProductModal() {
         });
     };
 
-    // Load product directly from MongoDB database via API
+    // Load product directly from MongoDB database via API (or sample catalog if sample piece)
     useEffect(() => {
         if (!id) return;
         setLoadingProduct(true);
         setError(null);
+
+        // Check if item is an atelier sample piece from design preview
+        if (id.startsWith("stitch-sample-") || id.startsWith("snitch-")) {
+            const sample = STITCH_SAMPLE_PIECES.find((p) => p._id === id);
+            if (sample) {
+                const sampleSizes = Array.isArray(sample.sizes) ? sample.sizes : ["S", "M", "L", "XL"];
+                const mockVariants = sampleSizes.map((sz, idx) => ({
+                    _id: `${sample._id}-var-${idx}`,
+                    stock: 12,
+                    attributes: {
+                        Size: sz,
+                        Color: sample.color || "Olive"
+                    },
+                    images: sample.images || []
+                }));
+
+                setProduct({
+                    ...sample,
+                    variants: mockVariants,
+                    attributeKeys: ["Color", "Size"]
+                });
+                setLoadingProduct(false);
+                return;
+            }
+        }
 
         handleGetProductById(id)
             .then((data) => {
@@ -160,7 +186,23 @@ export default function ProductModal() {
             })
             .catch((err) => {
                 console.error("Product API fetch error:", err);
-                setError(err?.response?.data?.message || "Failed to load product details.");
+                // Fallback check in case id matched a sample piece
+                const sample = STITCH_SAMPLE_PIECES.find((p) => p._id === id);
+                if (sample) {
+                    const sampleSizes = Array.isArray(sample.sizes) ? sample.sizes : ["S", "M", "L", "XL"];
+                    setProduct({
+                        ...sample,
+                        variants: sampleSizes.map((sz, idx) => ({
+                            _id: `${sample._id}-var-${idx}`,
+                            stock: 12,
+                            attributes: { Size: sz, Color: sample.color || "Olive" },
+                            images: sample.images || []
+                        })),
+                        attributeKeys: ["Color", "Size"]
+                    });
+                } else {
+                    setError(err?.response?.data?.message || "Failed to load product details.");
+                }
             })
             .finally(() => {
                 setLoadingProduct(false);

@@ -6,6 +6,7 @@ import SellerDashboard from "../features/products/pages/SellerDashboard.jsx"
 import SellerProduct from "../features/products/pages/SellerProduct.jsx"
 import SellerProductModel from "../features/products/pages/SellerProductModel.jsx"
 import Home from "../features/products/pages/Home.jsx"
+import SearchResultsPage from "../features/products/pages/SearchResultsPage.jsx"
 import ProductModal from "../features/products/pages/ProductModal.jsx"
 import CartPage from "../features/cart/pages/CartPage.jsx"
 import OrdersListPage from "../features/orders/pages/OrdersListPage.jsx"
@@ -36,6 +37,10 @@ export const router = createBrowserRouter([
             {
                 path: "/",
                 element: <Protected><Home /></Protected>,
+            },
+            {
+                path: "/search",
+                element: <Protected><SearchResultsPage /></Protected>,
             },
             {
                 path: "/product/:id",

@@ -153,6 +153,14 @@ export default function Home() {
         handleGetAllProducts().catch(() => {});
     }, []);
 
+    // Redirect any legacy ?search= queries to the dedicated Search Results Page
+    useEffect(() => {
+        const s = searchParams.get("search");
+        if (s) {
+            navigate(`/search?q=${encodeURIComponent(s)}`, { replace: true });
+        }
+    }, [searchParams, navigate]);
+
     // Toggle wishlist
     const handleToggleWishlist = (id) => {
         setWishlist((prev) => {

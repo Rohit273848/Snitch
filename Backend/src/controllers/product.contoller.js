@@ -467,3 +467,68 @@ export async function deleteSellerProduct(req, res) {
         });
     }
 }
+
+export async function searchProducts(req, res) {
+    try {
+        const {
+            q = "",
+            category = "all",
+            color = "all",
+            minPrice,
+            maxPrice,
+            brand = "all",
+            sort = "relevance",
+            limit = 24,
+            page = 1
+        } = req.query;
+
+        const filter = {};
+
+        if (q && q.trim()) {
+            filter.$or = [
+                { title: { $regex: q.trim(), $options: "i" } },
+                { description: { $regex: q.trim(), $options: "i" } },
+                { category: { $regex: q.trim(), $options: "i" } },
+                { "images.color": { $regex: q.trim(), $options: "i" } },
+            ];
+        }
+
+        if (category && category !== "all") {
+            filter.category = { $regex: category.trim(), $options: "i" };
+        }
+
+        if (color && color !== "all") {
+            filter["images.color"] = { $regex: color.trim(), $options: "i" };
+        }
+
+        if (minPrice || maxPrice) {
+            filter["price.amount"] = {};
+            if (minPrice) filter["price.amount"].$gte = Number(minPrice);
+            if (maxPrice) filter["price.amount"].$lte = Number(maxPrice);
+        }
+
+        let sortObj = { createdAt: -1 };
+        if (sort === "price-low") sortObj = { "price.amount": 1 };
+        else if (sort === "price-high") sortObj = { "price.amount": -1 };
+        else if (sort === "rating") sortObj = { "rating.rate": -1 };
+
+        const products = await productModel
+            .find(filter)
+            .sort(sortObj)
+            .limit(Number(limit))
+            .populate("seller", "username email name fullname");
+
+        return res.status(200).json({
+            success: true,
+            total: products.length,
+            products,
+        });
+    } catch (err) {
+        console.error("search products error:", err);
+        return res.status(500).json({
+            success: false,
+            message: "Failed to search products",
+        });
+    }
+}
+

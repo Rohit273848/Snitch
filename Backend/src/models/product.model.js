@@ -86,7 +86,25 @@ const productSchema = new mongoose.Schema({
                 required: false,
             }
         },
-    ]
+    ],
+    rating: {
+        rate: {
+            type: Number,
+            default: 4.8,
+            min: 1,
+            max: 5,
+        },
+        count: {
+            type: Number,
+            default: 42,
+            min: 0,
+        }
+    },
+    brand: {
+        type: String,
+        trim: true,
+        default: "NORTHLINE Atelier",
+    }
 }, { timestamps: true, toJSON: { flattenMaps: true }, toObject: { flattenMaps: true } });
 
 const productModel = mongoose.models.product || mongoose.model('product', productSchema);

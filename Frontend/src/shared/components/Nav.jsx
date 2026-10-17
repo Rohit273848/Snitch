@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
+import SearchBar from "./SearchBar.jsx";
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 function SearchIcon({ className = "w-3.5 h-3.5" }) {
@@ -49,6 +50,7 @@ export default function Nav() {
     const [searchParams, setSearchParams] = useSearchParams();
     const [searchTerm, setSearchTerm] = useState(() => searchParams.get("search") || "");
     const [isSearchOpen, setIsSearchOpen] = useState(false);
+    const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     const user = useSelector((state) => state.auth?.user);
@@ -167,35 +169,25 @@ export default function Nav() {
 
                 {/* ─── RIGHT: SEARCH, ACCOUNT, BAG, PROFILE ───────────────── */}
                 <div className="flex items-center gap-4 sm:gap-6">
-                    {/* Inline or Expandable Search */}
+                    {/* Search Control (Desktop & Mobile) */}
                     {isSearchOpen ? (
-                        <form
-                            onSubmit={handleSearchSubmit}
-                            className="relative flex items-center w-40 sm:w-64 transition-all"
-                        >
-                            <input
-                                type="text"
+                        <div className="relative w-56 sm:w-72 md:w-80 transition-all">
+                            <SearchBar
                                 autoFocus
-                                value={searchTerm}
-                                onChange={(e) => handleSearchChange(e.target.value)}
-                                placeholder="Search apparel..."
-                                className="w-full bg-[#F4F0E8] text-[#1A1917] placeholder-[#8A857B] text-xs px-3 py-1.5 border-b border-[#1A1917] focus:outline-none tracking-wide"
+                                customPlaceholder="overshirt"
+                                onSearchExecuted={() => setIsSearchOpen(false)}
                             />
-                            <button
-                                type="button"
-                                onClick={() => {
-                                    handleSearchChange("");
-                                    setIsSearchOpen(false);
-                                }}
-                                className="absolute right-1 text-[#5A564D] hover:text-black p-1"
-                            >
-                                <XIcon className="w-3.5 h-3.5" />
-                            </button>
-                        </form>
+                        </div>
                     ) : (
                         <button
                             type="button"
-                            onClick={() => setIsSearchOpen(true)}
+                            onClick={() => {
+                                if (window.innerWidth < 768) {
+                                    setIsMobileSearchOpen(true);
+                                } else {
+                                    setIsSearchOpen(true);
+                                }
+                            }}
                             className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[#5A564D] hover:text-[#1A1917] transition-colors cursor-pointer"
                         >
                             <SearchIcon className="w-3.5 h-3.5" />
@@ -308,6 +300,19 @@ export default function Nav() {
                             </Link>
                         )}
                     </div>
+                </div>
+            )}
+
+            {/* ─── MOBILE SEARCH MODAL (Matching Stitch Mobile Reference) ─── */}
+            {isMobileSearchOpen && (
+                <div className="fixed inset-0 z-50 bg-[#FBF9F5] p-4 flex flex-col overflow-y-auto animate-fadeIn">
+                    <SearchBar
+                        isMobileModal
+                        autoFocus
+                        customPlaceholder="overshirt"
+                        onCloseMobile={() => setIsMobileSearchOpen(false)}
+                        onSearchExecuted={() => setIsMobileSearchOpen(false)}
+                    />
                 </div>
             )}
         </header>
