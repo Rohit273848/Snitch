@@ -109,12 +109,18 @@ export async function createOrderFromCart({
     const orderItems = cart.items.map((item) => {
         const prod = item.product || {};
         const variant = item.variant || null;
-        const pIdStr = (prod._id || prod).toString();
+        const prodId = prod._id || prod;
+        const pIdStr = (prodId || "").toString();
 
-        const sellerId = prod.seller || sellerMap.get(pIdStr) || null;
-        if (sellerId) {
-            sellersSet.add(sellerId.toString());
+        const rawSeller = prod.seller || sellerMap.get(pIdStr) || null;
+        const sellerIdStr = rawSeller?._id ? rawSeller._id.toString() : rawSeller ? rawSeller.toString() : null;
+        if (sellerIdStr && mongoose.Types.ObjectId.isValid(sellerIdStr)) {
+            sellersSet.add(sellerIdStr);
         }
+
+        const sellerObjectId = sellerIdStr && mongoose.Types.ObjectId.isValid(sellerIdStr)
+            ? new mongoose.Types.ObjectId(sellerIdStr)
+            : null;
 
         // Determine cover image
         let coverImg = "";
@@ -131,8 +137,8 @@ export async function createOrderFromCart({
         const itemTotal = unitPrice * quantity;
 
         return {
-            product: prod._id,
-            seller: sellerId,
+            product: prodId,
+            seller: sellerObjectId,
             title: prod.title || "Snitch Product",
             coverImage: coverImg,
             variant: variant
@@ -378,10 +384,11 @@ export async function getSellerOrders(sellerId, { status = null, search = "" } =
         if (ord.orderStatus !== "CANCELLED") {
             // Calculate revenue specifically from this seller's items
             ord.items.forEach((item) => {
-                const itemSellerId = item.seller ? item.seller.toString() : null;
+                const itemSellerId = (item.seller?._id || item.seller || "").toString();
+                const itemProdId = (item.product?._id || item.product || "").toString();
                 const isItemFromSeller =
                     itemSellerId === sellerId.toString() ||
-                    sellerProductIds.some((pId) => pId.toString() === item.product?.toString());
+                    sellerProductIds.some((pId) => pId.toString() === itemProdId);
                 if (isItemFromSeller) {
                     totalRevenue += Number(item.itemTotal || 0);
                 }
@@ -442,7 +449,8 @@ export async function updateOrderStatusBySeller({
             order.items.some(
                 (item) =>
                     (item.seller && item.seller.toString() === sellerId.toString()) ||
-                    (item.product && sellerProductIds.includes(item.product._id?.toString() || item.product.toString()))
+                    (item.product && sellerProductIds.includes(item.product._id?.toString() || item.product.toString())) ||
+                    (item.product?.seller && item.product.seller.toString() === sellerId.toString())
             ));
 
     if (!isAuthorized) {
