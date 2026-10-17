@@ -34,13 +34,18 @@ export async function createOrderFromCart({
     paymentDetails = {},
     discount = 0,
     shippingFee = 0,
+    items = null,
 }) {
     const userObjectId = new mongoose.Types.ObjectId(userId);
 
     // 1. Fetch live cart items and current pricing
-    const cart = await getCartDetails(userId);
-    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+    let cart = await getCartDetails(userId);
+    let effectiveItems = (cart && Array.isArray(cart.items) && cart.items.length > 0) ? cart.items : (Array.isArray(items) && items.length > 0 ? items : []);
+    if (!effectiveItems || effectiveItems.length === 0) {
         throw new Error("Your cart is empty. Please add items to proceed.");
+    }
+    if (!cart || !Array.isArray(cart.items) || cart.items.length === 0) {
+        cart = { ...cart, items: effectiveItems };
     }
 
     // 2. Resolve Shipping Address
@@ -139,7 +144,7 @@ export async function createOrderFromCart({
         return {
             product: prodId,
             seller: sellerObjectId,
-            title: prod.title || "Snitch Product",
+            title: prod.title || "Velmora Product",
             coverImage: coverImg,
             variant: variant
                 ? {
@@ -188,7 +193,7 @@ export async function createOrderFromCart({
             status: "CONFIRMED",
             title: "Payment Confirmed",
             description: `Payment of ₹${totalAmount.toLocaleString("en-IN")} confirmed via ${paymentMethod.toUpperCase()}.`,
-            location: "Snitch Central Hub",
+            location: "Velmora Central Hub",
             timestamp: new Date(),
             completed: true,
         });
@@ -218,7 +223,7 @@ export async function createOrderFromCart({
         },
         orderStatus: isPaidOnline && paymentDetails.status === "completed" ? "CONFIRMED" : "PLACED",
         tracking: {
-            carrier: "Snitch Express Courier",
+            carrier: "Velmora Express Courier",
             trackingNumber,
             estimatedDelivery,
             events: initialEvents,
@@ -228,8 +233,8 @@ export async function createOrderFromCart({
     const savedOrder = await orderDoc.save();
 
     // 6. Clear user cart items after order is placed
-    await cartModel.findOneAndUpdate(
-        { user: userObjectId },
+    await cartModel.updateMany(
+        { user: { $in: [userObjectId, userId.toString()] } },
         { $set: { items: [] } }
     );
 
@@ -312,7 +317,7 @@ export async function cancelOrderById(orderId, userId, reason = "") {
         status: "CANCELLED",
         title: "Order Cancelled",
         description: reason ? `Order was cancelled. Reason: ${reason}` : "Order was cancelled by the customer.",
-        location: "Snitch Central Hub",
+        location: "Velmora Central Hub",
         timestamp: new Date(),
         completed: true,
     });

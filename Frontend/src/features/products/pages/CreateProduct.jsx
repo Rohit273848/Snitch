@@ -1049,14 +1049,14 @@ export default function CreateProduct() {
 
         </div>
 
-        {/* ─── Snitch Store Footer (Matching Home.jsx) ────────────────── */}
+        {/* ─── Velmora Store Footer (Matching Home.jsx) ────────────────── */}
         <footer className="mt-16 border-t border-zinc-200 bg-white py-10 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-2 font-mono-code">
           <div className="flex items-center justify-center gap-2">
             <span className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold text-black">
-              S
+              V
             </span>
             <span className="font-bold text-zinc-900 tracking-widest uppercase">
-              SNITCH STUDIO
+              VELMORA STUDIO
             </span>
           </div>
           <p className="text-[11px] text-zinc-400">

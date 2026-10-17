@@ -113,6 +113,7 @@ export default function CartPage() {
         handleIncreamentQuantity,
         handleDecrementQuantity,
         handleDeleteCartItem,
+        handleClearCart,
         handleGetAddresses,
         handleCreateAddress,
         handleUpdateAddress,
@@ -146,13 +147,6 @@ export default function CartPage() {
         handleGetCart().catch(() => {});
         handleGetAddresses().catch(() => {});
     }, []);
-
-    // Ensure cart has items (default to the reference ensemble if initially empty)
-    useEffect(() => {
-        if (!cartItems || cartItems.length === 0) {
-            dispatch(setItem(DEFAULT_ENSEMBLE_ITEMS));
-        }
-    }, [cartItems, dispatch]);
 
     // Format safe items array with fallback product specs
     const items = useMemo(() => {
@@ -253,19 +247,19 @@ export default function CartPage() {
             setPromoError("Please enter an atelier or gift voucher code.");
             return;
         }
-        if (code === "ATELIER10" || code === "NORTHLINE10" || code === "SNITCH10") {
+        if (code === "ATELIER10" || code === "VELMORA10" || code === "NORTHLINE10" || code === "SNITCH10") {
             setAppliedDiscount({ code, percent: 10 });
             setPromoCodeInput("");
             setPromoAccordionOpen(false);
         } else {
-            setPromoError("Invalid code. Try 'ATELIER10' for 10% complimentary credit.");
+            setPromoError("Invalid code. Try 'VELMORA10' or 'ATELIER10' for 10% complimentary credit.");
         }
     };
 
     // Checkout execution
     async function handleProceedCheckout(extraOpts = {}) {
         if (isCheckingOut) return;
-        const method = extraOpts.method || "upi";
+        const method = extraOpts.method || "razorpay";
 
         if (!items || items.length === 0) {
             setError("Your shopping bag is empty.");
@@ -289,9 +283,10 @@ export default function CartPage() {
                     addressData: shippingAddress,
                     discount: discountAmount,
                     shippingFee: 0,
+                    items: items,
                 });
                 if (res?.success && res?.order) {
-                    dispatch(clearCart());
+                    await handleClearCart();
                     setConfirmedOrder(res.order);
                     navigate(`/order-success/${res.order._id}`);
                 } else {
@@ -327,7 +322,7 @@ export default function CartPage() {
                 key: rzpKey,
                 amount: rzpOrder.amount,
                 currency: rzpOrder.currency || "INR",
-                name: "NORTHLINE / Snitch Atelier",
+                name: "Velmora Atelier",
                 description: `Ensemble Order #${rzpOrder.id}`,
                 order_id: rzpOrder.id,
                 prefill: {
@@ -348,9 +343,10 @@ export default function CartPage() {
                             paymentMethod: method,
                             discount: discountAmount,
                             shippingFee: 0,
+                            items: items,
                         });
                         if (verifyRes?.success && verifyRes?.order) {
-                            dispatch(clearCart());
+                            await handleClearCart();
                             setConfirmedOrder(verifyRes.order);
                             navigate(`/order-success/${verifyRes.order._id}`);
                         }
@@ -416,22 +412,24 @@ export default function CartPage() {
                     </div>
 
                     {/* Top Right: Complimentary Expedited Shipping Unlocked Notification */}
-                    <div className="border border-[#E5DFD3] bg-[#F7F5F0] p-3.5 sm:p-4 max-w-md w-full font-interface-sans space-y-1.5 self-start lg:self-auto">
-                        <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] uppercase text-[#1A1917]">
-                            <span className="flex items-center gap-1.5">
-                                <CheckmarkIcon className="w-3.5 h-3.5 text-[#4A5340]" />
-                                COMPLIMENTARY EXPEDITED SHIPPING UNLOCKED
-                            </span>
-                            <span className="font-bold">100%</span>
+                    {totalQuantity > 0 && (
+                        <div className="border border-[#E5DFD3] bg-[#F7F5F0] p-3.5 sm:p-4 max-w-md w-full font-interface-sans space-y-1.5 self-start lg:self-auto">
+                            <div className="flex items-center justify-between text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] uppercase text-[#1A1917]">
+                                <span className="flex items-center gap-1.5">
+                                    <CheckmarkIcon className="w-3.5 h-3.5 text-[#4A5340]" />
+                                    COMPLIMENTARY EXPEDITED SHIPPING UNLOCKED
+                                </span>
+                                <span className="font-bold">100%</span>
+                            </div>
+                            {/* 100% Filled Thin Bar */}
+                            <div className="w-full h-1 bg-[#E2DBD0] overflow-hidden">
+                                <div className="h-full bg-[#1A1917] w-full" />
+                            </div>
+                            <p className="text-[10px] sm:text-[11px] text-[#6C685F] leading-tight">
+                                Qualified order threshold met. Carbon-neutral transit via courier.
+                            </p>
                         </div>
-                        {/* 100% Filled Thin Bar */}
-                        <div className="w-full h-1 bg-[#E2DBD0] overflow-hidden">
-                            <div className="h-full bg-[#1A1917] w-full" />
-                        </div>
-                        <p className="text-[10px] sm:text-[11px] text-[#6C685F] leading-tight">
-                            Qualified order threshold met. Carbon-neutral transit via courier.
-                        </p>
-                    </div>
+                    )}
                 </div>
 
                 {/* ─── Checkout Flow Stepper (If advancing to Address/Payment) ─── */}
@@ -509,11 +507,11 @@ export default function CartPage() {
                                         {items.map((item, idx) => (
                                             <div
                                                 key={item._id || item.pId || idx}
-                                                className="py-6 sm:py-8 first:pt-0 flex flex-col sm:flex-row items-start justify-between gap-5 sm:gap-6"
+                                                className="py-5 sm:py-8 first:pt-0 flex flex-row items-start justify-between gap-3 sm:gap-6"
                                             >
                                                 {/* Left: Product Thumbnail with IN STOCK Badge */}
-                                                <div className="relative w-24 sm:w-28 aspect-square overflow-hidden bg-[#ECE7DD] border border-[#E5DFD3] flex-shrink-0">
-                                                    <span className="absolute top-1.5 left-1.5 bg-[#FBF9F5]/90 backdrop-blur-xs px-1.5 py-0.5 text-[8px] font-bold tracking-[0.16em] uppercase text-[#1A1917] font-interface-sans z-10">
+                                                <div className="relative w-20 sm:w-28 aspect-square overflow-hidden bg-[#ECE7DD] border border-[#E5DFD3] flex-shrink-0">
+                                                    <span className="absolute top-1 left-1 sm:top-1.5 sm:left-1.5 bg-[#FBF9F5]/90 backdrop-blur-xs px-1 sm:px-1.5 py-0.5 text-[7.5px] sm:text-[8px] font-bold tracking-[0.16em] uppercase text-[#1A1917] font-interface-sans z-10">
                                                         IN STOCK
                                                     </span>
                                                     <img
@@ -524,26 +522,26 @@ export default function CartPage() {
                                                 </div>
 
                                                 {/* Center & Right: Title, Specs, Price, Quantity & Remove Controls */}
-                                                <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch space-y-4">
+                                                <div className="flex-1 min-w-0 flex flex-col justify-between self-stretch space-y-3 sm:space-y-4">
                                                     <div>
-                                                        <div className="flex items-baseline justify-between gap-4">
-                                                            <h3 className="font-editorial-serif text-xl sm:text-2xl font-normal text-[#1A1917] truncate">
+                                                        <div className="flex items-baseline justify-between gap-2 sm:gap-4">
+                                                            <h3 className="font-editorial-serif text-lg sm:text-2xl font-normal text-[#1A1917] truncate">
                                                                 {item.title}
                                                             </h3>
-                                                            <span className="font-interface-sans text-base sm:text-lg font-normal text-[#1A1917] flex-shrink-0">
+                                                            <span className="font-interface-sans text-sm sm:text-lg font-normal text-[#1A1917] flex-shrink-0">
                                                                 {symbol}{item.unitPrice}
                                                             </span>
                                                         </div>
 
                                                         {/* Garment Details & Specs */}
-                                                        <div className="pt-1 space-y-0.5 font-interface-sans text-xs text-[#5A564D]">
+                                                        <div className="pt-0.5 sm:pt-1 space-y-0.5 font-interface-sans text-[11px] sm:text-xs text-[#5A564D]">
                                                             <p>{item.color} • Size {item.size}</p>
-                                                            <p className="text-[#6C685F]">{item.fabric}</p>
+                                                            <p className="text-[#6C685F] truncate">{item.fabric}</p>
                                                         </div>
                                                     </div>
 
                                                     {/* Controls Row: Quantity Box + Remove Action */}
-                                                    <div className="flex items-center justify-between pt-2">
+                                                    <div className="flex items-center justify-between pt-1 sm:pt-2">
                                                         {/* Quantity Box: [ - ] [ 1 ] [ + ] */}
                                                         <div className="inline-flex items-center border border-[#D5CEBF] bg-[#FBF9F5] font-interface-sans">
                                                             <button
@@ -554,7 +552,7 @@ export default function CartPage() {
                                                             >
                                                                 <MinusIcon className="w-3 h-3" />
                                                             </button>
-                                                            <span className="w-8 text-center text-xs font-medium text-[#1A1917] select-none">
+                                                            <span className="w-7 sm:w-8 text-center text-xs font-medium text-[#1A1917] select-none">
                                                                 {item.quantity}
                                                             </span>
                                                             <button
@@ -571,7 +569,7 @@ export default function CartPage() {
                                                         <button
                                                             type="button"
                                                             onClick={() => handleRemove(item)}
-                                                            className="inline-flex items-center gap-1.5 font-interface-sans text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase text-[#6C685F] hover:text-[#1A1917] transition-colors cursor-pointer"
+                                                            className="inline-flex items-center gap-1.5 font-interface-sans text-[10px] sm:text-[11px] font-semibold tracking-[0.16em] sm:tracking-[0.2em] uppercase text-[#6C685F] hover:text-[#1A1917] transition-colors cursor-pointer"
                                                         >
                                                             <XIcon className="w-3 h-3" />
                                                             <span>REMOVE</span>
@@ -645,7 +643,7 @@ export default function CartPage() {
                         </div>
 
                         {/* ─── RIGHT COLUMN: ORDER SUMMARY CARD (Exact Mockup Match) ─── */}
-                        <div className="lg:col-span-5 xl:col-span-4 space-y-6 sticky top-24">
+                        <div className="lg:col-span-5 xl:col-span-4 space-y-6 relative lg:sticky top-6 lg:top-24">
                             <div className="bg-[#F7F5F0] border border-[#E5DFD3] p-6 sm:p-8 space-y-6 font-interface-sans">
 
                                 {/* Summary Header */}
@@ -781,8 +779,8 @@ export default function CartPage() {
                                             disabled={isCheckingOut}
                                             className="w-full py-4 bg-[#1A1917] hover:bg-[#32312D] disabled:opacity-50 text-[#FBF9F5] font-interface-sans text-xs sm:text-[13px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-98 shadow-sm cursor-pointer flex items-center justify-center gap-2"
                                         >
-                                            <span>{isCheckingOut ? "PROCESSING..." : `CONFIRM & PAY ${symbol}${finalTotal.toFixed(2)}`}</span>
-                                            <span className="text-sm">✓</span>
+                                            <span>{isCheckingOut ? "PROCESSING..." : `PAY ${symbol}${finalTotal.toFixed(2)} VIA RAZORPAY`}</span>
+                                            <span className="text-sm">→</span>
                                         </button>
                                     )}
 
@@ -897,7 +895,7 @@ export default function CartPage() {
                         {/* Column 1: Brand Manifesto */}
                         <div className="space-y-3">
                             <span className="font-editorial-serif text-xl sm:text-2xl font-normal tracking-[0.18em] uppercase block text-[#1A1917]">
-                                NORTHLINE
+                                VELMORA
                             </span>
                             <p className="text-xs text-[#5A564D] leading-relaxed max-w-xs">
                                 Architectural menswear crafted with unhurried precision, quiet tactile luxury, and sustainable European cloth.
@@ -963,7 +961,7 @@ export default function CartPage() {
 
                     {/* Bottom Legal Line */}
                     <div className="pt-8 border-t border-[#E8E2D6] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#6C685F]">
-                        <p>© 2026 NORTHLINE Menswear Studio. All rights reserved.</p>
+                        <p>© 2026 VELMORA Menswear Studio. All rights reserved.</p>
                         <div className="flex items-center gap-6">
                             <span className="hover:text-[#1A1917] cursor-pointer">Sustainability Pledge</span>
                             <span className="hover:text-[#1A1917] cursor-pointer">Privacy</span>

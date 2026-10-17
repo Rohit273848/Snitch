@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useProduct } from "../hook/useProduct.js";
+import Loading from "../../../components/ui/Loading.jsx";
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
 function FontLoader() {
@@ -203,6 +204,17 @@ export default function SellerProductModel() {
             setLoading(false);
         }
     };
+
+    // Ensure seller product details page starts at the top
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, [id]);
+
+    useEffect(() => {
+        if (!loading) {
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        }
+    }, [loading]);
 
     useEffect(() => {
         if (!id) return;
@@ -583,11 +595,8 @@ export default function SellerProductModel() {
 
                     {/* Loading State */}
                     {loading && (
-                        <div className="flex flex-col items-center justify-center py-28 space-y-4">
-                            <div className="w-9 h-9 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                            <p className="text-xs font-mono-code text-zinc-500 uppercase tracking-widest">
-                                Loading product specifications...
-                            </p>
+                        <div className="py-20 max-w-xl mx-auto">
+                            <Loading message="Loading product specifications..." variant="brand" size="lg" />
                         </div>
                     )}
 
@@ -1078,7 +1087,7 @@ export default function SellerProductModel() {
 
                 {/* ─── ADD NEW VARIETY MODAL ──────────────────────────────────── */}
                 {showAddVariantModal && (
-                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
                         <div className="bg-white border border-zinc-200 rounded-3xl w-full max-w-lg p-6 sm:p-8 space-y-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
 
                             <div className="flex items-center justify-between border-b border-zinc-100 pb-4 sticky top-0 bg-white z-10">
@@ -1244,14 +1253,14 @@ export default function SellerProductModel() {
                     </div>
                 )}
 
-                {/* ─── Snitch Store Footer (Matching Home.jsx) ────────────────── */}
+                {/* ─── Velmora Store Footer (Matching Home.jsx) ────────────────── */}
                 <footer className="mt-16 border-t border-zinc-200 bg-white py-10 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-2 font-mono-code">
                     <div className="flex items-center justify-center gap-2">
                         <span className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold text-black">
-                            S
+                            V
                         </span>
                         <span className="font-bold text-zinc-900 tracking-widest uppercase">
-                            SNITCH STUDIO
+                            VELMORA STUDIO
                         </span>
                     </div>
                     <p className="text-[11px] text-zinc-400">

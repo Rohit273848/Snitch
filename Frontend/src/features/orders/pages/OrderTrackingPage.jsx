@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { getOrderById, cancelOrder } from "../services/order.api.js";
 
-// ─── SVG Icons (NORTHLINE Atelier Quiet Refinement System) ─────────────────────
+// ─── SVG Icons (VELMORA Atelier Quiet Refinement System) ─────────────────────
 function ArrowLeftIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" aria-hidden="true">
@@ -139,7 +139,7 @@ const DEFAULT_REFERENCE_ORDER = {
     placedDate: "16 Oct 2026",
     status: "CONFIRMED",
     estimatedDelivery: "Tue, 20 Oct",
-    courier: "Snitch Express Courier",
+    courier: "Velmora Express Courier",
     trackingNumber: "SNTRK-9792-8544",
     shippingAddress: {
         addressType: "HOME",
@@ -174,7 +174,7 @@ const DEFAULT_REFERENCE_ORDER = {
             type: "payment",
             title: "Payment Confirmed",
             description: "Payment of ₹912 confirmed via UPI.",
-            location: "SNITCH CENTRAL HUB",
+            location: "VELMORA CENTRAL HUB",
             time: "16 OCT, 04:39 PM",
         },
         {
@@ -299,7 +299,7 @@ export default function OrderTrackingPage() {
 
     return (
         <div className="min-h-screen bg-[#FBF9F5] text-[#171717] selection:bg-[#171717] selection:text-[#FBF9F5] antialiased">
-            {/* Custom font definitions matching NORTHLINE Atelier Design System */}
+            {/* Custom font definitions matching VELMORA Atelier Design System */}
             <style>{`
                 .font-editorial-serif {
                     font-family: 'EB Garamond', 'Newsreader', 'Cormorant Garamond', Georgia, serif;
@@ -764,10 +764,10 @@ export default function OrderTrackingPage() {
                             </p>
                             <div className="pt-1">
                                 <a
-                                    href="mailto:support@snitch.co.in"
+                                    href="mailto:support@velmora.co.in"
                                     className="inline-flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#171717] hover:text-[#4A5340] underline underline-offset-4 transition-colors"
                                 >
-                                    <span>SUPPORT@SNITCH.CO.IN</span>
+                                    <span>SUPPORT@VELMORA.CO.IN</span>
                                     <ArrowUpRightIcon className="w-3 h-3" />
                                 </a>
                             </div>
@@ -778,11 +778,11 @@ export default function OrderTrackingPage() {
                 {/* ─── CANCEL ORDER CONFIRMATION MODAL ───────────────────────── */}
                 {showCancelModal && (
                     <div
-                        className="fixed inset-0 z-50 bg-[#171717]/50 backdrop-blur-xs flex items-center justify-center p-4"
+                        className="fixed inset-0 z-50 bg-[#171717]/50 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
                         role="dialog"
                         aria-modal="true"
                     >
-                        <div className="bg-[#FBF9F5] border border-[#ECE7DD] w-full max-w-md p-6 sm:p-7 space-y-5 shadow-xl relative">
+                        <div className="bg-[#FBF9F5] border border-[#ECE7DD] w-full max-w-md p-6 sm:p-7 space-y-5 shadow-xl relative max-h-[90vh] overflow-y-auto">
                             <button
                                 type="button"
                                 onClick={() => setShowCancelModal(false)}
@@ -850,7 +850,7 @@ export default function OrderTrackingPage() {
                         {/* Column 1: Brand Manifesto */}
                         <div className="space-y-3">
                             <span className="font-editorial-serif text-xl sm:text-2xl font-normal tracking-[0.18em] uppercase block text-[#1A1917]">
-                                NORTHLINE
+                                VELMORA
                             </span>
                             <p className="text-xs text-[#5A564D] leading-relaxed max-w-xs">
                                 Architectural menswear crafted with unhurried precision, quiet tactile luxury, and sustainable European cloth.
@@ -915,7 +915,7 @@ export default function OrderTrackingPage() {
 
                     {/* Bottom Copyright Strip */}
                     <div className="pt-8 border-t border-[#ECE7DD] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#737373]">
-                        <p>© 2026 NORTHLINE Menswear Studio. All rights reserved.</p>
+                        <p>© 2026 VELMORA Menswear Studio. All rights reserved.</p>
                         <div className="flex items-center gap-6">
                             <span className="hover:text-[#1A1917] cursor-pointer">Sustainability Pledge</span>
                             <span className="hover:text-[#1A1917] cursor-pointer">Privacy</span>

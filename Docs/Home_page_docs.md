@@ -24,7 +24,7 @@ This document explains every single part of the [`Home.jsx`](file:///d:/Sheryian
 
 ## 1. Overview
 
-The `Home.jsx` page is the **main storefront** of the SNITCH web application. Its purpose is to:
+The `Home.jsx` page is the **main storefront** of the VELMORA web application. Its purpose is to:
 - Fetch and show **all products from all independent sellers** in one place.
 - Provide a **search bar** to find products by name, description, or seller name.
 - Provide a **sorting dropdown** to sort products by price or date.
@@ -217,7 +217,7 @@ const filteredProducts = useMemo(() => {
 The return statement in `Home` renders in 4 clear stages:
 
 1. **Top Header Bar**:
-   - SNITCH logo button.
+   - VELMORA logo button.
    - User email status badge.
    - "Dashboard" link if the user role is `seller`.
 

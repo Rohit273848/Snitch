@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { getSellerOrders, updateSellerOrderStatus } from "../services/order.api.js";
 
-// ─── Refined SVG Line Icons (NORTHLINE Atelier Design System) ──────────────────
+// ─── Refined SVG Line Icons (VELMORA Atelier Design System) ──────────────────
 function DashboardIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
@@ -189,7 +189,7 @@ const COURIER_OPTIONS = [
     "DHL Express Priority",
     "FedEx International",
     "Shadowfax Atelier Dispatch",
-    "Snitch Express Courier",
+    "Velmora Express Courier",
 ];
 
 // Helper to determine status badge styling
@@ -627,7 +627,7 @@ export default function SellerOrdersPage() {
         link.setAttribute("href", encodedUri);
         link.setAttribute(
             "download",
-            `NORTHLINE_Consignments_${new Date().toISOString().slice(0, 10)}.csv`
+            `VELMORA_Consignments_${new Date().toISOString().slice(0, 10)}.csv`
         );
         document.body.appendChild(link);
         link.click();
@@ -636,7 +636,7 @@ export default function SellerOrdersPage() {
 
     return (
         <div className="min-h-screen bg-[#FBF9F5] text-[#171717] selection:bg-[#171717] selection:text-[#FBF9F5] antialiased flex flex-col lg:flex-row">
-            {/* Custom font definitions matching NORTHLINE Atelier Design System */}
+            {/* Custom font definitions matching VELMORA Atelier Design System */}
             <style>{`
                 .font-editorial-serif {
                     font-family: 'EB Garamond', 'Newsreader', 'Cormorant Garamond', Georgia, serif;
@@ -659,7 +659,7 @@ export default function SellerOrdersPage() {
             `}</style>
 
             {/* ══════════════════════════════════════════════════════════════════
-                1. NORTHLINE SELLER SIDEBAR NAVIGATION
+                1. VELMORA SELLER SIDEBAR NAVIGATION
             ══════════════════════════════════════════════════════════════════ */}
             <aside className="w-full lg:w-64 xl:w-72 bg-[#FBF9F5] border-r border-[#ECE7DD] flex flex-col justify-between flex-shrink-0 z-30 font-interface-sans no-print">
                 {/* Sidebar Top: Brand & Menu Links */}
@@ -669,7 +669,7 @@ export default function SellerOrdersPage() {
                         <div>
                             <Link to="/" className="block focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#171717]">
                                 <span className="font-editorial-serif text-2xl font-normal tracking-[0.2em] text-[#171717] uppercase block">
-                                    NORTHLINE
+                                    VELMORA
                                 </span>
                                 <span className="text-[9px] uppercase tracking-[0.22em] text-[#737373] block mt-0.5">
                                     SELLER STUDIO / MERCHANT PORTAL
@@ -692,6 +692,7 @@ export default function SellerOrdersPage() {
                     <nav className={`${mobileNavOpen ? "block" : "hidden"} lg:block py-4 px-3 space-y-1`} aria-label="Portal Navigation">
                         <Link
                             to="/seller/dashboard"
+                            onClick={() => setMobileNavOpen(false)}
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase text-[#525252] hover:text-[#171717] hover:bg-[#F5F2EB] transition-colors focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:outline-none"
                         >
                             <DashboardIcon className="w-4 h-4 text-[#737373]" />
@@ -700,6 +701,7 @@ export default function SellerOrdersPage() {
 
                         <Link
                             to="/seller/products"
+                            onClick={() => setMobileNavOpen(false)}
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase text-[#525252] hover:text-[#171717] hover:bg-[#F5F2EB] transition-colors focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:outline-none"
                         >
                             <ArchiveBoxIcon className="w-4 h-4 text-[#737373]" />
@@ -709,6 +711,7 @@ export default function SellerOrdersPage() {
                         {/* Active Item: ORDERS & FULFILLMENT */}
                         <Link
                             to="/seller/orders"
+                            onClick={() => setMobileNavOpen(false)}
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase bg-[#171717] text-[#FBF9F5] shadow-xs focus-visible:ring-2 focus-visible:ring-[#4A5340] focus-visible:outline-none"
                             aria-current="page"
                         >
@@ -727,10 +730,20 @@ export default function SellerOrdersPage() {
 
                     <Link
                         to="/"
+                        onClick={() => setMobileNavOpen(false)}
                         className="w-full py-2.5 px-3 bg-[#FBF9F5] border border-[#D5CEBF] hover:border-[#171717] text-[#171717] text-[10px] font-semibold tracking-[0.2em] uppercase flex items-center justify-between transition-colors shadow-xs focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:outline-none"
                     >
                         <span>RETURN TO STOREFRONT</span>
                         <ArrowUpRightIcon className="w-3.5 h-3.5" />
+                    </Link>
+
+                    <Link
+                        to="/logout"
+                        onClick={() => setMobileNavOpen(false)}
+                        className="w-full py-2 px-3 text-[#737373] hover:text-[#171717] text-[10px] font-semibold tracking-[0.2em] uppercase flex items-center justify-between transition-colors focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:outline-none"
+                    >
+                        <span>SIGN OUT</span>
+                        <span className="text-xs">→</span>
                     </Link>
                 </div>
             </aside>
@@ -746,13 +759,13 @@ export default function SellerOrdersPage() {
                         <div className="text-[10px] sm:text-[11px] font-medium tracking-[0.2em] uppercase text-[#737373] flex items-center">
                             <span>PORTAL NODE</span>
                             <span className="mx-2 text-[#D5CEBF]">/</span>
-                            <span className="text-[#171717] font-semibold">NORTHLINE TAILORING ATELIER</span>
+                            <span className="text-[#171717] font-semibold">VELMORA TAILORING ATELIER</span>
                         </div>
 
                         {/* Top Right Controls */}
                         <div className="flex items-center gap-4">
                             <span className="hidden sm:inline text-[10px] font-medium tracking-[0.18em] uppercase text-[#737373]">
-                                STOREFRONT: NORTHLINE STUDIO
+                                STOREFRONT: VELMORA STUDIO
                             </span>
                             <button
                                 type="button"
@@ -878,7 +891,7 @@ export default function SellerOrdersPage() {
                                         <span className="block text-[10px] uppercase font-semibold text-[#737373] tracking-wider mb-1">
                                             Dispatch Atelier
                                         </span>
-                                        <p className="font-medium text-[#171717]">NORTHLINE Tailoring Node 01</p>
+                                        <p className="font-medium text-[#171717]">VELMORA Tailoring Node 01</p>
                                     </div>
                                     <div>
                                         <span className="block text-[10px] uppercase font-semibold text-[#737373] tracking-wider mb-1">
@@ -1029,7 +1042,7 @@ export default function SellerOrdersPage() {
                                         <option value="DHL">DHL EXPRESS</option>
                                         <option value="FedEx">FEDEX</option>
                                         <option value="Shadowfax">SHADOWFAX</option>
-                                        <option value="Snitch">SNITCH EXPRESS</option>
+                                        <option value="Velmora">VELMORA EXPRESS</option>
                                         <option value="UNASSIGNED">UNASSIGNED</option>
                                     </select>
                                     <span className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-[#737373]">
@@ -1587,7 +1600,7 @@ export default function SellerOrdersPage() {
                         <div className="border-b-2 border-black pb-4 flex justify-between items-start">
                             <div>
                                 <h1 className="font-editorial-serif text-3xl font-bold uppercase tracking-wider">
-                                    NORTHLINE ATELIER
+                                    VELMORA ATELIER
                                 </h1>
                                 <p className="text-xs uppercase tracking-widest text-gray-600">
                                     Consignment Dispatch &amp; Packing Slip
@@ -1660,7 +1673,7 @@ export default function SellerOrdersPage() {
                         </div>
 
                         <div className="pt-8 border-t border-gray-300 text-[10px] text-gray-500 flex justify-between">
-                            <span>NORTHLINE TAILORING ATELIER • ALL RIGHTS RESERVED</span>
+                            <span>VELMORA TAILORING ATELIER • ALL RIGHTS RESERVED</span>
                             <span>DISPATCH AGENT SIGNATURE: _______________________</span>
                         </div>
                     </div>
@@ -1668,7 +1681,7 @@ export default function SellerOrdersPage() {
 
                 {/* Bottom Footer Note */}
                 <footer className="border-t border-[#ECE7DD] bg-[#FBF9F5] px-6 sm:px-10 py-5 text-[10px] sm:text-[11px] text-[#737373] tracking-[0.18em] uppercase flex flex-col sm:flex-row items-center justify-between gap-3 font-interface-sans no-print">
-                    <span>NORTHLINE ATELIER FULFILLMENT &amp; LOGISTICS PORTAL • SYSTEM VERSION 2.4</span>
+                    <span>VELMORA ATELIER FULFILLMENT &amp; LOGISTICS PORTAL • SYSTEM VERSION 2.4</span>
                     <span>ALL DATA PROTECTED &amp; LOGGED</span>
                 </footer>
             </main>

@@ -9,10 +9,10 @@ const ContinueWithGoogle = () => {
         <button
             type="button"
             onClick={handleGoogleLogin}
-            className="w-full flex items-center justify-center gap-3 border border-gray-300 rounded-lg py-3 px-4  bg-gray-50 hover:bg-gray-100 transition cursor-pointer"
+            className="w-full h-12 sm:h-13 flex items-center justify-center gap-3 border border-[#D5CEBF] bg-[#FFFFFF] hover:bg-[#F7F5F0] hover:border-[#1A1917] text-[#1A1917] text-[11px] sm:text-xs font-semibold tracking-[0.18em] uppercase transition-all duration-200 cursor-pointer shadow-2xs group"
         >
             <svg
-                className="w-5 h-5"
+                className="w-4 h-4 flex-shrink-0 transition-transform duration-200 group-hover:scale-105"
                 viewBox="0 0 24 24"
                 aria-hidden="true"
             >
@@ -36,7 +36,7 @@ const ContinueWithGoogle = () => {
 
             <span>Continue with Google</span>
         </button>
-    )
+    );
 }
 
 export default ContinueWithGoogle;

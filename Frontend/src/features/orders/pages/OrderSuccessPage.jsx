@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import { getOrderById } from "../services/order.api.js";
+import { clearCart } from "../../cart/state/cart.slice.js";
+import { clearCartApi } from "../../cart/service/cart.api.js";
 
 function CheckIcon({ className = "w-6 h-6" }) {
     return (
@@ -30,9 +33,16 @@ function MapPinIcon({ className = "w-4 h-4" }) {
 export default function OrderSuccessPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        // Guarantee user cart is completely emptied upon reaching order success
+        dispatch(clearCart());
+        clearCartApi().catch(() => {});
+    }, [dispatch]);
 
     useEffect(() => {
         let mounted = true;

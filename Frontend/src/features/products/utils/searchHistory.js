@@ -1,11 +1,12 @@
 // LocalStorage manager for e-commerce search history
 
-const HISTORY_KEY = "snitch_search_history";
+const HISTORY_KEY = "velmora_search_history";
+const LEGACY_HISTORY_KEY = "snitch_search_history";
 const MAX_HISTORY_ITEMS = 8;
 
 export function getSearchHistory() {
     try {
-        const stored = localStorage.getItem(HISTORY_KEY);
+        const stored = localStorage.getItem(HISTORY_KEY) || localStorage.getItem(LEGACY_HISTORY_KEY);
         if (!stored) return [];
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {

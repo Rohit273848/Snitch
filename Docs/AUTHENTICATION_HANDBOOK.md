@@ -1,6 +1,6 @@
 # Enterprise Authentication Architecture & Engineering Handbook
 
-> **Project:** Snitch E-Commerce Platform  
+> **Project:** Velmora E-Commerce Platform  
 > **Author:** Senior Software Architecture & Security Engineering Team  
 > **Document Version:** 1.0.0  
 > **Classification:** Internal Technical Standard & Blueprint  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-This handbook details the complete architectural design, security mechanisms, request-response lifecycles, and operational procedures for the Authentication System implemented within the **Snitch** application repository.
+This handbook details the complete architectural design, security mechanisms, request-response lifecycles, and operational procedures for the Authentication System implemented within the **Velmora** application repository.
 
 This document serves dual purposes:
 1. **System Documentation:** Explaining *how* and *why* the existing authentication infrastructure operates.
@@ -21,7 +21,7 @@ This document serves dual purposes:
 
 ### 1.1 Authentication Architecture
 
-The Snitch application utilizes a **Decoupled Stateless-Token with Cookie-Transport** authentication model. The system cleanly separates concerns between:
+The Velmora application utilizes a **Decoupled Stateless-Token with Cookie-Transport** authentication model. The system cleanly separates concerns between:
 - **Frontend Presentation Layer (React + Redux Toolkit + Axios):** Manages user interactions, form validation, state persistence across page reloads, and HTTP request dispatching.
 - **Backend API Gateway & Business Layer (Express + MongoDB + Mongoose):** Handles request routing, body validation via Express-Validator, password hashing via Bcrypt, token issuance via JSON Web Tokens (JWT), and database operations.
 
@@ -88,10 +88,10 @@ The system employs a **Hybrid JWT-Cookie Strategy**:
 
 ## 2. Folder Structure
 
-Below is the directory hierarchy of the Snitch codebase, demonstrating a modular, feature-oriented structure.
+Below is the directory hierarchy of the Velmora codebase, demonstrating a modular, feature-oriented structure.
 
 ```
-Snitch/
+Velmora/
 ├── Backend/
 │   ├── .env
 │   ├── package.json
@@ -593,7 +593,7 @@ Controllers process HTTP requests, execute application logic, and generate respo
 
 ### Why Services Exist
 
-In larger scale software architecture, the **Service Layer** decouples business logic from HTTP transport mechanisms (Express `req`, `res`). While Snitch currently combines business operations inside controllers, migrating to a dedicated Service layer offers major advantages:
+In larger scale software architecture, the **Service Layer** decouples business logic from HTTP transport mechanisms (Express `req`, `res`). While Velmora currently combines business operations inside controllers, migrating to a dedicated Service layer offers major advantages:
 
 ```
 [ Express Route ] ---> [ Controller (Parses req, res) ] ---> [ Auth Service (Pure Business Logic) ] ---> [ Database Model ]
@@ -728,7 +728,7 @@ Cookies are the secure mechanism for storing JWTs in client browsers.
 
 ### 16.1 Attribute Matrix
 
-| Option | Value in Snitch | Recommended Production Value | Security Purpose |
+| Option | Value in Velmora | Recommended Production Value | Security Purpose |
 | :--- | :--- | :--- | :--- |
 | `httpOnly` | Implicit Default (Off) | `true` | Prevents client-side JS (`document.cookie`) from reading the token (Neutralizes XSS token theft). |
 | `secure` | Implicit Default (Off) | `true` | Forces cookie to be transmitted ONLY over encrypted HTTPS connections. |
@@ -744,7 +744,7 @@ Cookies are the secure mechanism for storing JWTs in client browsers.
 | Variable Name | Purpose | Required | Example Value | Security Notes |
 | :--- | :--- | :--- | :--- | :--- |
 | `PORT` | Node HTTP Server Port | Yes | `3000` | Non-sensitive server port configuration. |
-| `MONGO_URI` | MongoDB Connection String | Yes | `mongodb://127.0.0.1:27017/snitch` | Contains database host, port, credentials. Never commit to Git. |
+| `MONGO_URI` | MongoDB Connection String | Yes | `mongodb://127.0.0.1:27017/velmora` | Contains database host, port, credentials. Never commit to Git. |
 | `JWT_SECRET` | Secret key for JWT signing | Yes | `c8e19b67f3a8b41...` | High-entropy cryptographic string. Minimum 32 characters. |
 | `VITE_API_URL` | Frontend API Base Route | Yes | `http://localhost:3000/` | Configured in React `.env` for Axios calls. |
 
@@ -1232,7 +1232,7 @@ Before deploying this authentication system to production, complete the followin
 
 ## 27. Code Review Notes
 
-Review of the existing authentication implementation within the Snitch repository:
+Review of the existing authentication implementation within the Velmora repository:
 
 ### 27.1 Positives & Architecture Highlights
 - Clean separation of routes, controllers, models, and validators in backend.
@@ -1280,4 +1280,4 @@ Review of the existing authentication implementation within the Snitch repositor
 
 ### Conclusion
 
-This handbook serves as the definitive reference manual for the Snitch application authentication system. By adhering to the architecture diagrams, security guidelines, and step-by-step rebuilding checklist contained herein, engineering teams can reliably maintain, scale, and replicate this secure authentication engine across current and future software platforms.
+This handbook serves as the definitive reference manual for the Velmora application authentication system. By adhering to the architecture diagrams, security guidelines, and step-by-step rebuilding checklist contained herein, engineering teams can reliably maintain, scale, and replicate this secure authentication engine across current and future software platforms.

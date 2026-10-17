@@ -523,7 +523,7 @@ export default function SearchBar({
                                                     />
                                                 ) : (
                                                     <div className="w-full h-full flex items-center justify-center text-[9px] font-mono text-[#8A857B]">
-                                                        SNITCH
+                                                        VELMORA
                                                     </div>
                                                 )}
                                             </div>

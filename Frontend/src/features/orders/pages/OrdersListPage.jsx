@@ -4,7 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import { getMyOrders } from "../services/order.api.js";
 import { setUser } from "../../auth/state/auth.slice.js";
 
-// ─── SVG Icons (NORTHLINE Editorial Line Icons) ────────────────────────────────
+// ─── SVG Icons (VELMORA Editorial Line Icons) ────────────────────────────────
 function ScissorsIcon({ className = "w-4 h-4" }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24" aria-hidden="true">
@@ -155,8 +155,7 @@ export default function OrdersListPage() {
 
     // ─── Sign Out Handler ─────────────────────────────────────────────────────
     const handleSignOut = () => {
-        dispatch(setUser(null));
-        navigate("/login");
+        navigate("/logout");
     };
 
     // ─── Download Invoice Generator ───────────────────────────────────────────
@@ -166,7 +165,7 @@ export default function OrdersListPage() {
         const total = order.pricing?.currency === "USD" ? `$${order.pricing?.totalAmount}` : `₹${order.pricing?.totalAmount}`;
 
         let invoiceText = `==========================================================\n`;
-        invoiceText += `              NORTHLINE MENSWEAR ATELIER                 \n`;
+        invoiceText += `              VELMORA MENSWEAR ATELIER                 \n`;
         invoiceText += `               OFFICIAL ACQUISITION RECEIPT              \n`;
         invoiceText += `==========================================================\n\n`;
         invoiceText += `Order Reference: #${orderNum}\n`;
@@ -194,14 +193,14 @@ export default function OrdersListPage() {
         invoiceText += `----------------------------------------------------------\n`;
         invoiceText += `TOTAL AMOUNT: ${total}\n`;
         invoiceText += `==========================================================\n`;
-        invoiceText += `Thank you for commissioning NORTHLINE Menswear Studio.\n`;
+        invoiceText += `Thank you for commissioning VELMORA Menswear Studio.\n`;
         invoiceText += `All garments carry lifetime atelier seam repair warranty.\n`;
 
         const blob = new Blob([invoiceText], { type: "text/plain;charset=utf-8" });
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `NORTHLINE_Invoice_${orderNum}.txt`;
+        link.download = `VELMORA_Invoice_${orderNum}.txt`;
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
@@ -213,7 +212,7 @@ export default function OrdersListPage() {
 
     return (
         <div className="min-h-screen bg-[#FBF9F5] text-[#171717] selection:bg-[#171717] selection:text-[#FBF9F5] antialiased">
-            {/* Custom typography matching NORTHLINE Editorial style */}
+            {/* Custom typography matching VELMORA Editorial style */}
             <style>{`
                 .font-editorial-serif {
                     font-family: 'EB Garamond', 'Newsreader', 'Cormorant Garamond', Georgia, serif;
@@ -688,7 +687,7 @@ export default function OrdersListPage() {
                             </div>
                             <div className="flex flex-wrap items-center gap-3 pt-1">
                                 <a
-                                    href="mailto:concierge@northline-atelier.com"
+                                    href="mailto:concierge@velmora-atelier.com"
                                     className="px-4 py-2.5 bg-[#FBF9F5] border border-[#D5CEBF] hover:border-[#171717] text-[#171717] text-[10px] font-semibold tracking-[0.18em] uppercase transition-colors shadow-xs"
                                 >
                                     EMAIL ATELIER
@@ -707,11 +706,11 @@ export default function OrdersListPage() {
                 {/* ─── MODAL DIALOG (Account Details, Addresses, Tailoring) ──────── */}
                 {modalData && (
                     <div
-                        className="fixed inset-0 z-50 bg-[#171717]/40 backdrop-blur-xs flex items-center justify-center p-4"
+                        className="fixed inset-0 z-50 bg-[#171717]/40 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
                         role="dialog"
                         aria-modal="true"
                     >
-                        <div className="bg-[#FBF9F5] border border-[#ECE7DD] w-full max-w-md p-6 sm:p-7 space-y-5 shadow-lg relative">
+                        <div className="bg-[#FBF9F5] border border-[#ECE7DD] w-full max-w-md p-6 sm:p-7 space-y-5 shadow-lg relative max-h-[90vh] overflow-y-auto">
                             <button
                                 type="button"
                                 onClick={() => setModalData(null)}
@@ -764,7 +763,7 @@ export default function OrdersListPage() {
                         {/* Column 1: Brand Manifesto */}
                         <div className="space-y-3">
                             <span className="font-editorial-serif text-xl sm:text-2xl font-normal tracking-[0.18em] uppercase block text-[#1A1917]">
-                                NORTHLINE
+                                VELMORA
                             </span>
                             <p className="text-xs text-[#5A564D] leading-relaxed max-w-xs">
                                 Architectural menswear crafted with unhurried precision, quiet tactile luxury, and sustainable European cloth.
@@ -829,7 +828,7 @@ export default function OrdersListPage() {
 
                     {/* Bottom Copyright Strip */}
                     <div className="pt-8 border-t border-[#ECE7DD] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#737373]">
-                        <p>© 2026 NORTHLINE Menswear Studio. All rights reserved.</p>
+                        <p>© 2026 VELMORA Menswear Studio. All rights reserved.</p>
                         <div className="flex items-center gap-6">
                             <span className="hover:text-[#1A1917] cursor-pointer">Sustainability Pledge</span>
                             <span className="hover:text-[#1A1917] cursor-pointer">Privacy</span>

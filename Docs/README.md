@@ -1,6 +1,6 @@
-# Snitch System Documentation
+# Velmora System Documentation
 
-Welcome to the internal engineering documentation directory for **Snitch**.
+Welcome to the internal engineering documentation directory for **Velmora**.
 
 ## Available Handbooks & Specifications
 

@@ -83,8 +83,8 @@ const CATEGORIES_OPTIONS = [
 ];
 
 const COLLECTION_OPTIONS = [
-    { id: "NORTHLINE Atelier", label: "NORTHLINE Atelier" },
-    { id: "NORTHLINE Essentials", label: "NORTHLINE Essentials" },
+    { id: "Velmora Atelier", label: "Velmora Atelier" },
+    { id: "Velmora Essentials", label: "Velmora Essentials" },
     { id: "Edition Sartorial", label: "Edition Sartorial" },
 ];
 
@@ -119,7 +119,11 @@ export default function SearchResultsPage() {
     const allDbProducts = useSelector((state) => state.product?.allProducts || []);
     const loading = useSelector((state) => state.product?.loading);
 
-    // Initial load
+    // Initial load and scroll to top on search query or category change
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, [searchQuery, activeCategoryParam]);
+
     useEffect(() => {
         handleGetAllProducts().catch(() => {});
     }, []);
@@ -153,7 +157,7 @@ export default function SearchResultsPage() {
     // Wishlist stored in localStorage
     const [wishlist, setWishlist] = useState(() => {
         try {
-            return JSON.parse(localStorage.getItem("snitch_wishlist") || "[]");
+            return JSON.parse(localStorage.getItem("velmora_wishlist") || localStorage.getItem("snitch_wishlist") || "[]");
         } catch {
             return [];
         }
@@ -163,7 +167,7 @@ export default function SearchResultsPage() {
         setWishlist((prev) => {
             const next = prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id];
             try {
-                localStorage.setItem("snitch_wishlist", JSON.stringify(next));
+                localStorage.setItem("velmora_wishlist", JSON.stringify(next));
             } catch (e) {
                 console.error("wishlist err", e);
             }
@@ -762,7 +766,7 @@ export default function SearchResultsPage() {
 
                         {/* Product Cards Grid */}
                         {!loading && visibleProducts.length > 0 && (
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-5 sm:gap-7">
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-3 sm:gap-6">
                                 {(visibleProducts || []).map((prod) => {
                                     const isWish = wishlist.includes(prod._id);
 
@@ -770,7 +774,7 @@ export default function SearchResultsPage() {
                                         <div
                                             key={prod._id}
                                             onClick={() => navigate(`/product/${prod._id}`)}
-                                            className="group cursor-pointer bg-[#FBF9F5] border border-[#E5DFD3] hover:border-[#1A1917] p-3 sm:p-4 flex flex-col justify-between space-y-3 transition-all duration-300"
+                                            className="group cursor-pointer bg-[#FBF9F5] border border-[#E5DFD3] hover:border-[#1A1917] p-2.5 sm:p-4 flex flex-col justify-between space-y-3 transition-all duration-300"
                                         >
                                             <div className="space-y-3">
                                                 {/* Portrait Image Container */}
@@ -784,7 +788,7 @@ export default function SearchResultsPage() {
                                                         />
                                                     ) : (
                                                         <div className="w-full h-full flex items-center justify-center font-mono text-xs text-[#8A857B]">
-                                                            NORTHLINE
+                                                            VELMORA
                                                         </div>
                                                     )}
 
@@ -939,8 +943,8 @@ export default function SearchResultsPage() {
                 4. MOBILE FILTER BOTTOM SHEET / DRAWER (Matching Reference)
             ══════════════════════════════════════════════════════════════════ */}
             {mobileFilterOpen && (
-                <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/50 backdrop-blur-xs">
-                    <div className="bg-[#FBF9F5] w-full max-h-[85vh] rounded-t-xl p-6 overflow-y-auto space-y-6 animate-slideUp">
+                <div className="fixed inset-0 z-50 flex flex-col justify-end bg-black/60 backdrop-blur-xs">
+                    <div className="bg-[#FBF9F5] w-full max-h-[85vh] rounded-t-xl p-6 overflow-y-auto space-y-6 animate-slideUp pb-safe">
                         {/* Header */}
                         <div className="flex items-center justify-between pb-3 border-b border-[#ECE7DD]">
                             <h3 className="font-editorial-serif text-2xl font-normal text-[#1A1917]">
@@ -1028,7 +1032,7 @@ export default function SearchResultsPage() {
                         <button
                             type="button"
                             onClick={() => setMobileFilterOpen(false)}
-                            className="w-full py-3.5 bg-[#1A1917] text-[#FBF9F5] text-xs font-semibold tracking-[0.2em] uppercase"
+                            className="w-full py-3.5 bg-[#1A1917] text-[#FBF9F5] text-xs font-semibold tracking-[0.2em] uppercase cursor-pointer"
                         >
                             APPLY FILTERS ({filteredResults.length} PIECES)
                         </button>
@@ -1041,7 +1045,7 @@ export default function SearchResultsPage() {
             ══════════════════════════════════════════════════════════════════ */}
             <nav
                 aria-label="Mobile Bottom Navigation"
-                className="lg:hidden sticky bottom-0 z-40 bg-[#FBF9F5] border-t border-[#ECE7DD] grid grid-cols-4 py-2 px-1 text-center text-[9px] font-bold tracking-[0.18em] uppercase text-[#6C685F]"
+                className="lg:hidden sticky bottom-0 z-40 bg-[#FBF9F5] border-t border-[#ECE7DD] grid grid-cols-4 py-2 px-1 text-center text-[9px] font-bold tracking-[0.18em] uppercase text-[#6C685F] pb-safe"
             >
                 <Link to="/" className="flex flex-col items-center gap-1 hover:text-[#1A1917]">
                     <span className="text-base">⌂</span>
@@ -1052,7 +1056,7 @@ export default function SearchResultsPage() {
                     onClick={() => {
                         window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
-                    className="flex flex-col items-center gap-1 text-[#1A1917]"
+                    className="flex flex-col items-center gap-1 text-[#1A1917] cursor-pointer"
                 >
                     <span className="text-base">⋈</span>
                     <span>COLLECTION</span>

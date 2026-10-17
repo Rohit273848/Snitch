@@ -87,7 +87,7 @@ const EDITORIAL_LOOKS = [
         cloth: "Cloth: 100% Organic Melton & Combed Slub Cotton",
         atelier: "AUTUMN / BORDEAUX ATELIER",
         ensemblePrice: 6670,
-        primaryTarget: "snitch-overshirt",
+        primaryTarget: "velmora-overshirt",
     },
     {
         lookNumber: "02",
@@ -96,7 +96,7 @@ const EDITORIAL_LOOKS = [
         cloth: "Cloth: 280 GSM Supima Cotton & Italian Super 120s Wool",
         atelier: "MILAN / NAVIGLI ATELIER",
         ensemblePrice: 4180,
-        primaryTarget: "snitch-supima-tee",
+        primaryTarget: "velmora-supima-tee",
     },
     {
         lookNumber: "03",
@@ -105,7 +105,7 @@ const EDITORIAL_LOOKS = [
         cloth: "Cloth: Double Pleated Melton Wool & Linen Blend",
         atelier: "LISBON / CHIADO ATELIER",
         ensemblePrice: 5380,
-        primaryTarget: "snitch-pleated-trouser",
+        primaryTarget: "velmora-pleated-trouser",
     },
 ];
 
@@ -131,14 +131,14 @@ export default function Home() {
     const [sortBy, setSortBy] = useState("newest");
     const [tailoringModalOpen, setTailoringModalOpen] = useState(false);
     const [selectedSizes, setSelectedSizes] = useState({
-        "snitch-overshirt": "M",
-        "snitch-supima-tee": "L",
-        "snitch-pleated-trouser": "32",
+        "velmora-overshirt": "M",
+        "velmora-supima-tee": "L",
+        "velmora-pleated-trouser": "32",
     });
 
     const [wishlist, setWishlist] = useState(() => {
         try {
-            return JSON.parse(localStorage.getItem("snitch_wishlist") || "[]");
+            return JSON.parse(localStorage.getItem("velmora_wishlist") || localStorage.getItem("snitch_wishlist") || "[]");
         } catch {
             return [];
         }
@@ -166,7 +166,7 @@ export default function Home() {
         setWishlist((prev) => {
             const next = prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id];
             try {
-                localStorage.setItem("snitch_wishlist", JSON.stringify(next));
+                localStorage.setItem("velmora_wishlist", JSON.stringify(next));
             } catch (e) {
                 console.error("wishlist err", e);
             }
@@ -181,9 +181,9 @@ export default function Home() {
         const supima = dbItems.find((p) => (p.title || "").toLowerCase().includes("supima"));
         const trouser = dbItems.find((p) => (p.title || "").toLowerCase().includes("trouser"));
         return {
-            overshirtId: overshirt?._id || "snitch-overshirt",
-            supimaId: supima?._id || "snitch-supima-tee",
-            trouserId: trouser?._id || "snitch-pleated-trouser",
+            overshirtId: overshirt?._id || "velmora-overshirt",
+            supimaId: supima?._id || "velmora-supima-tee",
+            trouserId: trouser?._id || "velmora-pleated-trouser",
         };
     }, [allDbProducts]);
 
@@ -287,7 +287,7 @@ export default function Home() {
                             </div>
 
                             {/* Main Editorial Headline */}
-                            <h1 className="font-editorial-serif text-5xl sm:text-6xl md:text-7xl font-normal leading-[1.04] tracking-[-0.02em] text-[#1A1917]">
+                            <h1 className="font-editorial-serif text-4xl sm:text-6xl md:text-7xl font-normal leading-[1.04] tracking-[-0.02em] text-[#1A1917]">
                                 Made for the everyday.
                             </h1>
 
@@ -297,18 +297,18 @@ export default function Home() {
                             </p>
 
                             {/* Actions: Primary CTA + Secondary Link */}
-                            <div className="flex flex-wrap items-center gap-5 pt-2">
+                            <div className="flex flex-wrap items-center gap-4 pt-2">
                                 <button
                                     type="button"
                                     onClick={scrollToCatalog}
-                                    className="px-7 py-3.5 bg-[#1A1917] hover:bg-[#32312D] text-[#FBF9F5] font-interface-sans text-[11px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
+                                    className="w-full sm:w-auto text-center px-7 py-3.5 bg-[#1A1917] hover:bg-[#32312D] text-[#FBF9F5] font-interface-sans text-[11px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-95 shadow-xs cursor-pointer"
                                 >
                                     SHOP THE COLLECTION
                                 </button>
                                 <button
                                     type="button"
                                     onClick={scrollToCapsule}
-                                    className="group inline-flex items-center gap-2 font-interface-sans text-[11px] font-semibold tracking-[0.18em] text-[#1A1917] hover:text-[#4A5340] uppercase transition-colors cursor-pointer"
+                                    className="group inline-flex items-center gap-2 font-interface-sans text-[11px] font-semibold tracking-[0.18em] text-[#1A1917] hover:text-[#4A5340] uppercase transition-colors cursor-pointer py-1"
                                 >
                                     <span>EXPLORE THE LOOK</span>
                                     <span className="transform group-hover:translate-x-1 transition-transform">→</span>
@@ -318,9 +318,9 @@ export default function Home() {
 
                         {/* Look Details Box (Bottom Left Box matching screenshot) */}
                         <div className="border border-[#E5DFD3] bg-[#F5F2EB]/70 p-4 sm:p-5 transition-all">
-                            <div className="flex items-center justify-between pb-2 border-b border-[#E8E2D6] text-[11px] tracking-[0.18em] text-[#1A1917] font-semibold uppercase font-interface-sans">
-                                <span>{activeLook.title}</span>
-                                <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-between pb-2 border-b border-[#E8E2D6] text-[10px] sm:text-[11px] tracking-[0.18em] text-[#1A1917] font-semibold uppercase font-interface-sans gap-2">
+                                <span className="truncate">{activeLook.title}</span>
+                                <div className="flex items-center gap-3 shrink-0">
                                     <span className="text-[#6C685F] font-normal">{activeLook.lookNumber} — {activeLook.totalLooks}</span>
                                     <div className="flex items-center gap-1">
                                         <button
@@ -359,7 +359,7 @@ export default function Home() {
                             />
 
                             {/* Top Right Floating Badge */}
-                            <div className="absolute top-4 right-4 bg-[#FBF9F5]/85 backdrop-blur-md px-3 py-1.5 border border-white/60 text-[10px] font-semibold tracking-[0.2em] uppercase text-[#1A1917] font-interface-sans">
+                            <div className="absolute top-3 right-3 sm:top-4 sm:right-4 bg-[#FBF9F5]/85 backdrop-blur-md px-2.5 sm:px-3 py-1 sm:py-1.5 border border-white/60 text-[9px] sm:text-[10px] font-semibold tracking-[0.2em] uppercase text-[#1A1917] font-interface-sans">
                                 {activeLook.atelier}
                             </div>
 
@@ -377,7 +377,7 @@ export default function Home() {
 
                                 {/* Tooltip Popover */}
                                 {activeHotspot === "overshirt" && (
-                                    <div className="absolute top-9 left-1/2 -translate-x-1/2 w-48 bg-[#FBF9F5] border border-[#E2DBD0] shadow-xl p-3 z-30 font-interface-sans text-left space-y-1">
+                                    <div className="absolute top-9 left-1/2 -translate-x-1/2 w-44 sm:w-48 max-w-[calc(100vw-3rem)] bg-[#FBF9F5] border border-[#E2DBD0] shadow-xl p-3 z-30 font-interface-sans text-left space-y-1">
                                         <p className="text-[10px] tracking-[0.16em] uppercase text-[#4A5340] font-semibold">01 • OUTERWEAR</p>
                                         <p className="font-editorial-serif text-sm font-semibold text-[#1A1917]">The Field Overshirt</p>
                                         <p className="text-[11px] text-[#5A564D]">Muted Olive • ₹2,490</p>
@@ -406,7 +406,7 @@ export default function Home() {
 
                                 {/* Tooltip Popover */}
                                 {activeHotspot === "trouser" && (
-                                    <div className="absolute bottom-9 left-1/2 -translate-x-1/2 w-48 bg-[#FBF9F5] border border-[#E2DBD0] shadow-xl p-3 z-30 font-interface-sans text-left space-y-1">
+                                    <div className="absolute bottom-9 left-1/2 -translate-x-1/2 w-44 sm:w-48 max-w-[calc(100vw-3rem)] bg-[#FBF9F5] border border-[#E2DBD0] shadow-xl p-3 z-30 font-interface-sans text-left space-y-1">
                                         <p className="text-[10px] tracking-[0.16em] uppercase text-[#4A5340] font-semibold">03 • BASE</p>
                                         <p className="font-editorial-serif text-sm font-semibold text-[#1A1917]">Relaxed Pleated Trouser</p>
                                         <p className="text-[11px] text-[#5A564D]">Deep Charcoal • ₹2,890</p>
@@ -579,9 +579,9 @@ export default function Home() {
                                     <button
                                         key={sz}
                                         type="button"
-                                        onClick={() => setSelectedSizes({ ...selectedSizes, "snitch-overshirt": sz })}
+                                        onClick={() => setSelectedSizes({ ...selectedSizes, "velmora-overshirt": sz })}
                                         className={`w-6 h-6 text-[10px] font-semibold border flex items-center justify-center transition-colors cursor-pointer ${
-                                            selectedSizes["snitch-overshirt"] === sz
+                                            selectedSizes["velmora-overshirt"] === sz
                                                 ? "bg-[#1A1917] text-[#FBF9F5] border-[#1A1917]"
                                                 : "border-[#D5CEBF] text-[#5A564D] hover:border-[#1A1917] hover:text-[#1A1917]"
                                         }`}
@@ -636,9 +636,9 @@ export default function Home() {
                                     <button
                                         key={sz}
                                         type="button"
-                                        onClick={() => setSelectedSizes({ ...selectedSizes, "snitch-supima-tee": sz })}
+                                        onClick={() => setSelectedSizes({ ...selectedSizes, "velmora-supima-tee": sz })}
                                         className={`w-6 h-6 text-[10px] font-semibold border flex items-center justify-center transition-colors cursor-pointer ${
-                                            selectedSizes["snitch-supima-tee"] === sz
+                                            selectedSizes["velmora-supima-tee"] === sz
                                                 ? "bg-[#1A1917] text-[#FBF9F5] border-[#1A1917]"
                                                 : "border-[#D5CEBF] text-[#5A564D] hover:border-[#1A1917] hover:text-[#1A1917]"
                                         }`}
@@ -703,9 +703,9 @@ export default function Home() {
                                     <button
                                         key={sz}
                                         type="button"
-                                        onClick={() => setSelectedSizes({ ...selectedSizes, "snitch-pleated-trouser": sz })}
+                                        onClick={() => setSelectedSizes({ ...selectedSizes, "velmora-pleated-trouser": sz })}
                                         className={`w-6 h-6 text-[10px] font-semibold border flex items-center justify-center transition-colors cursor-pointer ${
-                                            selectedSizes["snitch-pleated-trouser"] === sz
+                                            selectedSizes["velmora-pleated-trouser"] === sz
                                                 ? "bg-[#1A1917] text-[#FBF9F5] border-[#1A1917]"
                                                 : "border-[#D5CEBF] text-[#5A564D] hover:border-[#1A1917] hover:text-[#1A1917]"
                                         }`}
@@ -770,13 +770,13 @@ export default function Home() {
 
                     {/* Filter Pills & Sorting */}
                     <div className="flex flex-wrap items-center gap-3">
-                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full">
+                        <div className="flex items-center gap-1.5 overflow-x-auto pb-1 max-w-full no-scrollbar">
                             {CATEGORY_TABS.map((tab) => (
                                 <button
                                     key={tab.id}
                                     type="button"
                                     onClick={() => setSelectedTab(tab.id)}
-                                    className={`px-3.5 py-1.5 text-[10px] font-semibold tracking-[0.16em] uppercase transition-all cursor-pointer whitespace-nowrap font-interface-sans ${
+                                    className={`px-3 sm:px-3.5 py-1.5 text-[9px] sm:text-[10px] font-semibold tracking-[0.16em] uppercase transition-all cursor-pointer whitespace-nowrap font-interface-sans ${
                                         selectedTab === tab.id
                                             ? "bg-[#1A1917] text-[#FBF9F5]"
                                             : "bg-[#F5F2EB] text-[#5A564D] hover:text-[#1A1917] border border-[#E5DFD3]"
@@ -803,7 +803,7 @@ export default function Home() {
 
                 {/* Loading State */}
                 {loading && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                         {Array.from({ length: 4 }).map((_, i) => (
                             <div key={i} className="animate-pulse bg-[#F5F2EB] aspect-[3/4]" />
                         ))}
@@ -830,7 +830,7 @@ export default function Home() {
 
                 {/* Product Grid */}
                 {!loading && filteredProducts.length > 0 && (
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-5 sm:gap-7">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-6">
                         {filteredProducts.map((prod) => {
                             const isWish = wishlist.includes(prod._id);
                             const coverImg =
@@ -845,7 +845,7 @@ export default function Home() {
                                 <div
                                     key={prod._id}
                                     onClick={() => navigate(`/product/${prod._id}`)}
-                                    className="group cursor-pointer bg-[#F7F4EC] border border-[#E5DFD3] hover:border-[#1A1917] p-3 sm:p-4 flex flex-col justify-between space-y-3 transition-all duration-300"
+                                    className="group cursor-pointer bg-[#F7F4EC] border border-[#E5DFD3] hover:border-[#1A1917] p-2.5 sm:p-4 flex flex-col justify-between space-y-3 transition-all duration-300"
                                 >
                                     <div>
                                         {/* Image */}
@@ -918,7 +918,7 @@ export default function Home() {
                             <span
                                 className="font-editorial-serif text-xl sm:text-2xl font-normal tracking-[0.18em] uppercase block text-[#1A1917]"
                             >
-                                SNITCH
+                                VELMORA
                             </span>
                             <p className="text-xs text-[#5A564D] leading-relaxed max-w-xs">
                                 Architectural menswear crafted with unhurried precision, quiet tactile luxury, and sustainable European cloth.
@@ -994,7 +994,7 @@ export default function Home() {
 
                     {/* Bottom Legal Line */}
                     <div className="pt-8 border-t border-[#E8E2D6] flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-[#6C685F]">
-                        <p>© 2026 SNITCH Menswear Studio. All rights reserved.</p>
+                        <p>© 2026 VELMORA Menswear Studio. All rights reserved.</p>
                         <div className="flex items-center gap-6">
                             <span className="hover:text-[#1A1917] cursor-pointer">Sustainability Pledge</span>
                             <span className="hover:text-[#1A1917] cursor-pointer">Privacy</span>
@@ -1008,12 +1008,12 @@ export default function Home() {
                 7. MODAL: TAILORING CONCIERGE CARE
             ══════════════════════════════════════════════════════════════════ */}
             {tailoringModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-xs font-interface-sans">
-                    <div className="bg-[#FBF9F5] border border-[#E5DFD3] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs font-interface-sans overflow-y-auto">
+                    <div className="bg-[#FBF9F5] border border-[#E5DFD3] max-w-lg w-full p-6 sm:p-8 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto">
                         <button
                             type="button"
                             onClick={() => setTailoringModalOpen(false)}
-                            className="absolute top-5 right-5 text-[#5A564D] hover:text-[#1A1917] p-1 cursor-pointer"
+                            className="absolute top-4 right-4 text-[#5A564D] hover:text-[#1A1917] p-2 cursor-pointer"
                         >
                             <XIcon className="w-4 h-4" />
                         </button>
@@ -1024,7 +1024,7 @@ export default function Home() {
                             Complimentary Tailoring Concierge
                         </h3>
                         <p className="text-xs sm:text-sm text-[#5A564D] leading-relaxed">
-                            Every pair of Snitch trousers includes precision inseam hemming or 1.5” classic turn-up cuffs at zero additional charge.
+                            Every pair of Velmora trousers includes precision inseam hemming or 1.5” classic turn-up cuffs at zero additional charge.
                         </p>
                         <div className="p-4 bg-[#F5F2EB] border border-[#E5DFD3] space-y-2 text-xs">
                             <div className="flex justify-between font-semibold text-[#1A1917]">

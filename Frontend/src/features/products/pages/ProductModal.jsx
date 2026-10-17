@@ -4,6 +4,7 @@ import { useProduct } from "../hook/useProduct.js";
 import { useChat } from "../../cart/hook/useChat.js";
 import ProductVarietySelector from "../components/ProductVarietySelector.jsx";
 import { STITCH_SAMPLE_PIECES } from "../utils/searchEngine.js";
+import Loading from "../../../components/ui/Loading.jsx";
 
 // ─── Google Fonts loader ──────────────────────────────────────────────────────
 function FontLoader() {
@@ -124,7 +125,7 @@ export default function ProductModal() {
     // Wishlist state synced with localStorage
     const [wishlist, setWishlist] = useState(() => {
         try {
-            return JSON.parse(localStorage.getItem("snitch_wishlist") || "[]");
+            return JSON.parse(localStorage.getItem("velmora_wishlist") || localStorage.getItem("snitch_wishlist") || "[]");
         } catch {
             return [];
         }
@@ -137,13 +138,25 @@ export default function ProductModal() {
         setWishlist((prev) => {
             const next = prev.includes(prodId) ? prev.filter((i) => i !== prodId) : [...prev, prodId];
             try {
-                localStorage.setItem("snitch_wishlist", JSON.stringify(next));
+                localStorage.setItem("velmora_wishlist", JSON.stringify(next));
             } catch (e) {
                 console.error("wishlist error", e);
             }
             return next;
         });
     };
+
+    // Ensure the page always starts from the top on route/id change or initial mount
+    useEffect(() => {
+        window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    }, [id]);
+
+    // When product finishes loading, guarantee view is positioned at the top
+    useEffect(() => {
+        if (!loadingProduct) {
+            window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+        }
+    }, [loadingProduct]);
 
     // Load product directly from MongoDB database via API (or sample catalog if sample piece)
     useEffect(() => {
@@ -152,7 +165,7 @@ export default function ProductModal() {
         setError(null);
 
         // Check if item is an atelier sample piece from design preview
-        if (id.startsWith("stitch-sample-") || id.startsWith("snitch-")) {
+        if (id.startsWith("stitch-sample-") || id.startsWith("snitch-") || id.startsWith("velmora-")) {
             const sample = STITCH_SAMPLE_PIECES.find((p) => p._id === id);
             if (sample) {
                 const sampleSizes = Array.isArray(sample.sizes) ? sample.sizes : ["S", "M", "L", "XL"];
@@ -265,7 +278,7 @@ export default function ProductModal() {
 
     const symbol = currencySymbol[activePrice?.currency] ?? activePrice?.currency ?? "₹";
     const formattedPrice = Number(activePrice?.amount || 0).toLocaleString("en-IN");
-    const sellerName = product?.seller?.username || product?.seller?.name || product?.seller?.email || "Snitch Official";
+    const sellerName = product?.seller?.username || product?.seller?.name || product?.seller?.email || "Velmora Official";
 
     // Dynamic stock calculations
     const currentStock = selectedVariant
@@ -299,7 +312,7 @@ export default function ProductModal() {
                 message: err?.response?.data?.message || "Item queued in cart.",
             });
             // If offline/curated mock, still provide friendly confirmation
-            if (String(product._id).startsWith("snitch-")) {
+            if (String(product._id).startsWith("snitch-") || String(product._id).startsWith("velmora-")) {
                 setCartFeedback({ type: "success", message: "Added to your shopping bag!" });
             }
         } finally {
@@ -358,11 +371,8 @@ export default function ProductModal() {
 
                     {/* Loading State */}
                     {loadingProduct && (
-                        <div className="flex flex-col items-center justify-center py-36 space-y-4">
-                            <div className="w-9 h-9 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                            <p className="text-xs font-mono-code text-zinc-500 uppercase tracking-widest">
-                                Loading product drop...
-                            </p>
+                        <div className="py-20 max-w-xl mx-auto">
+                            <Loading message="Loading product drop..." variant="brand" size="lg" />
                         </div>
                     )}
 
@@ -421,21 +431,21 @@ export default function ProductModal() {
                                     </button>
 
                                     {/* Verified Seller Pill (Floating Top Left) */}
-                                    <div className="absolute top-4 left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-zinc-200 text-zinc-900 text-[10px] font-bold tracking-wider uppercase px-3 py-1 rounded-full shadow-xs font-mono-code">
-                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                                        <span>Listed by: {sellerName}</span>
+                                    <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex items-center gap-1.5 bg-white/90 backdrop-blur-md border border-zinc-200 text-zinc-900 text-[9px] sm:text-[10px] font-bold tracking-wider uppercase px-2.5 sm:px-3 py-1 rounded-full shadow-xs font-mono-code max-w-[calc(100%-4rem)] truncate">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse flex-shrink-0" />
+                                        <span className="truncate">Listed by: {sellerName}</span>
                                     </div>
                                 </div>
 
                                 {/* Image Thumbnails Carousel */}
                                 {displayImages && displayImages.length > 1 && (
-                                    <div className="flex gap-3 overflow-x-auto pb-2 pt-1 no-scrollbar">
+                                    <div className="flex gap-2.5 sm:gap-3 overflow-x-auto pb-2 pt-1 no-scrollbar">
                                         {displayImages.map((img, i) => (
                                             <button
                                                 key={i}
                                                 type="button"
                                                 onClick={() => setSelectedImg(i)}
-                                                className={`w-20 aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-[#f4f4f5] flex-shrink-0 ${
+                                                className={`w-16 sm:w-20 aspect-[3/4] rounded-xl overflow-hidden border-2 transition-all cursor-pointer bg-[#f4f4f5] flex-shrink-0 ${
                                                     selectedImg === i
                                                         ? "border-black ring-2 ring-zinc-300 ring-offset-1 scale-95 shadow-sm"
                                                         : "border-zinc-200 hover:border-zinc-400 opacity-70 hover:opacity-100"
@@ -469,7 +479,7 @@ export default function ProductModal() {
                                     </div>
 
                                     {/* Price & Stock Card */}
-                                    <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-xs flex items-baseline justify-between">
+                                    <div className="bg-white border border-zinc-200 rounded-2xl p-4 sm:p-5 shadow-xs flex flex-col sm:flex-row sm:items-baseline justify-between gap-3">
                                         <div>
                                             <p className="text-[10px] uppercase font-mono-code tracking-widest text-zinc-400 mb-0.5">
                                                 {selectedVariant?.price?.amount ? "Selected Variety Price" : "Listed Price"}
@@ -485,20 +495,22 @@ export default function ProductModal() {
                                         </div>
 
                                         {/* Stock Badge */}
-                                        {isOutOfStock ? (
-                                            <span className="text-[10px] uppercase font-bold tracking-widest text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full font-mono-code">
-                                                Out Of Stock
-                                            </span>
-                                        ) : currentStock <= 5 && product?.variants && product.variants.length > 0 ? (
-                                            <span className="text-[10px] uppercase font-bold tracking-widest text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full font-mono-code">
-                                                Only {currentStock} Left
-                                            </span>
-                                        ) : (
-                                            <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full flex items-center gap-1.5 font-mono-code">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                                                <span>In Stock</span>
-                                            </span>
-                                        )}
+                                        <div>
+                                            {isOutOfStock ? (
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-rose-700 bg-rose-50 border border-rose-200 px-3 py-1 rounded-full font-mono-code inline-block">
+                                                    Out Of Stock
+                                                </span>
+                                            ) : currentStock <= 5 && product?.variants && product.variants.length > 0 ? (
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-amber-700 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full font-mono-code inline-block">
+                                                    Only {currentStock} Left
+                                                </span>
+                                            ) : (
+                                                <span className="text-[10px] uppercase font-bold tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1 rounded-full inline-flex items-center gap-1.5 font-mono-code">
+                                                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                    <span>In Stock</span>
+                                                </span>
+                                            )}
+                                        </div>
                                     </div>
 
                                     {/* Variety Selector (Colors + Sizes + Size Guide) */}
@@ -518,7 +530,7 @@ export default function ProductModal() {
                                                 type="button"
                                                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                                                 disabled={isOutOfStock}
-                                                className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-40"
+                                                className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-40"
                                             >
                                                 -
                                             </button>
@@ -531,7 +543,7 @@ export default function ProductModal() {
                                                     setQuantity((q) => (currentStock ? Math.min(currentStock, q + 1) : q + 1))
                                                 }
                                                 disabled={isOutOfStock || (currentStock && quantity >= currentStock)}
-                                                className="w-8 h-8 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-40"
+                                                className="w-9 h-9 rounded-full flex items-center justify-center text-zinc-600 hover:text-black hover:bg-zinc-100 transition-colors cursor-pointer disabled:opacity-40"
                                             >
                                                 +
                                             </button>
@@ -596,46 +608,46 @@ export default function ProductModal() {
                                     </div>
 
                                     {/* Trust & Guarantee Strip */}
-                                    <div className="grid grid-cols-2 gap-3 pt-2">
-                                        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
+                                    <div className="grid grid-cols-2 gap-2 sm:gap-3 pt-2">
+                                        <div className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
                                             <ShieldCheckIcon className="w-4 h-4 text-zinc-800 flex-shrink-0" />
-                                            <div>
-                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">100% Genuine</p>
-                                                <p className="text-[9px] text-zinc-400">Authentic Snitch drop</p>
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] sm:text-[10px] font-bold uppercase font-mono-code text-zinc-900 truncate">100% Genuine</p>
+                                                <p className="text-[8px] sm:text-[9px] text-zinc-400 truncate">Authentic drop</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
+                                        <div className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
                                             <TruckIcon className="w-4 h-4 text-zinc-800 flex-shrink-0" />
-                                            <div>
-                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">Express Shipping</p>
-                                                <p className="text-[9px] text-zinc-400">2-4 business days</p>
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] sm:text-[10px] font-bold uppercase font-mono-code text-zinc-900 truncate">Express Delivery</p>
+                                                <p className="text-[8px] sm:text-[9px] text-zinc-400 truncate">2-4 business days</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
+                                        <div className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
                                             <RefreshIcon className="w-4 h-4 text-zinc-800 flex-shrink-0" />
-                                            <div>
-                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">7-Day Easy Return</p>
-                                                <p className="text-[9px] text-zinc-400">Hassle-free exchange</p>
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] sm:text-[10px] font-bold uppercase font-mono-code text-zinc-900 truncate">7-Day Return</p>
+                                                <p className="text-[8px] sm:text-[9px] text-zinc-400 truncate">Easy exchange</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center gap-2.5 p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
+                                        <div className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-xl bg-white border border-zinc-200 shadow-2xs">
                                             <TagIcon className="w-4 h-4 text-zinc-800 flex-shrink-0" />
-                                            <div>
-                                                <p className="text-[10px] font-bold uppercase font-mono-code text-zinc-900">Best Price Drop</p>
-                                                <p className="text-[9px] text-zinc-400">Verified seller price</p>
+                                            <div className="min-w-0">
+                                                <p className="text-[9px] sm:text-[10px] font-bold uppercase font-mono-code text-zinc-900 truncate">Best Price</p>
+                                                <p className="text-[8px] sm:text-[9px] text-zinc-400 truncate">Verified seller price</p>
                                             </div>
                                         </div>
                                     </div>
 
                                     {/* Product Description Box */}
-                                    <div className="bg-white border border-zinc-200 rounded-2xl p-5 shadow-xs space-y-2">
+                                    <div className="bg-white border border-zinc-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-2">
                                         <h3 className="text-xs font-mono-code font-bold uppercase tracking-wider text-zinc-900">
-                                            Product Overview & Details
+                                            Product Overview &amp; Details
                                         </h3>
                                         <p className="text-xs sm:text-sm text-zinc-600 leading-relaxed font-light whitespace-pre-line">
                                             {product.description || "Premium streetwear piece made with high-grade breathable fabric and reinforced seams for longevity and comfort."}
                                         </p>
-                                        <div className="pt-2 border-t border-zinc-100 flex flex-wrap gap-4 text-[11px] font-mono-code text-zinc-500">
+                                        <div className="pt-2 border-t border-zinc-100 flex flex-wrap gap-3 sm:gap-4 text-[10px] sm:text-[11px] font-mono-code text-zinc-500">
                                             <span>• 100% Combed Heavyweight Cotton</span>
                                             <span>• Machine Wash Cold</span>
                                             <span>• True to Size Regular Fit</span>
@@ -651,14 +663,48 @@ export default function ProductModal() {
 
                 </div>
 
-                {/* ─── Snitch Store Footer (Matching Home.jsx) ────────────────── */}
-                <footer className="mt-16 border-t border-zinc-200 bg-white py-10 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-2 font-mono-code">
+                {/* ─── STICKY MOBILE QUICK ADD BAR ───────────────────────────── */}
+                {!loadingProduct && product && (
+                    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-zinc-200 px-4 py-3 flex items-center justify-between gap-3 pb-safe shadow-lg">
+                        <div className="min-w-0">
+                            <span className="text-[10px] font-mono-code text-zinc-400 uppercase tracking-wider block">Price</span>
+                            <span className="text-lg font-black font-mono-code text-zinc-950">
+                                {symbol}{formattedPrice}
+                            </span>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleAddToCart}
+                            disabled={isOutOfStock || isAddingToCart}
+                            className={`px-5 py-3 font-bold text-xs uppercase tracking-widest rounded-full transition-all flex items-center gap-2 font-mono-code cursor-pointer flex-shrink-0 ${
+                                isOutOfStock
+                                    ? "bg-zinc-200 text-zinc-400 cursor-not-allowed"
+                                    : cartFeedback?.type === "success"
+                                    ? "bg-emerald-600 text-white"
+                                    : "bg-black text-white active:scale-95"
+                            }`}
+                        >
+                            {isAddingToCart ? (
+                                <span>Adding...</span>
+                            ) : cartFeedback?.type === "success" ? (
+                                <span>Added!</span>
+                            ) : isOutOfStock ? (
+                                <span>Out of Stock</span>
+                            ) : (
+                                <span>Add To Bag</span>
+                            )}
+                        </button>
+                    </div>
+                )}
+
+                {/* ─── Velmora Store Footer (Matching Home.jsx) ────────────────── */}
+                <footer className="mt-16 border-t border-zinc-200 bg-white py-10 px-4 sm:px-8 text-center text-xs text-zinc-500 space-y-2 font-mono-code pb-20 lg:pb-10">
                     <div className="flex items-center justify-center gap-2">
                         <span className="w-5 h-5 rounded-full border border-black flex items-center justify-center text-[10px] font-bold text-black">
-                            S
+                            V
                         </span>
                         <span className="font-bold text-zinc-900 tracking-widest uppercase">
-                            SNITCH STORE
+                            VELMORA STORE
                         </span>
                     </div>
                     <p className="text-[11px] text-zinc-400">

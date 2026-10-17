@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 
 function ShieldCheckIcon({ className = "w-4 h-4" }) {
@@ -39,11 +39,9 @@ export default function PaymentStep({
     isProcessing = false,
     confirmedOrder = null,
 }) {
-    const [selectedMethod, setSelectedMethod] = useState("upi");
-
     const handlePay = async () => {
         if (onPlaceOrder) {
-            await onPlaceOrder({ method: selectedMethod });
+            await onPlaceOrder({ method: "razorpay" });
         }
     };
 
@@ -139,90 +137,43 @@ export default function PaymentStep({
                 </div>
             )}
 
-            {/* Payment Method Selector */}
-            <div className="bg-white border border-zinc-200 rounded-2xl p-6 shadow-xs space-y-4">
-                <div className="flex items-center justify-between">
-                    <h3 className="text-sm font-bold uppercase tracking-widest text-zinc-950 font-mono-code">
-                        Select Payment Method
-                    </h3>
-                    <div className="flex items-center gap-1 text-[11px] font-mono-code text-emerald-600 font-bold">
+            {/* Razorpay Secure Gateway Card */}
+            <div className="bg-white border border-zinc-200 rounded-2xl p-6 sm:p-7 shadow-xs space-y-5">
+                <div className="flex items-center justify-between border-b border-zinc-100 pb-4">
+                    <div>
+                        <span className="text-[10px] font-mono-code font-bold uppercase tracking-widest text-zinc-500">
+                            Payment Gateway
+                        </span>
+                        <h3 className="text-sm font-bold uppercase tracking-wider text-zinc-950 font-mono-code">
+                            Razorpay Secure Checkout
+                        </h3>
+                    </div>
+                    <div className="flex items-center gap-1.5 text-[11px] font-mono-code text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/60">
                         <LockIcon className="w-3.5 h-3.5" />
                         <span>100% Secure Checkout</span>
                     </div>
                 </div>
 
-                <div className="space-y-2.5">
-                    {[
-                        {
-                            id: "upi",
-                            label: "UPI (Google Pay, PhonePe, Paytm, QR)",
-                            desc: "Instant payment with zero transaction fees",
-                            badge: "RECOMMENDED",
-                        },
-                        {
-                            id: "card",
-                            label: "Credit / Debit Card",
-                            desc: "Visa, MasterCard, RuPay & American Express",
-                        },
-                        {
-                            id: "netbanking",
-                            label: "Net Banking",
-                            desc: "All major Indian banks supported",
-                        },
-                        {
-                            id: "cod",
-                            label: "Cash on Delivery (COD)",
-                            desc: "Pay cash or scan QR code at your doorstep",
-                        },
-                    ].map((method) => {
-                        const isSelected = selectedMethod === method.id;
-                        return (
-                            <div
-                                key={method.id}
-                                onClick={() => setSelectedMethod(method.id)}
-                                className={`p-4 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
-                                    isSelected
-                                        ? "border-black bg-zinc-50/70 ring-1 ring-black"
-                                        : "border-zinc-200 hover:border-zinc-300"
-                                }`}
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div
-                                        className={`w-4 h-4 rounded-full border flex items-center justify-center transition-all ${
-                                            isSelected ? "border-black bg-black" : "border-zinc-300 bg-white"
-                                        }`}
-                                    >
-                                        {isSelected && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                    </div>
-                                    <div>
-                                        <div className="flex items-center gap-2">
-                                            <p className="text-xs font-bold font-mono-code uppercase text-zinc-900">
-                                                {method.label}
-                                            </p>
-                                            {method.badge && (
-                                                <span className="text-[9px] font-mono-code font-black bg-black text-white px-1.5 py-0.2 rounded-full uppercase">
-                                                    {method.badge}
-                                                </span>
-                                            )}
-                                        </div>
-                                        <p className="text-[11px] text-zinc-500 font-normal">{method.desc}</p>
-                                    </div>
-                                </div>
-                                <CreditCardIcon className="w-4 h-4 text-zinc-400 flex-shrink-0" />
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* COD Helper Notice */}
-                {selectedMethod === "cod" && (
-                    <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 text-amber-900 text-xs font-mono-code space-y-1">
-                        <p className="font-bold uppercase tracking-wider text-[10px]">Cash on Delivery Policy</p>
-                        <p className="text-[11px] text-amber-800">
-                            Please keep exact cash ready or you can pay the delivery partner via UPI QR code upon arrival.
+                <div className="bg-zinc-50 rounded-xl p-4 border border-zinc-200/80 flex items-start gap-3.5">
+                    <div className="w-9 h-9 rounded-lg bg-zinc-900 text-white flex items-center justify-center flex-shrink-0 mt-0.5 shadow-xs">
+                        <CreditCardIcon className="w-4 h-4" />
+                    </div>
+                    <div className="space-y-1 text-xs font-mono-code">
+                        <p className="font-bold text-zinc-900">
+                            All Payment Methods Handled Securely via Razorpay
+                        </p>
+                        <p className="text-[11px] text-zinc-500 leading-relaxed font-normal">
+                            Razorpay provides all payment options in one encrypted popup window. You can pay using UPI (Google Pay, PhonePe, Paytm, QR), Credit &amp; Debit Cards, Net Banking, or Wallets.
                         </p>
                     </div>
-                )}
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1 text-[10px] font-mono-code text-zinc-600 uppercase tracking-wider">
+                    <span className="px-2.5 py-1 bg-zinc-100 rounded-md font-semibold">UPI / QR</span>
+                    <span className="px-2.5 py-1 bg-zinc-100 rounded-md font-semibold">Credit &amp; Debit Cards</span>
+                    <span className="px-2.5 py-1 bg-zinc-100 rounded-md font-semibold">Net Banking</span>
+                    <span className="px-2.5 py-1 bg-zinc-100 rounded-md font-semibold">Wallets</span>
+                </div>
             </div>
 
             {/* Navigation Buttons */}
@@ -246,17 +197,11 @@ export default function PaymentStep({
                     {isProcessing ? (
                         <>
                             <span className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            <span>
-                                {selectedMethod === "cod" ? "Placing Order..." : "Processing Payment..."}
-                            </span>
+                            <span>Opening Razorpay Gateway...</span>
                         </>
                     ) : (
                         <>
-                            <span>
-                                {selectedMethod === "cod"
-                                    ? `Place Order (${currencySymbol}${totalPrice.toLocaleString("en-IN")})`
-                                    : `Pay ${currencySymbol}${totalPrice.toLocaleString("en-IN")}`}
-                            </span>
+                            <span>Pay {currencySymbol}{totalPrice.toLocaleString("en-IN")} via Razorpay</span>
                             <span>→</span>
                         </>
                     )}

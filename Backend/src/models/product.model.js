@@ -103,7 +103,7 @@ const productSchema = new mongoose.Schema({
     brand: {
         type: String,
         trim: true,
-        default: "NORTHLINE Atelier",
+        default: "Velmora Atelier",
     }
 }, { timestamps: true, toJSON: { flattenMaps: true }, toObject: { flattenMaps: true } });
 

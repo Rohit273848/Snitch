@@ -204,7 +204,7 @@ export async function getProductById(req, res) {
         }
 
         if (!product) {
-            const cleanKey = String(id).replace(/^snitch-/, "").replace(/[-_]/g, " ").trim();
+            const cleanKey = String(id).replace(/^(velmora|snitch)-/, "").replace(/[-_]/g, " ").trim();
             if (cleanKey) {
                 product = await productModel.findOne({
                     title: { $regex: cleanKey, $options: "i" }

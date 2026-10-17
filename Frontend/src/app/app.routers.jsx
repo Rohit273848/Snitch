@@ -1,6 +1,7 @@
-import { createBrowserRouter, Outlet } from "react-router-dom"
+import { createBrowserRouter, Outlet, ScrollRestoration } from "react-router-dom"
 import Register from "../features/auth/pages/Register"
 import Login from "../features/auth/pages/login"
+import Logout from "../features/auth/pages/Logout.jsx"
 import CreateProduct from "../features/products/pages/CreateProduct.jsx"
 import SellerDashboard from "../features/products/pages/SellerDashboard.jsx"
 import SellerProduct from "../features/products/pages/SellerProduct.jsx"
@@ -19,24 +20,36 @@ import Nav from "../shared/components/Nav.jsx"
 
 export const router = createBrowserRouter([
     {
-        path: '/register',
-        element: <Register />
-    },
-    {
-        path: "/login",
-        element: <Login />
-    },
-    {
         element: (
             <>
-                <Nav />
+                <ScrollRestoration />
                 <Outlet />
             </>
         ),
         children: [
             {
+                path: '/register',
+                element: <Register />
+            },
+            {
+                path: "/login",
+                element: <Login />
+            },
+            {
+                path: "/logout",
+                element: <Logout />
+            },
+            {
+                element: (
+                    <>
+                        <Nav />
+                        <Outlet />
+                    </>
+                ),
+        children: [
+            {
                 path: "/",
-                element: <Protected><Home /></Protected>,
+                element: <Home />,
             },
             {
                 path: "/search",
@@ -122,6 +135,8 @@ export const router = createBrowserRouter([
                     <SellerProductModel />
                 </SellerProtected>
             }
+        ]
+    }
         ]
     }
 ])

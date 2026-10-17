@@ -10,6 +10,7 @@ import {
     updateAddressState,
     removeAddressState,
     setCartStep,
+    clearCart,
 } from "../state/cart.slice";
 import {
     addItemToCart,
@@ -23,7 +24,8 @@ import {
     deleteAddress as deleteAddressApi,
     selectCartAddress as selectCartAddressApi,
     clearCartAddress as clearCartAddressApi,
-    createCartOrder as createCartOrderApi
+    createCartOrder as createCartOrderApi,
+    clearCartApi,
 } from "../service/cart.api";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -177,6 +179,15 @@ export const useChat = () => {
         dispatch(setCartStep(step));
     }
 
+    async function handleClearCart() {
+        dispatch(clearCart());
+        try {
+            await clearCartApi();
+        } catch (err) {
+            console.warn("Backend clear cart error:", err);
+        }
+    }
+
     return {
         handleAddToItem,
         handleGetCart,
@@ -187,6 +198,7 @@ export const useChat = () => {
         handleDeleteCartItem,
         handleRemoveCartItem: handleDeleteCartItem,
         handleRemoveItem: handleDeleteCartItem,
+        handleClearCart,
         handleGetAddresses,
         handleCreateAddress,
         handleUpdateAddress,

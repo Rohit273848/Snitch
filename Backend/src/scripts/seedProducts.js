@@ -290,11 +290,11 @@ async function seed() {
         // 1. Resolve or create seller
         let seller = await userModel.findOne({ role: "seller" });
         if (!seller) {
-            console.log("No seller found. Creating default 'Snitch Atelier' seller account...");
+            console.log("No seller found. Creating default 'Velmora Atelier' seller account...");
             seller = await userModel.create({
-                email: "atelier@snitch.co",
-                password: "SnitchAtelier2026!",
-                fullname: "Snitch Atelier",
+                email: "atelier@velmora.co",
+                password: "VelmoraAtelier2026!",
+                fullname: "Velmora Atelier",
                 contact: "+91 9876543210",
                 role: "seller",
             });

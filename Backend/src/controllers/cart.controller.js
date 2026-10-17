@@ -469,3 +469,43 @@ export const createOrderController = async (req, res) => {
         });
     }
 };
+
+/**
+ * Clear all items from the user's cart (used after checkout or manual reset)
+ */
+export const clearCartController = async (req, res) => {
+    try {
+        const userId = req.user?._id || req.user?.id;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Unauthorized: User not found",
+            });
+        }
+
+        const userObjectId = mongoose.Types.ObjectId.isValid(userId)
+            ? new mongoose.Types.ObjectId(userId)
+            : userId;
+
+        await cartModel.updateMany(
+            { user: { $in: [userObjectId, userId.toString()] } },
+            { $set: { items: [] } }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Cart cleared successfully",
+            cart: {
+                user: userId,
+                items: [],
+                totalPrice: 0,
+            },
+        });
+    } catch (error) {
+        console.error("Error clearing cart:", error);
+        return res.status(500).json({
+            success: false,
+            message: error?.message || "Failed to clear cart",
+        });
+    }
+};

@@ -30,6 +30,7 @@ export async function verifyPaymentAndPlaceOrder({
     paymentMethod = "razorpay",
     discount = 0,
     shippingFee = 0,
+    items = null,
 }) {
     const response = await orderApiInstance.post("/verify-payment", {
         razorpay_order_id,
@@ -40,6 +41,7 @@ export async function verifyPaymentAndPlaceOrder({
         paymentMethod,
         discount,
         shippingFee,
+        items,
     });
     return response.data;
 }
@@ -52,12 +54,14 @@ export async function placeCodOrder({
     addressData,
     discount = 0,
     shippingFee = 0,
+    items = null,
 }) {
     const response = await orderApiInstance.post("/checkout/cod", {
         addressId,
         addressData,
         discount,
         shippingFee,
+        items,
     });
     return response.data;
 }

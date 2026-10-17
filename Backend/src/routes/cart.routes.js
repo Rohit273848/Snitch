@@ -3,7 +3,7 @@ import { validateAddToCart, validateIncrementCartItemQuantity, validateDecrement
 import { validate } from "../middleweres/validate.js";
 import { authenticateUser } from "../middleweres/auth.middleweres.js";
 import { addToCart, getCart, IncrementItemCartQuantity, DecrementItemCartQuantity, removeCartItem,
-    createOrderController } from "../controllers/cart.controller.js";
+    createOrderController, clearCartController } from "../controllers/cart.controller.js";
 import {
     getUserAddresses,
     createAddress,
@@ -23,6 +23,12 @@ const router = Router();
 router.get("/", authenticateUser, getCart);
 router.post("/add/:productId/:variantId", authenticateUser, validateAddToCart, validate, addToCart);
 router.post("/add/:productId", authenticateUser, validateAddToCart, validate, addToCart);
+
+// Clear Cart routes
+router.delete("/clear", authenticateUser, clearCartController);
+router.delete("/items", authenticateUser, clearCartController);
+router.post("/clear", authenticateUser, clearCartController);
+router.delete("/", authenticateUser, clearCartController);
 
 // Address layer in cart routes
 router.get("/address", authenticateUser, getUserAddresses);

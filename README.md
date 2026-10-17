@@ -1,4 +1,4 @@
-# 🛒 Snitch — Full-Stack Multi-Vendor E-Commerce Platform
+# 🛒 Velmora — Full-Stack Multi-Vendor E-Commerce Platform
 
 [![Node.js](https://img.shields.io/badge/Node.js-v18%2B-339933?logo=node.js&logoColor=white)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5.x-000000?logo=express&logoColor=white)](https://expressjs.com/)
@@ -10,7 +10,7 @@
 [![Razorpay](https://img.shields.io/badge/Razorpay-Payment%20Gateway-0C2340?logo=razorpay&logoColor=white)](https://razorpay.com/)
 [![ImageKit](https://img.shields.io/badge/ImageKit-Cloud%20Media-0052CC?logo=imagekit&logoColor=white)](https://imagekit.io/)
 
-A modern, high-performance, full-stack multi-vendor e-commerce platform inspired by the bold, minimalist streetwear aesthetic of **Snitch**. The platform provides an end-to-end shopping and selling experience: featuring real-time catalog discovery, dynamic variant management, atomic cart validation, multi-address shipping, Razorpay payment processing, and live order tracking.
+A modern, high-performance, full-stack multi-vendor e-commerce platform inspired by the bold, minimalist architectural aesthetic of **Velmora**. The platform provides an end-to-end shopping and selling experience: featuring real-time catalog discovery, dynamic variant management, atomic cart validation, multi-address shipping, Razorpay payment processing, and live order tracking.
 
 The user interface was crafted and refined using **AI-assisted modern UI engineering**, delivering rich micro-interactions, responsive layouts, and a luxury streetwear design system.
 
@@ -174,7 +174,7 @@ sequenceDiagram
 
 ## 💡 What I Learned from This Project
 
-Building **Snitch** was a comprehensive end-to-end engineering journey that went far beyond basic CRUD applications. It provided deep, practical mastery over distributed backend architectures, real-world e-commerce edge cases, payment security, and state-of-the-art UI craftsmanship.
+Building **Velmora** was a comprehensive end-to-end engineering journey that went far beyond basic CRUD applications. It provided deep, practical mastery over distributed backend architectures, real-world e-commerce edge cases, payment security, and state-of-the-art UI craftsmanship.
 
 ### 🛡️ Backend Engineering Deep Dive
 
@@ -225,7 +225,7 @@ Building **Snitch** was a comprehensive end-to-end engineering journey that went
 
 ### 🎨 AI-Assisted UI Engineering
 
-The user interface of Snitch was built and iterated using **AI pair-programming**, proving how modern AI tools can accelerate frontend development from basic prototypes to production-grade, aesthetically stunning experiences.
+The user interface of Velmora was built and iterated using **AI pair-programming**, proving how modern AI tools can accelerate frontend development from basic prototypes to production-grade, aesthetically stunning experiences.
 
 #### 1. Premium Streetwear Design System
 - Rather than settling for default CSS layouts, AI was leveraged to create a tailored design system inspired by luxury fashion retailers:
@@ -428,7 +428,7 @@ PORT=3000
 NODE_ENV=development
 
 # Database Connection (MongoDB Atlas)
-MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/snitch?retryWrites=true&w=majority
+MONGO_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/velmora?retryWrites=true&w=majority
 
 # JWT Token Secret
 JWT_SECRET=your_super_secure_jwt_secret_key_here
@@ -532,7 +532,7 @@ npm run dev
 2. **Build Command**: `npm install`
 3. **Start Command**: `node server.js`
 4. Add all environment variables from `Backend/.env` into your host provider's dashboard.
-5. Set `CLIENT_URL` to your production frontend domain (e.g. `https://snitch-store.vercel.app`) and `SERVER_URL` to your backend URL.
+5. Set `CLIENT_URL` to your production frontend domain (e.g. `https://velmora-store.vercel.app`) and `SERVER_URL` to your backend URL.
 6. The app includes `app.set("trust proxy", 1)` ensuring secure HTTPS cookies are processed correctly behind load balancers.
 
 ### Frontend (Vercel / Netlify)

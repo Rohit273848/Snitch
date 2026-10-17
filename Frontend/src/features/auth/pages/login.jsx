@@ -1,72 +1,141 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useAuth } from "../hook/useAuth";
 import ContinueWithGoogle from "../components/ContinueWithGoogle";
 
-// --- Google Fonts loader
-function FontLoader() {
-    useEffect(() => {
-        const link = document.createElement("link");
-        link.rel = "stylesheet";
-        link.href = "https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap";
-        document.head.appendChild(link);
-    }, []);
-    return null;
-}
-
-// --- Icons
-const icons = {
-    mail: (<path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />),
-    lock: (<path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />),
-    eyeOff: (<path strokeLinecap="round" strokeLinejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858-5.908a10.026 10.026 0 013.98-.863c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m-6.158-6.158a3 3 0 104.243 4.243m-4.243-4.243L3 3l18 18" />),
-    eye: (<><path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></>),
-    arrow: (<path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />),
-};
-
-function Icon({ name, className = "w-4 h-4", strokeWidth = "1.5" }) {
-    return <svg className={className} fill="none" stroke="currentColor" strokeWidth={strokeWidth} viewBox="0 0 24 24">{icons[name]}</svg>;
-}
-
-function Spinner() {
+// ─── SVG Icons ────────────────────────────────────────────────────────────────
+function MailIcon({ className = "w-4 h-4" }) {
     return (
-        <svg className="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
         </svg>
     );
 }
 
-// --- Input Field
-function InputField({ id, name, label, type = "text", icon, value, onChange, onFocus, onBlur, placeholder, error, focused, autoFocus, autoComplete, rightEl }) {
-    const isActive = focused === name;
+function LockIcon({ className = "w-4 h-4" }) {
     return (
-        <div className="group">
-            <label htmlFor={id} className={`block text-[10px] font-medium tracking-[0.15em] uppercase mb-3 transition-colors duration-200 ${isActive ? "text-yellow-500" : error ? "text-red-400" : "text-zinc-500"}`}>{label}</label>
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" />
+        </svg>
+    );
+}
+
+function EyeIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.639C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+    );
+}
+
+function EyeSlashIcon({ className = "w-4 h-4" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="1.6" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 001.934 12C3.226 16.338 7.244 19.5 12 19.5c.993 0 1.953-.138 2.863-.395M6.228 6.228A10.45 10.45 0 0112 4.5c4.756 0 8.773 3.162 10.065 7.498a10.523 10.523 0 01-4.293 5.774M6.228 6.228L3 3m3.228 3.228l3.65 3.65m7.894 7.894L21 21m-3.228-3.228l-3.65-3.65m0 0a3 3 0 10-4.243-4.243m4.242 4.242L9.88 9.88" />
+        </svg>
+    );
+}
+
+function CheckShieldIcon({ className = "w-3.5 h-3.5" }) {
+    return (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+        </svg>
+    );
+}
+
+// ─── Input Field Component ────────────────────────────────────────────────────
+function FormInput({
+    id,
+    name,
+    label,
+    type = "text",
+    value,
+    onChange,
+    onFocus,
+    onBlur,
+    placeholder,
+    error,
+    autoFocus = false,
+    autoComplete,
+    rightEl = null,
+    icon = null,
+}) {
+    return (
+        <div className="space-y-1.5 font-interface-sans">
+            <label
+                htmlFor={id}
+                className="block text-[10px] font-semibold tracking-[0.2em] uppercase text-[#6C685F]"
+            >
+                {label}
+            </label>
             <div className="relative">
-                <span className={`absolute left-0 top-1/2 -translate-y-1/2 transition-colors duration-200 ${isActive ? "text-yellow-500" : "text-zinc-600"}`}><Icon name={icon} className="w-[15px] h-[15px]" /></span>
-                <input id={id} name={name} type={type} autoFocus={autoFocus} autoComplete={autoComplete} value={value} onChange={onChange} onFocus={onFocus} onBlur={onBlur} placeholder={placeholder}
-                    className={`w-full h-12 pl-6 ${rightEl ? "pr-9" : "pr-0"} bg-transparent text-white text-sm placeholder-zinc-700 outline-none border-b transition-all duration-300 ${error ? "border-red-500/60" : isActive ? "border-yellow-500" : "border-zinc-800 hover:border-zinc-600"}`} />
-                {rightEl && <div className="absolute right-0 top-1/2 -translate-y-1/2">{rightEl}</div>}
+                {icon && (
+                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#8A857B] pointer-events-none">
+                        {icon}
+                    </div>
+                )}
+                <input
+                    id={id}
+                    name={name}
+                    type={type}
+                    value={value}
+                    onChange={onChange}
+                    onFocus={onFocus}
+                    onBlur={onBlur}
+                    placeholder={placeholder}
+                    autoFocus={autoFocus}
+                    autoComplete={autoComplete}
+                    className={`w-full h-12 bg-white text-[#1A1917] text-xs sm:text-sm placeholder-[#A39E93] border ${
+                        error
+                            ? "border-red-400 focus:border-red-500 focus:ring-1 focus:ring-red-500"
+                            : "border-[#D5CEBF] hover:border-[#1A1917] focus:border-[#1A1917] focus:ring-1 focus:ring-[#1A1917]"
+                    } outline-none transition-all duration-200 ${icon ? "pl-10" : "pl-4"} ${rightEl ? "pr-11" : "pr-4"}`}
+                />
+                {rightEl && (
+                    <div className="absolute right-3.5 top-1/2 -translate-y-1/2 text-[#8A857B]">
+                        {rightEl}
+                    </div>
+                )}
             </div>
-            <div className={`h-px bg-yellow-500 transition-all duration-300 origin-left ${isActive && !error ? "scale-x-100" : "scale-x-0"}`} />
-            {error && <p className="mt-2 text-[11px] text-red-400 tracking-wide flex items-center gap-1.5" style={{ animation: "slideDown 0.15s ease-out" }}><span className="w-1 h-1 rounded-full bg-red-400 inline-block flex-shrink-0" />{error}</p>}
+            {error && (
+                <p className="text-[11px] text-red-600 tracking-wide flex items-center gap-1.5 pt-0.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-red-600 inline-block" />
+                    <span>{error}</span>
+                </p>
+            )}
         </div>
     );
 }
 
-// --- Login Page
 export default function Login() {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const { handleLogin } = useAuth();
+    const user = useSelector((state) => state.auth.user);
+
     const [formData, setFormData] = useState({ email: "", password: "" });
     const [showPassword, setShowPassword] = useState(false);
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [focused, setFocused] = useState(null);
-    const [mounted, setMounted] = useState(false);
     const [apiError, setApiError] = useState("");
 
-    useEffect(() => { const t = setTimeout(() => setMounted(true), 50); return () => clearTimeout(t); }, []);
+    useEffect(() => {
+        if (user) {
+            navigate(user.role === "seller" ? "/seller/dashboard" : "/", { replace: true });
+        }
+    }, [user, navigate]);
+
+    useEffect(() => {
+        const errorParam = searchParams.get("error");
+        if (errorParam === "auth_failed") {
+            setApiError("Google sign-in could not be completed. Please try again or use your email and password.");
+        } else if (errorParam === "no_email") {
+            setApiError("No email address was provided by your Google account. Please use standard registration.");
+        }
+    }, [searchParams]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -77,201 +146,296 @@ export default function Login() {
 
     const validate = () => {
         const e = {};
-        if (!formData.email.trim()) { e.email = "Email address is required"; }
-        else if (!/\S+@\S+\.\S+/.test(formData.email)) { e.email = "Enter a valid email"; }
-        if (!formData.password) { e.password = "Password is required"; }
-        else if (formData.password.length < 6) { e.password = "Min. 6 characters"; }
+        if (!formData.email.trim()) {
+            e.email = "Email address is required";
+        } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+            e.email = "Please enter a valid email address";
+        }
+        if (!formData.password) {
+            e.password = "Password is required";
+        } else if (formData.password.length < 6) {
+            e.password = "Password must be at least 6 characters";
+        }
         return e;
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const errs = validate();
-        if (Object.keys(errs).length > 0) { setErrors(errs); return; }
+        if (Object.keys(errs).length > 0) {
+            setErrors(errs);
+            return;
+        }
+
         setIsSubmitting(true);
         setApiError("");
         try {
             const user = await handleLogin({ email: formData.email, password: formData.password });
-            if (user.role == "seller") {
-                navigate("/seller/dashboard")
-            } else if (user.role == "buyer") {
+            if (user?.role === "seller") {
+                navigate("/seller/dashboard");
+            } else {
                 navigate("/");
             }
         } catch (err) {
-            setApiError(err?.message || "Invalid email or password. Please try again.");
+            setApiError(err?.response?.data?.message || err?.message || "Invalid credentials. Please verify your email and password.");
         } finally {
             setIsSubmitting(false);
         }
     };
 
-    const field = (name) => ({ name, id: name, value: formData[name], onChange: handleChange, onFocus: () => setFocused(name), onBlur: () => setFocused(null), focused, error: errors[name] });
-
     return (
-        <>
-            <FontLoader />
+        <div className="min-h-screen bg-[#FBF9F5] text-[#1A1917] selection:bg-[#1A1917] selection:text-[#FBF9F5] antialiased flex flex-col justify-between">
+            {/* Custom font definitions matching reference design system */}
             <style>{`
-                *, *::before, *::after { font-family: 'Hanken Grotesk', ui-sans-serif, system-ui, sans-serif; }
-                .font-mono-label { font-family: 'JetBrains Mono', 'Courier New', monospace; }
-                @keyframes panelIn { from { opacity: 0; transform: translateX(-32px); } to { opacity: 1; transform: translateX(0); } }
-                @keyframes formIn  { from { opacity: 0; transform: translateY(24px);  } to { opacity: 1; transform: translateY(0); } }
-                @keyframes slideDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
-                @keyframes marquee { from { transform: translateY(0); } to { transform: translateY(-50%); } }
-                @keyframes pulse-glow { 0%, 100% { opacity: 0.06; } 50% { opacity: 0.12; } }
-                @keyframes errorShake { 0%,100% { transform: translateX(0); } 20% { transform: translateX(-6px); } 40% { transform: translateX(6px); } 60% { transform: translateX(-4px); } 80% { transform: translateX(4px); } }
-                .marquee-track { animation: marquee 22s linear infinite; }
-                .s-glow { animation: pulse-glow 5s ease-in-out infinite; }
-                .panel-in { animation: panelIn 0.7s cubic-bezier(0.22,1,0.36,1) both; }
-                .form-in  { animation: formIn  0.65s cubic-bezier(0.22,1,0.36,1) 0.15s both; }
-                input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
-                    -webkit-box-shadow: 0 0 0 1000px #0e0e0e inset; -webkit-text-fill-color: #fff; caret-color: #fff;
+                .font-editorial-serif {
+                    font-family: 'EB Garamond', 'Newsreader', 'Cormorant Garamond', Georgia, serif;
+                }
+                .font-interface-sans {
+                    font-family: 'Inter', 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
                 }
             `}</style>
 
-            <main className="min-h-screen w-full flex bg-[#0a0a0a] selection:bg-yellow-500 selection:text-black overflow-hidden" style={{ fontFamily: "'Hanken Grotesk', sans-serif" }}>
-
-                {/* LEFT PANEL */}
-                <div className={`hidden lg:flex flex-col relative w-[44%] xl:w-[42%] min-h-screen bg-[#0a0a0a] border-r border-zinc-900 overflow-hidden ${mounted ? "panel-in" : "opacity-0"}`}>
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none">
-                        <span className="s-glow text-[28vw] font-black text-white leading-none tracking-tighter" style={{ opacity: 0.06 }}>S</span>
-                    </div>
-                    <div className="absolute left-6 top-0 bottom-0 w-5 overflow-hidden pointer-events-none select-none opacity-[0.07]">
-                        <div className="marquee-track flex flex-col gap-8">
-                            {Array.from({ length: 10 }).map((_, i) => (
-                                <span key={i} className="font-mono-label text-[9px] tracking-[0.4em] uppercase text-white" style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}>SNITCH — WEAR THE FUTURE —</span>
-                            ))}
+            {/* ─── Top Minimal Brand Header ────────────────────────────────────── */}
+            <header className="border-b border-[#ECE7DD] bg-[#FBF9F5]/90 backdrop-blur-md sticky top-0 z-30">
+                <div className="max-w-7xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
+                    <Link to="/" className="flex items-center gap-3 group">
+                        <span className="w-8 h-8 rounded-full bg-[#1A1917] text-[#FBF9F5] flex items-center justify-center font-editorial-serif text-lg font-bold">
+                            V
+                        </span>
+                        <div className="flex flex-col">
+                            <span className="font-editorial-serif text-lg sm:text-xl font-semibold tracking-wider text-[#1A1917]">
+                                VELMORA
+                            </span>
+                            <span className="text-[8.5px] uppercase tracking-[0.24em] text-[#6C685F] -mt-1 font-interface-sans">
+                                Atelier Menswear
+                            </span>
                         </div>
-                    </div>
-                    <div className="absolute top-8 left-8 w-16 h-16 border-l border-t border-zinc-800 pointer-events-none" />
-                    <div className="absolute bottom-8 right-8 w-16 h-16 border-r border-b border-zinc-800 pointer-events-none" />
+                    </Link>
 
-                    <div className="relative z-10 flex items-center justify-between px-10 pt-10">
-                        <Link to="/" className="inline-flex items-center gap-2.5 group">
-                            <span className="h-8 w-8 rounded-md bg-yellow-500 flex items-center justify-center text-black font-black text-base shadow-lg shadow-yellow-500/20 group-hover:shadow-yellow-500/40 transition-shadow duration-300">S</span>
-                            <span className="text-[13px] font-bold tracking-[0.3em] uppercase text-white font-mono-label">SNITCH</span>
-                        </Link>
-                        <span className="font-mono-label text-[9px] tracking-[0.2em] uppercase text-zinc-600">SS / 2025</span>
-                    </div>
-
-                    <div className="relative z-10 flex-1 flex flex-col justify-center px-10 xl:px-14">
-                        <div className="flex items-center gap-3 mb-10">
-                            <div className="h-px w-8 bg-yellow-500" />
-                            <span className="font-mono-label text-[9px] tracking-[0.2em] uppercase text-yellow-500">02 / Return</span>
-                        </div>
-                        <h2 className="text-5xl xl:text-6xl font-black leading-[0.95] tracking-[-0.04em] text-white mb-10 uppercase">
-                            Back<br />In<br /><span className="text-yellow-500">Style.</span>
-                        </h2>
-                        <p className="text-sm text-zinc-500 leading-relaxed max-w-[260px] mb-12 font-light tracking-wide">
-                            Welcome back. Your exclusive wardrobe and curated drops are waiting. Sign in to continue.
-                        </p>
-                        <div className="space-y-4">
-                            {[
-                                { label: "Your Orders", desc: "Track all deliveries in real-time" },
-                                { label: "Saved Looks", desc: "Resume your wishlist & favourites" },
-                                { label: "Member Deals", desc: "Access private member-only offers" },
-                            ].map(({ label, desc }) => (
-                                <div key={label} className="flex items-start gap-4 group cursor-default">
-                                    <div className="mt-0.5 flex-shrink-0 w-1.5 h-1.5 rounded-full bg-yellow-500 group-hover:scale-150 transition-transform duration-300" />
-                                    <div>
-                                        <p className="text-[12px] font-semibold text-zinc-200 group-hover:text-white transition-colors tracking-wide">{label}</p>
-                                        <p className="text-[11px] text-zinc-600 mt-0.5 tracking-wide">{desc}</p>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    <div className="relative z-10 px-10 pb-10">
-                        <div className="h-px w-full bg-zinc-900 mb-6" />
-                        <p className="font-mono-label text-[9px] tracking-[0.15em] uppercase text-zinc-700">© {new Date().getFullYear()} SNITCH Inc. — All rights reserved</p>
-                    </div>
+                    <Link
+                        to="/"
+                        className="text-[10px] sm:text-[11px] font-interface-sans font-semibold tracking-[0.2em] uppercase text-[#6C685F] hover:text-[#1A1917] transition-colors"
+                    >
+                        ← Return to Shop
+                    </Link>
                 </div>
+            </header>
 
-                {/* RIGHT PANEL */}
-                <div className="flex-1 min-h-screen bg-[#0e0e0e] flex flex-col overflow-y-auto">
-                    <div className="lg:hidden flex items-center justify-between px-6 pt-8 pb-4 border-b border-zinc-900">
-                        <Link to="/" className="inline-flex items-center gap-2.5">
-                            <span className="h-8 w-8 rounded-md bg-yellow-500 flex items-center justify-center text-black font-black text-base">S</span>
-                            <span className="text-[13px] font-bold tracking-[0.3em] uppercase text-white">SNITCH</span>
-                        </Link>
+            {/* ─── Main Content Split ─────────────────────────────────────────── */}
+            <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-8 py-8 sm:py-14 flex items-center justify-center">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-14 w-full items-stretch">
+
+                    {/* ─── LEFT COLUMN: ATELIER SHOWCASE BANNER ────────────────────── */}
+                    <div className="hidden lg:flex lg:col-span-5 bg-[#F5F2EB] border border-[#ECE7DD] p-10 flex-col justify-between relative overflow-hidden">
+                        <div className="space-y-6 relative z-10">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-[#4A5340]" />
+                                <span className="font-interface-sans text-[10px] font-semibold tracking-[0.24em] text-[#6C685F] uppercase">
+                                    CLIENT ATELIER PORTAL
+                                </span>
+                            </div>
+
+                            <div className="space-y-3">
+                                <h2 className="font-editorial-serif text-4xl xl:text-5xl font-normal text-[#1A1917] leading-[1.08] tracking-tight">
+                                    Welcome back to the <span className="italic font-normal">Atelier.</span>
+                                </h2>
+                                <p className="font-interface-sans text-xs text-[#6C685F] leading-relaxed">
+                                    Sign in to view your garment orders, track carbon-neutral dispatches, manage custom tailoring measurements, and explore private lookbook editions.
+                                </p>
+                            </div>
+
+                            {/* Client Perks List */}
+                            <div className="pt-6 space-y-4 border-t border-[#E5DFD3] font-interface-sans">
+                                {[
+                                    {
+                                        title: "Real-Time Tracking",
+                                        desc: "Monitor your courier transit milestones live from our fulfillment hub.",
+                                    },
+                                    {
+                                        title: "Saved Bag & Wardrobe",
+                                        desc: "Seamless synchronization of your lookbook favorites across all devices.",
+                                    },
+                                    {
+                                        title: "Atelier Guarantee",
+                                        desc: "Lifetime seam maintenance and raw-edge repair warranty on all pieces.",
+                                    },
+                                ].map((item, idx) => (
+                                    <div key={idx} className="flex items-start gap-3">
+                                        <div className="w-5 h-5 rounded-full bg-[#EAE5D9] text-[#1A1917] flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">
+                                            ✓
+                                        </div>
+                                        <div>
+                                            <p className="text-xs font-semibold text-[#1A1917] uppercase tracking-wider">
+                                                {item.title}
+                                            </p>
+                                            <p className="text-[11px] text-[#6C685F] leading-normal pt-0.5">
+                                                {item.desc}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                        {/* Subtle Editorial Tailoring Watermark Quote */}
+                        <div className="pt-8 border-t border-[#E5DFD3] relative z-10 font-interface-sans">
+                            <p className="font-editorial-serif italic text-sm text-[#5A564D]">
+                                "Crafted for permanence, understated elegance, and effortless proportion."
+                            </p>
+                            <span className="text-[9px] font-semibold tracking-[0.2em] uppercase text-[#8A857B] block pt-1">
+                                Velmora Heritage • Collection Look 01
+                            </span>
+                        </div>
                     </div>
 
-                    <div className={`flex-1 flex items-center justify-center px-6 py-14 lg:py-0 ${mounted ? "form-in" : "opacity-0"}`}>
-                        <div className="w-full max-w-[420px]">
+                    {/* ─── RIGHT COLUMN: LOGIN FORM CARD ──────────────────────────── */}
+                    <div className="lg:col-span-7 flex items-center justify-center">
+                        <div className="w-full max-w-lg bg-[#FFFFFF] border border-[#ECE7DD] p-6 sm:p-10 shadow-xs space-y-7">
 
-                            <div className="flex items-center gap-2 mb-10">
-                                <span className="font-mono-label text-[9px] tracking-[0.2em] uppercase text-zinc-700">Account</span>
-                                <span className="text-zinc-800">/</span>
-                                <span className="font-mono-label text-[9px] tracking-[0.2em] uppercase text-yellow-500">Login</span>
+                            {/* Form Header */}
+                            <div className="space-y-1.5 border-b border-[#ECE7DD] pb-5">
+                                <span className="font-interface-sans text-[10px] font-semibold tracking-[0.22em] text-[#6C685F] uppercase block">
+                                    SECURITY / ATELIER AUTHENTICATION
+                                </span>
+                                <h1 className="font-editorial-serif text-3xl sm:text-4xl font-normal text-[#1A1917] tracking-tight">
+                                    Sign In to Atelier
+                                </h1>
+                                <p className="font-interface-sans text-xs text-[#6C685F] leading-relaxed">
+                                    Enter your credentials or continue seamlessly with Google.
+                                </p>
                             </div>
 
-                            <div className="mb-8">
-                                <h1 className="text-4xl sm:text-5xl font-black tracking-[-0.04em] text-white leading-[0.95] uppercase mb-5">Welcome<br />Back</h1>
-                                <div className="flex items-center gap-4">
-                                    <div className="h-[2px] w-10 bg-yellow-500" />
-                                    <p className="text-[12px] text-zinc-500 tracking-wide">Sign in to your SNITCH account</p>
-                                </div>
-                            </div>
-
+                            {/* Error Banner */}
                             {apiError && (
-                                <div className="mb-6 px-4 py-3 border border-red-500/30 bg-red-500/5 flex items-center gap-3" style={{ animation: "errorShake 0.4s ease-out" }}>
-                                    <span className="w-1.5 h-1.5 rounded-full bg-red-500 flex-shrink-0" />
-                                    <p className="text-[12px] text-red-400 tracking-wide">{apiError}</p>
+                                <div className="p-3.5 bg-[#FDF5F5] border border-[#E5B8B8] text-[#9E2A2B] text-xs font-interface-sans space-y-1">
+                                    <div className="flex items-center gap-2 font-semibold">
+                                        <span>⚠</span>
+                                        <span>Authentication Notice</span>
+                                    </div>
+                                    <p className="text-[11px] text-[#7A2021] leading-relaxed">
+                                        {apiError}
+                                    </p>
                                 </div>
                             )}
 
-                            <form onSubmit={handleSubmit} noValidate className="space-y-7">
-                                <InputField {...field("email")} label="Email Address" type="email" icon="mail" placeholder="alexander@example.com" autoFocus autoComplete="email" />
-                                <InputField {...field("password")} label="Password" type={showPassword ? "text" : "password"} icon="lock" placeholder="Your password" autoComplete="current-password"
-                                    rightEl={
-                                        <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Hide password" : "Show password"}
-                                            className="text-zinc-600 hover:text-zinc-300 focus:text-yellow-500 focus:outline-none transition-colors duration-150 p-0.5">
-                                            <Icon name={showPassword ? "eyeOff" : "eye"} className="w-4 h-4" />
-                                        </button>
-                                    }
-                                />
-
-                                <div className="flex justify-end -mt-3">
-                                    <button type="button" className="font-mono-label text-[9px] tracking-[0.15em] uppercase text-zinc-600 hover:text-yellow-500 transition-colors duration-150 focus:outline-none focus:text-yellow-500">
-                                        Forgot Password?
-                                    </button>
-                                </div>
-
-
-
-                                <div className="pt-2">
-                                    <button type="submit" disabled={isSubmitting}
-                                        className="w-full h-14 bg-yellow-500 hover:bg-yellow-400 active:bg-yellow-600 text-black font-bold text-[13px] tracking-[0.12em] uppercase flex items-center justify-between px-7 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer group"
-                                        style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }}>
-                                        {isSubmitting ? (
-                                            <span className="flex items-center gap-3 mx-auto"><Spinner />Signing In…</span>
-                                        ) : (
-                                            <><span>Sign In</span><Icon name="arrow" className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" strokeWidth="2.5" /></>
-                                        )}
-                                    </button>
-                                    <div className="w-full h-1 bg-yellow-500/20 mt-px" style={{ clipPath: "polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px))" }} />
-                                </div>
+                            {/* Google OAuth Provider */}
+                            <div className="space-y-4">
                                 <ContinueWithGoogle />
 
-                                <div className="flex items-center justify-center gap-3 pt-1">
-                                    <div className="h-px flex-1 bg-zinc-900" />
-                                    <p className="text-[11px] text-zinc-600 tracking-wider font-mono-label">
-                                        New to SNITCH? <Link to="/register" className="text-yellow-500 hover:text-yellow-400 font-semibold underline-offset-4 hover:underline transition-colors duration-150">Create Account</Link>
-                                    </p>
-                                    <div className="h-px flex-1 bg-zinc-900" />
+                                {/* Divider */}
+                                <div className="flex items-center gap-3">
+                                    <div className="h-px bg-[#ECE7DD] flex-1" />
+                                    <span className="font-interface-sans text-[9px] font-semibold tracking-[0.2em] uppercase text-[#8A857B]">
+                                        Or Continue with Email
+                                    </span>
+                                    <div className="h-px bg-[#ECE7DD] flex-1" />
                                 </div>
+                            </div>
+
+                            {/* Traditional Email / Password Form */}
+                            <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                                <FormInput
+                                    id="email"
+                                    name="email"
+                                    label="Email Address"
+                                    type="email"
+                                    value={formData.email}
+                                    onChange={handleChange}
+                                    placeholder="e.g. client@velmora-atelier.com"
+                                    autoComplete="email"
+                                    autoFocus
+                                    error={errors.email}
+                                    icon={<MailIcon className="w-4 h-4" />}
+                                />
+
+                                <div className="space-y-2">
+                                    <FormInput
+                                        id="password"
+                                        name="password"
+                                        label="Password"
+                                        type={showPassword ? "text" : "password"}
+                                        value={formData.password}
+                                        onChange={handleChange}
+                                        placeholder="Enter your confidential password"
+                                        autoComplete="current-password"
+                                        error={errors.password}
+                                        icon={<LockIcon className="w-4 h-4" />}
+                                        rightEl={
+                                            <button
+                                                type="button"
+                                                onClick={() => setShowPassword((prev) => !prev)}
+                                                className="hover:text-[#1A1917] transition-colors cursor-pointer p-1"
+                                                aria-label={showPassword ? "Hide password" : "Show password"}
+                                            >
+                                                {showPassword ? <EyeSlashIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+                                            </button>
+                                        }
+                                    />
+                                    <div className="text-right">
+                                        <button
+                                            type="button"
+                                            onClick={() => alert("Please contact atelier support at concierge@velmora.com to reset your credentials.")}
+                                            className="font-interface-sans text-[10px] font-semibold tracking-[0.16em] uppercase text-[#6C685F] hover:text-[#1A1917] transition-colors cursor-pointer"
+                                        >
+                                            Forgot Password?
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Submit Button */}
+                                <button
+                                    type="submit"
+                                    disabled={isSubmitting}
+                                    className="w-full py-4 bg-[#1A1917] hover:bg-[#32312D] disabled:opacity-60 text-[#FBF9F5] font-interface-sans text-xs sm:text-[13px] font-semibold tracking-[0.2em] uppercase transition-all duration-200 active:scale-[0.99] shadow-sm cursor-pointer flex items-center justify-center gap-2"
+                                >
+                                    {isSubmitting ? (
+                                        <>
+                                            <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            <span>Authenticating Session...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span>Sign In to Account</span>
+                                            <span>→</span>
+                                        </>
+                                    )}
+                                </button>
                             </form>
 
-                            <div className="mt-10 flex items-center justify-center gap-2 opacity-40">
-                                <svg className="w-3 h-3 text-zinc-500" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
-                                </svg>
-                                <span className="font-mono-label text-[9px] tracking-[0.15em] uppercase text-zinc-500">256-bit SSL encrypted</span>
+                            {/* Bottom Switcher */}
+                            <div className="pt-2 border-t border-[#ECE7DD] text-center font-interface-sans text-xs text-[#6C685F]">
+                                <span>Don't have an Atelier account yet? </span>
+                                <Link
+                                    to="/register"
+                                    className="font-semibold text-[#1A1917] underline hover:text-[#4A5340] tracking-wider transition-colors ml-1 uppercase text-[11px]"
+                                >
+                                    Create Account →
+                                </Link>
+                            </div>
+
+                            {/* Security Notice */}
+                            <div className="flex items-center justify-center gap-2 pt-1 text-[10px] font-interface-sans uppercase tracking-[0.18em] text-[#8A857B]">
+                                <CheckShieldIcon className="w-3.5 h-3.5 text-[#4A5340]" />
+                                <span>256-Bit SSL Encrypted • Atelier Privacy Protected</span>
                             </div>
 
                         </div>
                     </div>
+
                 </div>
             </main>
-        </>
+
+            {/* ─── Footer Strip ────────────────────────────────────────────────── */}
+            <footer className="border-t border-[#ECE7DD] py-6 bg-[#FBF9F5] font-interface-sans text-center text-[10px] uppercase tracking-[0.2em] text-[#8A857B]">
+                <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <span>© {new Date().getFullYear()} VELMORA ATELIER INC. ALL RIGHTS RESERVED.</span>
+                    <div className="flex items-center gap-6">
+                        <Link to="/" className="hover:text-[#1A1917] transition-colors">Client Services</Link>
+                        <Link to="/" className="hover:text-[#1A1917] transition-colors">Privacy Policy</Link>
+                        <Link to="/" className="hover:text-[#1A1917] transition-colors">Terms of Atelier</Link>
+                    </div>
+                </div>
+            </footer>
+        </div>
     );
 }

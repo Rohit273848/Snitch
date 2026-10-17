@@ -114,7 +114,7 @@ function RulerIcon({ className = "w-4 h-4" }) {
   );
 }
 
-// ─── Size Chart Modal (Light Modern Snitch Style) ─────────────────────────────
+// ─── Size Chart Modal (Light Modern Velmora Style) ─────────────────────────────
 function SizeGuideModal({ isOpen, onClose }) {
   const [unit, setUnit] = useState("in"); // "in" | "cm"
 
@@ -130,15 +130,15 @@ function SizeGuideModal({ isOpen, onClose }) {
   ];
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in">
-      <div className="relative w-full max-w-lg bg-white border border-zinc-200 rounded-3xl p-6 sm:p-8 text-zinc-900 shadow-2xl">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+      <div className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto bg-white border border-zinc-200 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-zinc-900 shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 border-b border-zinc-100">
+        <div className="flex items-center justify-between pb-3.5 border-b border-zinc-100">
           <div>
-            <h3 className="text-base font-black uppercase tracking-wider text-zinc-950 font-mono">
+            <h3 className="text-sm sm:text-base font-black uppercase tracking-wider text-zinc-950 font-mono">
               Size Guide
             </h3>
-            <p className="text-[11px] text-zinc-500 font-mono">Standard Fit Measurement Guidelines</p>
+            <p className="text-[10px] sm:text-[11px] text-zinc-500 font-mono">Standard Fit Measurement Guidelines</p>
           </div>
           <button
             onClick={onClose}

@@ -137,7 +137,7 @@ const orderSchema = new mongoose.Schema(
             index: true,
         },
         tracking: {
-            carrier: { type: String, default: "Snitch Express" },
+            carrier: { type: String, default: "Velmora Express" },
             trackingNumber: { type: String, default: "" },
             estimatedDelivery: { type: Date },
             events: [trackingEventSchema],

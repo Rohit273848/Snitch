@@ -81,9 +81,8 @@ export const googleCallBackController = async (req, res) => {
         const email = emails?.[0]?.value;
 
         if (!email) {
-            return res.status(400).json({
-                message: "Google account email not available",
-            });
+            console.error("Google auth callback: No email in Google profile", req.user);
+            return res.redirect(`${config.CLIENT_URL.replace(/\/+$/, "")}/login?error=no_email`);
         }
 
         let user = await userModel.findOne({ email });
@@ -91,10 +90,15 @@ export const googleCallBackController = async (req, res) => {
         if (!user) {
             user = await userModel.create({
                 email,
-                fullname: displayName,
+                fullname: displayName || "Google User",
                 role: "buyer",
                 googleID: id,
             });
+            console.log(`[Google Auth] Created new user: ${user.email} (${user._id})`);
+        } else if (!user.googleID) {
+            user.googleID = id;
+            await user.save();
+            console.log(`[Google Auth] Linked Google ID to existing user: ${user.email}`);
         }
 
         const token = jwt.sign(
@@ -115,10 +119,12 @@ export const googleCallBackController = async (req, res) => {
             maxAge: 7 * 24 * 60 * 60 * 1000,
         });
 
-        res.redirect(config.CLIENT_URL);
+        const targetPath = user.role === "seller" ? "/seller/dashboard" : "/";
+        res.redirect(`${config.CLIENT_URL.replace(/\/+$/, "")}${targetPath}`);
 
     } catch (error) {
-        res.redirect(config.CLIENT_URL);
+        console.error("googleCallBackController error:", error);
+        res.redirect(`${config.CLIENT_URL.replace(/\/+$/, "")}/login?error=auth_failed`);
     }
 };
 
@@ -134,4 +140,23 @@ export const getMe = async (req, res) => {
             role: user.role
         }
     })
-}
+};
+
+export const logout = async (req, res) => {
+    try {
+        res.clearCookie("token", {
+            httpOnly: true,
+            secure: config.NODE_ENV === "production",
+            sameSite: config.NODE_ENV === "production" ? "None" : "Lax",
+        });
+        return res.status(200).json({
+            success: true,
+            message: "Logged out successfully",
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Failed to log out",
+        });
+    }
+};

@@ -3,9 +3,9 @@ import {createSlice} from "@reduxjs/toolkit";
 export const DEFAULT_ENSEMBLE_ITEMS = [
     {
         _id: "cart-item-overshirt",
-        productId: "snitch-overshirt",
+        productId: "velmora-overshirt",
         product: {
-            _id: "snitch-overshirt",
+            _id: "velmora-overshirt",
             title: "The Field Overshirt",
             category: "Outerwear",
             price: { amount: 240, currency: "USD" },
@@ -24,9 +24,9 @@ export const DEFAULT_ENSEMBLE_ITEMS = [
     },
     {
         _id: "cart-item-supima-tee",
-        productId: "snitch-supima-tee",
+        productId: "velmora-supima-tee",
         product: {
-            _id: "snitch-supima-tee",
+            _id: "velmora-supima-tee",
             title: "Heavyweight Supima Tee",
             category: "Knitwear",
             price: { amount: 90, currency: "USD" },
@@ -45,9 +45,9 @@ export const DEFAULT_ENSEMBLE_ITEMS = [
     },
     {
         _id: "cart-item-pleated-trouser",
-        productId: "snitch-pleated-trouser",
+        productId: "velmora-pleated-trouser",
         product: {
-            _id: "snitch-pleated-trouser",
+            _id: "velmora-pleated-trouser",
             title: "Relaxed Pleated Trouser",
             category: "Trousers",
             price: { amount: 210, currency: "USD" },
@@ -69,9 +69,9 @@ export const DEFAULT_ENSEMBLE_ITEMS = [
 const cartSlice = createSlice({
     name:"cart",
     initialState:{
-        items: DEFAULT_ENSEMBLE_ITEMS,
-        totalPrice: 540,
-        currency: "USD",
+        items: [],
+        totalPrice: 0,
+        currency: "INR",
         shippingAddress: null,
         addresses: [],
         currentStep: 1, // 1: Bag, 2: Address, 3: Payment

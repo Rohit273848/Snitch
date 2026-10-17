@@ -64,6 +64,7 @@ export const verifyPaymentAndPlaceOrderController = async (req, res) => {
             paymentMethod = "razorpay",
             discount = 0,
             shippingFee = 0,
+            items = null,
         } = req.body;
 
         if (!razorpay_order_id || !razorpay_payment_id || !razorpay_signature) {
@@ -101,6 +102,7 @@ export const verifyPaymentAndPlaceOrderController = async (req, res) => {
             },
             discount,
             shippingFee,
+            items,
         });
 
         return res.status(201).json({
@@ -123,7 +125,7 @@ export const verifyPaymentAndPlaceOrderController = async (req, res) => {
 export const placeCodOrderController = async (req, res) => {
     try {
         const userId = req.user?._id || req.user?.id;
-        const { addressId, addressData, discount = 0, shippingFee = 0 } = req.body;
+        const { addressId, addressData, discount = 0, shippingFee = 0, items = null } = req.body;
 
         const createdOrder = await createOrderFromCart({
             userId,
@@ -138,6 +140,7 @@ export const placeCodOrderController = async (req, res) => {
             },
             discount,
             shippingFee,
+            items,
         });
 
         return res.status(201).json({

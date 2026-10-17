@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import SearchBar from "./SearchBar.jsx";
+import { getCart } from "../../features/cart/service/cart.api.js";
+import { setItem } from "../../features/cart/state/cart.slice.js";
 
 // ─── SVG Icons ────────────────────────────────────────────────────────────────
 function SearchIcon({ className = "w-3.5 h-3.5" }) {
@@ -55,6 +57,19 @@ export default function Nav() {
 
     const user = useSelector((state) => state.auth?.user);
     const cartItems = useSelector((state) => state.cart?.items || []);
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (user) {
+            getCart()
+                .then((data) => {
+                    if (data?.cart) {
+                        dispatch(setItem(data.cart));
+                    }
+                })
+                .catch(() => {});
+        }
+    }, [user, dispatch]);
 
     const totalQuantity = Array.isArray(cartItems)
         ? cartItems
@@ -92,19 +107,19 @@ export default function Nav() {
             </aside>
 
             {/* ─── MAIN TIDY HEADER ────────────────────────────────────────── */}
-            <div className="max-w-7xl mx-auto px-4 sm:px-8 py-4 flex items-center justify-between gap-4">
+            <div className="max-w-7xl mx-auto px-3.5 sm:px-8 py-3 sm:py-4 flex items-center justify-between gap-2 sm:gap-4">
 
                 {/* ─── LEFT: Brand Wordmark (Refined Serif) ────────────────── */}
-                <div className="flex items-center gap-6">
+                <div className="flex items-center gap-3 sm:gap-6 min-w-0">
                     <Link
                         to="/"
-                        className="group flex items-center gap-2 select-none"
+                        className="group flex items-center gap-2 select-none flex-shrink-0"
                     >
                         <span
-                            className="font-serif text-xl sm:text-2xl font-normal tracking-[0.2em] uppercase text-[#1A1917] group-hover:text-[#4A5340] transition-colors"
+                            className="font-serif text-lg sm:text-2xl font-normal tracking-[0.16em] sm:tracking-[0.2em] uppercase text-[#1A1917] group-hover:text-[#4A5340] transition-colors"
                             style={{ fontFamily: "'EB Garamond', 'Newsreader', 'Cormorant Garamond', serif" }}
                         >
-                            NORTHLINE
+                            VELMORA
                         </span>
                     </Link>
 
@@ -168,10 +183,10 @@ export default function Nav() {
                 </div>
 
                 {/* ─── RIGHT: SEARCH, ACCOUNT, BAG, PROFILE ───────────────── */}
-                <div className="flex items-center gap-4 sm:gap-6">
+                <div className="flex items-center gap-2 sm:gap-4 md:gap-6 flex-shrink-0">
                     {/* Search Control (Desktop & Mobile) */}
                     {isSearchOpen ? (
-                        <div className="relative w-56 sm:w-72 md:w-80 transition-all">
+                        <div className="relative w-44 sm:w-64 md:w-80 transition-all">
                             <SearchBar
                                 autoFocus
                                 customPlaceholder="overshirt"
@@ -188,18 +203,19 @@ export default function Nav() {
                                     setIsSearchOpen(true);
                                 }
                             }}
-                            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[#5A564D] hover:text-[#1A1917] transition-colors cursor-pointer"
+                            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[#5A564D] hover:text-[#1A1917] transition-colors cursor-pointer p-1.5"
+                            aria-label="Search Collection"
                         >
                             <SearchIcon className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">SEARCH</span>
                         </button>
                     )}
 
-                    {/* Account Control */}
+                    {/* Account Control (Hidden on very small screens, accessible via drawer) */}
                     {user ? (
                         <Link
                             to="/orders"
-                            className={`flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                            className={`hidden sm:flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] transition-colors ${
                                 location.pathname.startsWith("/orders") || location.pathname.startsWith("/account")
                                     ? "text-[#1A1917] font-semibold"
                                     : "text-[#5A564D] hover:text-[#1A1917]"
@@ -211,7 +227,7 @@ export default function Nav() {
                     ) : (
                         <Link
                             to="/login"
-                            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[#5A564D] hover:text-[#1A1917] transition-colors"
+                            className="hidden sm:flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[#5A564D] hover:text-[#1A1917] transition-colors"
                         >
                             <UserIcon className="w-3.5 h-3.5" />
                             <span className="hidden md:inline">ACCOUNT</span>
@@ -222,17 +238,20 @@ export default function Nav() {
                     <Link
                         to="/cart"
                         title="Shopping Bag"
-                        className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[#1A1917] font-semibold hover:text-[#4A5340] transition-colors cursor-pointer"
+                        className="flex items-center gap-1 sm:gap-1.5 text-[11px] uppercase tracking-[0.16em] sm:tracking-[0.18em] text-[#1A1917] font-semibold hover:text-[#4A5340] transition-colors cursor-pointer p-1"
                     >
                         <BagIcon className="w-3.5 h-3.5" />
-                        <span>BAG ({totalQuantity})</span>
+                        <span className="hidden xs:inline">BAG</span>
+                        <span className="text-[10px] sm:text-[11px] font-bold bg-[#EAE5D9] px-1.5 py-0.2 rounded-full">
+                            {totalQuantity}
+                        </span>
                     </Link>
 
                     {/* Monogram User Pill */}
                     <Link
                         to={user ? "/orders" : "/login"}
                         title={user ? user.fullname || user.email : "Sign In"}
-                        className="w-7 h-7 rounded-full border border-[#D5CEBF] hover:border-[#1A1917] bg-[#F4F0E8] text-[#1A1917] text-[10px] font-medium flex items-center justify-center uppercase tracking-widest transition-all"
+                        className="w-7 h-7 rounded-full border border-[#D5CEBF] hover:border-[#1A1917] bg-[#F4F0E8] text-[#1A1917] text-[10px] font-medium flex items-center justify-center uppercase tracking-widest transition-all flex-shrink-0"
                     >
                         {userInitial}
                     </Link>
@@ -241,10 +260,11 @@ export default function Nav() {
                     <button
                         type="button"
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                        className="lg:hidden p-1 text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
+                        className="lg:hidden p-1.5 text-[#1A1917] hover:text-[#4A5340] cursor-pointer"
                         aria-label="Toggle Navigation Menu"
+                        aria-expanded={mobileMenuOpen}
                     >
-                        <MenuIcon className="w-5 h-5" />
+                        {mobileMenuOpen ? <XIcon className="w-5 h-5" /> : <MenuIcon className="w-5 h-5" />}
                     </button>
                 </div>
 
@@ -252,23 +272,51 @@ export default function Nav() {
 
             {/* ─── MOBILE DRAWER ────────────────────────────────────────── */}
             {mobileMenuOpen && (
-                <div className="lg:hidden border-t border-[#ECE7DD] bg-[#FBF9F5] px-6 py-4 space-y-3">
-                    <div className="flex flex-col space-y-2 text-xs uppercase tracking-[0.18em]">
+                <div className="lg:hidden border-t border-[#ECE7DD] bg-[#FBF9F5] px-5 py-5 space-y-4 shadow-xl animate-in slide-in-from-top-2 duration-200">
+                    {/* User Monogram Header if logged in */}
+                    {user && (
+                        <div className="flex items-center gap-3 pb-3 border-b border-[#ECE7DD]">
+                            <div className="w-9 h-9 rounded-full bg-[#EAE5D9] text-[#1A1917] font-bold text-xs flex items-center justify-center uppercase">
+                                {userInitial}
+                            </div>
+                            <div className="min-w-0">
+                                <p className="text-xs font-bold text-[#1A1917] truncate">{user.fullname || user.email}</p>
+                                <p className="text-[10px] text-[#737373] uppercase tracking-wider">{user.role === "seller" ? "Atelier Seller" : "Valued Patron"}</p>
+                            </div>
+                        </div>
+                    )}
+
+                    <div className="flex flex-col space-y-3 text-xs uppercase tracking-[0.18em]">
                         <Link
                             to="/"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="py-1 text-[#1A1917]"
+                            className="py-1.5 text-[#1A1917] font-semibold flex items-center justify-between"
                         >
-                            Shop
+                            <span>Shop Storefront</span>
+                            <span>→</span>
                         </Link>
                         <button
                             type="button"
                             onClick={() => {
                                 setMobileMenuOpen(false);
-                                const el = document.getElementById("capsule-section");
-                                if (el) el.scrollIntoView({ behavior: "smooth" });
+                                setIsMobileSearchOpen(true);
                             }}
-                            className="py-1 text-left text-[#5A564D] hover:text-black"
+                            className="py-1.5 text-left text-[#5A564D] hover:text-black flex items-center justify-between"
+                        >
+                            <span>Search Pieces</span>
+                            <span>🔍</span>
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setMobileMenuOpen(false);
+                                if (location.pathname !== "/") navigate("/?cat=new");
+                                else {
+                                    const el = document.getElementById("capsule-section");
+                                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                                }
+                            }}
+                            className="py-1.5 text-left text-[#5A564D] hover:text-black"
                         >
                             Key Ensemble Pieces
                         </button>
@@ -276,28 +324,69 @@ export default function Nav() {
                             type="button"
                             onClick={() => {
                                 setMobileMenuOpen(false);
-                                const el = document.getElementById("catalog-section");
-                                if (el) el.scrollIntoView({ behavior: "smooth" });
+                                if (location.pathname !== "/") navigate("/");
+                                else {
+                                    const el = document.getElementById("catalog-section");
+                                    if (el) el.scrollIntoView({ behavior: "smooth" });
+                                }
                             }}
-                            className="py-1 text-left text-[#5A564D] hover:text-black"
+                            className="py-1.5 text-left text-[#5A564D] hover:text-black"
                         >
                             All Collections
                         </button>
                         <Link
                             to="/orders"
                             onClick={() => setMobileMenuOpen(false)}
-                            className="py-1 text-[#5A564D] hover:text-black"
+                            className="py-1.5 text-[#5A564D] hover:text-black flex items-center justify-between"
                         >
-                            My Orders
+                            <span>My Orders &amp; Account</span>
+                            <span>📦</span>
+                        </Link>
+                        <Link
+                            to="/cart"
+                            onClick={() => setMobileMenuOpen(false)}
+                            className="py-1.5 text-[#5A564D] hover:text-black flex items-center justify-between"
+                        >
+                            <span>Shopping Bag ({totalQuantity})</span>
+                            <span>🛍</span>
                         </Link>
                         {user?.role === "seller" && (
                             <Link
                                 to="/seller/dashboard"
                                 onClick={() => setMobileMenuOpen(false)}
-                                className="py-1 text-[#4A5340] font-semibold"
+                                className="py-2 px-3 bg-[#EAE5D9] text-[#1A1917] font-bold text-[11px] tracking-[0.2em] flex items-center justify-between"
                             >
-                                Seller Studio
+                                <span>Seller Studio Dashboard</span>
+                                <span>⚙</span>
                             </Link>
+                        )}
+                        {user ? (
+                            <div className="pt-2 border-t border-[#ECE7DD]">
+                                <Link
+                                    to="/logout"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="w-full py-2 text-center text-[11px] font-semibold tracking-wider uppercase text-[#737373] hover:text-[#9E2A2B] transition-colors block"
+                                >
+                                    Sign Out
+                                </Link>
+                            </div>
+                        ) : (
+                            <div className="pt-2 border-t border-[#ECE7DD] flex gap-3">
+                                <Link
+                                    to="/login"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="flex-1 py-2.5 text-center bg-[#1A1917] text-[#FBF9F5] text-[11px] font-semibold tracking-wider"
+                                >
+                                    Sign In
+                                </Link>
+                                <Link
+                                    to="/register"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                    className="flex-1 py-2.5 text-center border border-[#1A1917] text-[#1A1917] text-[11px] font-semibold tracking-wider"
+                                >
+                                    Register
+                                </Link>
+                            </div>
                         )}
                     </div>
                 </div>

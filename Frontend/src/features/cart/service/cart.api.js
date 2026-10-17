@@ -90,3 +90,8 @@ export async function createCartOrder(orderData = {}) {
     const response = await cartApiInstance.post("/payment/create/order", orderData);
     return response.data;
 }
+
+export async function clearCartApi() {
+    const response = await cartApiInstance.delete("/clear");
+    return response.data;
+}

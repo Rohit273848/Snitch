@@ -86,10 +86,10 @@ function ArrowUpRightIcon({ className = "w-3 h-3" }) {
     );
 }
 
-// ─── Default NORTHLINE Archival Catalog Data (Matching Screenshot) ────────────
-const DEFAULT_NORTHLINE_CATALOG = [
+// ─── Default VELMORA Archival Catalog Data (Matching Screenshot) ────────────
+const DEFAULT_VELMORA_CATALOG = [
     {
-        _id: "snitch-overshirt",
+        _id: "velmora-overshirt",
         sku: "#NTL-01",
         title: "The Field Overshirt",
         category: "OUTERWEAR",
@@ -106,7 +106,7 @@ const DEFAULT_NORTHLINE_CATALOG = [
         image: "/editorial/overshirt_olive_piece.jpg",
     },
     {
-        _id: "snitch-supima-tee",
+        _id: "velmora-supima-tee",
         sku: "#NTL-02",
         title: "Heavyweight Supima Tee",
         category: "KNITWEAR",
@@ -123,7 +123,7 @@ const DEFAULT_NORTHLINE_CATALOG = [
         image: "/editorial/supima_tee_piece.jpg",
     },
     {
-        _id: "snitch-pleated-trouser",
+        _id: "velmora-pleated-trouser",
         sku: "#NTL-03",
         title: "Relaxed Pleated Trouser",
         category: "TROUSERS",
@@ -187,7 +187,7 @@ export default function SellerProduct() {
                 image: p.images?.[0]?.url || p.images?.[0] || "/editorial/hero_bordeaux_menswear.jpg",
             }));
         }
-        return DEFAULT_NORTHLINE_CATALOG;
+        return DEFAULT_VELMORA_CATALOG;
     }, [dbProducts]);
 
     // Filter & Search processing
@@ -273,7 +273,7 @@ export default function SellerProduct() {
             `}</style>
 
             {/* ══════════════════════════════════════════════════════════════════
-                1. NORTHLINE SELLER SIDEBAR NAVIGATION
+                1. VELMORA SELLER SIDEBAR NAVIGATION
             ══════════════════════════════════════════════════════════════════ */}
             <aside className="w-full lg:w-64 xl:w-72 bg-[#FBF9F5] border-r border-[#ECE7DD] flex flex-col justify-between flex-shrink-0 z-30 font-interface-sans">
                 {/* Sidebar Top: Brand & Menu Links */}
@@ -283,7 +283,7 @@ export default function SellerProduct() {
                         <div>
                             <Link to="/" className="block">
                                 <span className="font-editorial-serif text-2xl font-normal tracking-[0.2em] text-[#171717] uppercase block">
-                                    NORTHLINE
+                                    VELMORA
                                 </span>
                                 <span className="text-[9px] uppercase tracking-[0.22em] text-[#737373] block mt-0.5">
                                     SELLER STUDIO / MERCHANT PORTAL
@@ -305,6 +305,7 @@ export default function SellerProduct() {
                     <nav className={`${mobileNavOpen ? "block" : "hidden"} lg:block py-4 px-3 space-y-1`}>
                         <Link
                             to="/seller/dashboard"
+                            onClick={() => setMobileNavOpen(false)}
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase text-[#525252] hover:text-[#171717] hover:bg-[#F5F2EB] transition-colors"
                         >
                             <DashboardIcon className="w-4 h-4 text-[#737373]" />
@@ -314,6 +315,7 @@ export default function SellerProduct() {
                         {/* Active Item: PRODUCTS CATALOG */}
                         <Link
                             to="/seller/products"
+                            onClick={() => setMobileNavOpen(false)}
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase bg-[#171717] text-[#FBF9F5] shadow-xs"
                         >
                             <ArchiveBoxIcon className="w-4 h-4 text-[#FBF9F5]" />
@@ -322,6 +324,7 @@ export default function SellerProduct() {
 
                         <Link
                             to="/seller/orders"
+                            onClick={() => setMobileNavOpen(false)}
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase text-[#525252] hover:text-[#171717] hover:bg-[#F5F2EB] transition-colors"
                         >
                             <TruckIcon className="w-4 h-4 text-[#737373]" />
@@ -339,10 +342,20 @@ export default function SellerProduct() {
 
                     <Link
                         to="/"
+                        onClick={() => setMobileNavOpen(false)}
                         className="w-full py-2.5 px-3 bg-[#FBF9F5] border border-[#D5CEBF] hover:border-[#171717] text-[#171717] text-[10px] font-semibold tracking-[0.2em] uppercase flex items-center justify-between transition-colors shadow-xs"
                     >
                         <span>RETURN TO STOREFRONT</span>
                         <ArrowUpRightIcon className="w-3.5 h-3.5" />
+                    </Link>
+
+                    <Link
+                        to="/logout"
+                        onClick={() => setMobileNavOpen(false)}
+                        className="w-full py-2 px-3 text-[#737373] hover:text-[#171717] text-[10px] font-semibold tracking-[0.2em] uppercase flex items-center justify-between transition-colors focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:outline-none"
+                    >
+                        <span>SIGN OUT</span>
+                        <span className="text-xs">→</span>
                     </Link>
                 </div>
             </aside>
@@ -358,13 +371,13 @@ export default function SellerProduct() {
                         <div className="text-[10px] sm:text-[11px] font-medium tracking-[0.2em] uppercase text-[#737373]">
                             <span>PORTAL NODE</span>
                             <span className="mx-2 text-[#D5CEBF]">/</span>
-                            <span className="text-[#171717] font-semibold">NORTHLINE TAILORING ATELIER</span>
+                            <span className="text-[#171717] font-semibold">VELMORA TAILORING ATELIER</span>
                         </div>
 
                         {/* Top Right Controls */}
                         <div className="flex items-center gap-4">
                             <span className="hidden sm:inline text-[10px] font-medium tracking-[0.18em] uppercase text-[#737373]">
-                                STOREFRONT: NORTHLINE STUDIO
+                                STOREFRONT: VELMORA STUDIO
                             </span>
                             <button
                                 type="button"
@@ -756,7 +769,7 @@ export default function SellerProduct() {
                             <div className="flex items-center gap-2 text-[11px] text-[#525252]">
                                 <span className="text-[#4A5340] font-bold">✓</span>
                                 <span>
-                                    Showing <strong>{filteredProducts.length} of {allProducts.length}</strong> published collection pieces • All garments registered in NORTHLINE Autumn/Winter 26 Atelier
+                                    Showing <strong>{filteredProducts.length} of {allProducts.length}</strong> published collection pieces • All garments registered in VELMORA Autumn/Winter 26 Atelier
                                 </span>
                             </div>
 
@@ -823,7 +836,7 @@ export default function SellerProduct() {
 
                 {/* Portal Footer */}
                 <footer className="border-t border-[#ECE7DD] bg-[#FBF9F5] py-4 px-6 sm:px-10 flex flex-col sm:flex-row items-center justify-between gap-2 text-[10px] font-interface-sans tracking-[0.16em] uppercase text-[#737373]">
-                    <span>© 2026 NORTHLINE ATELIER. MERCHANT STUDIO RUNTIME V2.4.</span>
+                    <span>© 2026 VELMORA ATELIER. MERCHANT STUDIO RUNTIME V2.4.</span>
                     <div className="flex items-center gap-4">
                         <Link to="/" className="hover:text-[#171717]">Storefront Home</Link>
                         <span>•</span>

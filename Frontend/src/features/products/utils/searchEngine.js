@@ -1,4 +1,4 @@
-// Advanced Search Engine for Northline / Snitch Atelier
+// Advanced Search Engine for Velmora Atelier
 // Features: Autocomplete, Product Previews, Typo Tolerance (Levenshtein), Synonyms, Natural Language Parsing, Faceted Filtering, Relevance Scoring.
 
 // ─── SYNONYM DICTIONARY ────────────────────────────────────────────────────────
@@ -88,7 +88,7 @@ export function buildCatalogDictionary(products = []) {
         "black", "white", "olive", "charcoal", "purple", "blue", "beige", "mocha", "brown",
         "chalk", "cream", "navy", "green", "ecru",
         // Brands & Sellers
-        "snitch", "atelier", "northline", "solly", "allen"
+        "velmora", "snitch", "atelier", "northline", "solly", "allen"
     ]);
 
     products.forEach(p => {
@@ -384,13 +384,13 @@ export function getProductRating(product) {
 }
 
 export function getProductBrand(product) {
-    if (!product) return "Snitch Atelier";
+    if (!product) return "Velmora Atelier";
     return (
         product.brand ||
         product.seller?.fullname ||
         product.seller?.name ||
         product.seller?.username ||
-        "Snitch Atelier"
+        "Velmora Atelier"
     );
 }
 
@@ -703,8 +703,8 @@ export const STITCH_SAMPLE_PIECES = [
         title: "The Field Overshirt",
         subtitle: "Organic Heavyweight Twill · Double Flap Pockets",
         category: "overshirt",
-        collectionLabel: "NORTHLINE Atelier",
-        brand: "NORTHLINE Atelier",
+        collectionLabel: "Velmora Atelier",
+        brand: "Velmora Atelier",
         color: "Olive",
         colorway: "Olive",
         price: { amount: 385, currency: "USD" },
@@ -725,8 +725,8 @@ export const STITCH_SAMPLE_PIECES = [
         title: "Heavy Cotton Utility Overshirt",
         subtitle: "Selvedge Japanese Twill · Horn Buttons",
         category: "overshirt",
-        collectionLabel: "NORTHLINE Essentials",
-        brand: "NORTHLINE Essentials",
+        collectionLabel: "Velmora Essentials",
+        brand: "Velmora Essentials",
         color: "Indigo",
         colorway: "Navy",
         price: { amount: 256, currency: "USD" },
@@ -771,8 +771,8 @@ export const STITCH_SAMPLE_PIECES = [
         title: "Relaxed Wool-Blend Shacket",
         subtitle: "Charcoal Melange · Cashmere Infusion",
         category: "overshirt",
-        collectionLabel: "NORTHLINE Atelier",
-        brand: "NORTHLINE Atelier",
+        collectionLabel: "Velmora Atelier",
+        brand: "Velmora Atelier",
         color: "Charcoal",
         colorway: "Charcoal",
         price: { amount: 440, currency: "USD" },
@@ -793,8 +793,8 @@ export const STITCH_SAMPLE_PIECES = [
         title: "Structured Canvas Workshirt",
         subtitle: "Weathered Tobacco · Triple-Stitched",
         category: "overshirt",
-        collectionLabel: "NORTHLINE Essentials",
-        brand: "NORTHLINE Essentials",
+        collectionLabel: "Velmora Essentials",
+        brand: "Velmora Essentials",
         color: "Brown",
         colorway: "Brown",
         price: { amount: 275, currency: "USD" },
@@ -1009,7 +1009,7 @@ export function formatProductPreview(product) {
             originalAmount: null,
             currency: "₹",
             category: "Apparel",
-            brand: "NORTHLINE Atelier",
+            brand: "Velmora Atelier",
             stockStatus: "in_stock",
             stockLabel: "IN STOCK",
             inStock: true,

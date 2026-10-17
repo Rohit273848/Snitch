@@ -103,12 +103,12 @@ Cookie: token=<JWT_AUTH_TOKEN>
       {
         "fileId": "66b5c3e49876543210fedcba",
         "name": "hoodie_front_12345.jpg",
-        "url": "https://ik.imagekit.io/snitch/snitch/hoodie_front_12345.jpg",
-        "thumbnailUrl": "https://ik.imagekit.io/snitch/tr:n-ik_ml_thumbnail/snitch/hoodie_front_12345.jpg",
+        "url": "https://ik.imagekit.io/velmora/velmora/hoodie_front_12345.jpg",
+        "thumbnailUrl": "https://ik.imagekit.io/velmora/tr:n-ik_ml_thumbnail/velmora/hoodie_front_12345.jpg",
         "height": 1200,
         "width": 1200,
         "size": 482019,
-        "filePath": "/snitch/hoodie_front_12345.jpg"
+        "filePath": "/velmora/hoodie_front_12345.jpg"
       }
     ],
     "createdAt": "2026-08-09T18:17:23.100Z",

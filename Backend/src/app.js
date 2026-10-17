@@ -27,12 +27,13 @@ app.use(cookieParser());
 app.use(passport.initialize());
 
 // Configure Passport to use Google OAuth 2.0 strategy
+const serverBase = (config.SERVER_URL || `http://localhost:${config.port || 3000}`).replace(/\/+$/, "");
 passport.use(
     new GoogleStrategy(
         {
             clientID: config.GOOGLE_CLIENT_ID,
             clientSecret: config.GOOGLE_CLIENT_SECRET,
-            callbackURL: `${config.SERVER_URL}/api/auth/google/callback`
+            callbackURL: `${serverBase}/api/auth/google/callback`
         },
         (accessToken, refreshToken, profile, done) => {
             return done(null, profile);
