@@ -53,6 +53,14 @@ export const router = createBrowserRouter([
                 element: <Protected><OrdersListPage /></Protected>,
             },
             {
+                path: "/account",
+                element: <Protected><OrdersListPage /></Protected>,
+            },
+            {
+                path: "/account/orders",
+                element: <Protected><OrdersListPage /></Protected>,
+            },
+            {
                 path: "/orders/:id",
                 element: <Protected><OrderTrackingPage /></Protected>,
             },

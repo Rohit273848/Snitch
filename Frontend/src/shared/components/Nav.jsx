@@ -100,9 +100,9 @@ export default function Nav() {
                     >
                         <span
                             className="font-serif text-xl sm:text-2xl font-normal tracking-[0.2em] uppercase text-[#1A1917] group-hover:text-[#4A5340] transition-colors"
-                            style={{ fontFamily: "'Newsreader', 'Cormorant Garamond', 'Playfair Display', serif" }}
+                            style={{ fontFamily: "'EB Garamond', 'Newsreader', 'Cormorant Garamond', serif" }}
                         >
-                            SNITCH
+                            NORTHLINE
                         </span>
                     </Link>
 
@@ -146,16 +146,20 @@ export default function Nav() {
                         </button>
                         <Link
                             to="/orders"
-                            className="text-[11px] uppercase tracking-[0.18em] text-[#5A564D] hover:text-[#1A1917] transition-colors"
+                            className={`text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                                location.pathname.startsWith("/orders") || location.pathname.startsWith("/account")
+                                    ? "text-[#1A1917] font-semibold border-b border-[#1A1917] pb-0.5"
+                                    : "text-[#5A564D] hover:text-[#1A1917]"
+                            }`}
                         >
-                            ORDERS
+                            JOURNAL
                         </Link>
                         {user?.role === "seller" && (
                             <Link
                                 to="/seller/dashboard"
                                 className="text-[11px] uppercase tracking-[0.18em] text-[#4A5340] hover:text-[#1A1917] font-semibold transition-colors"
                             >
-                                DASHBOARD
+                                SELLER PORTAL
                             </Link>
                         )}
                     </nav>
@@ -202,8 +206,12 @@ export default function Nav() {
                     {/* Account Control */}
                     {user ? (
                         <Link
-                            to="/seller/dashboard"
-                            className="flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] text-[#5A564D] hover:text-[#1A1917] transition-colors"
+                            to="/orders"
+                            className={`flex items-center gap-1.5 text-[11px] uppercase tracking-[0.18em] transition-colors ${
+                                location.pathname.startsWith("/orders") || location.pathname.startsWith("/account")
+                                    ? "text-[#1A1917] font-semibold"
+                                    : "text-[#5A564D] hover:text-[#1A1917]"
+                            }`}
                         >
                             <UserIcon className="w-3.5 h-3.5" />
                             <span className="hidden md:inline">ACCOUNT</span>
@@ -230,7 +238,7 @@ export default function Nav() {
 
                     {/* Monogram User Pill */}
                     <Link
-                        to={user ? "/seller/dashboard" : "/login"}
+                        to={user ? "/orders" : "/login"}
                         title={user ? user.fullname || user.email : "Sign In"}
                         className="w-7 h-7 rounded-full border border-[#D5CEBF] hover:border-[#1A1917] bg-[#F4F0E8] text-[#1A1917] text-[10px] font-medium flex items-center justify-center uppercase tracking-widest transition-all"
                     >
