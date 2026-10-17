@@ -517,7 +517,7 @@ export default function SellerOrdersPage() {
                         </Link>
 
                         <Link
-                            to="/seller/dashboard"
+                            to="/seller/products"
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase text-[#525252] hover:text-[#171717] hover:bg-[#F5F2EB] transition-colors focus-visible:ring-2 focus-visible:ring-[#171717] focus-visible:outline-none"
                         >
                             <ArchiveBoxIcon className="w-4 h-4 text-[#737373]" />

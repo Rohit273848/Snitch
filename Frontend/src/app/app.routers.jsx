@@ -2,6 +2,7 @@ import { createBrowserRouter, Outlet } from "react-router-dom"
 import Register from "../features/auth/pages/Register"
 import Login from "../features/auth/pages/login"
 import CreateProduct from "../features/products/pages/CreateProduct.jsx"
+import SellerDashboard from "../features/products/pages/SellerDashboard.jsx"
 import SellerProduct from "../features/products/pages/SellerProduct.jsx"
 import SellerProductModel from "../features/products/pages/SellerProductModel.jsx"
 import Home from "../features/products/pages/Home.jsx"
@@ -75,14 +76,25 @@ export const router = createBrowserRouter([
         path: "/seller",
         children: [
             {
-                path: "create-product",
+                path: "",
                 element: <SellerProtected>
-                    <CreateProduct />
+                    <SellerDashboard />
                 </SellerProtected>
-
             },
             {
                 path: "dashboard",
+                element: <SellerProtected>
+                    <SellerDashboard />
+                </SellerProtected>
+            },
+            {
+                path: "products",
+                element: <SellerProtected>
+                    <SellerProduct />
+                </SellerProtected>
+            },
+            {
+                path: "catalog",
                 element: <SellerProtected>
                     <SellerProduct />
                 </SellerProtected>
@@ -91,6 +103,12 @@ export const router = createBrowserRouter([
                 path: "orders",
                 element: <SellerProtected>
                     <SellerOrdersPage />
+                </SellerProtected>
+            },
+            {
+                path: "create-product",
+                element: <SellerProtected>
+                    <CreateProduct />
                 </SellerProtected>
             },
             {

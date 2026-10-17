@@ -315,7 +315,7 @@ export default function SellerProduct() {
 
                         {/* Active Item: PRODUCTS CATALOG */}
                         <Link
-                            to="/seller/dashboard"
+                            to="/seller/products"
                             className="flex items-center gap-3 px-3.5 py-3 text-[11px] font-semibold tracking-[0.16em] uppercase bg-[#171717] text-[#FBF9F5] shadow-xs"
                         >
                             <ArchiveBoxIcon className="w-4 h-4 text-[#FBF9F5]" />
